@@ -78,10 +78,10 @@ class Ini implements AuthInterface
      * @return boolean
      * 
      */
-    public function authenticate(array $opts)
+    public function authenticate(array $opts = [])
     {
         if (! isset($opts['username']) || ! isset($opts['password'])) {
-            $msg = 'The option `email` or `password` is missing.';
+            $msg = 'The option `username` or `password` is missing.';
             throw new Exception($msg);
         }
 

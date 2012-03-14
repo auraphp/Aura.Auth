@@ -29,5 +29,5 @@ interface AuthInterface
      * @return boolean
      * 
      */
-    public function authenticate(array $opts);
+    public function authenticate(array $opts = []);
 }
