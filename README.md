@@ -9,7 +9,7 @@ Each group is a user handle, with keys for `password` and the optional keys: `ha
 
 ```ini 
  [pmjones]
- password = plaintextpass
+ password = plaintextpass_or_hashedpass
  
  # Optional values:
   

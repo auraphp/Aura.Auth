@@ -89,8 +89,15 @@ class Mail implements AuthInterface
         if (is_resource($conn)) {
             @imap_close($conn);
 
+            if (false === strpos($username, '@')) {
+                $user['username'] = $username;
+            } else {
+                $tmp  = explode('@', $username);
+                $user = ['username' => $tmp[0], 'email' => $username];
+            }
+
             $user_obj = clone $this->user;
-            $user_obj->setFromArray(['username' => $username]);
+            $user_obj->setFromArray($user);
 
             return $user;
         }
