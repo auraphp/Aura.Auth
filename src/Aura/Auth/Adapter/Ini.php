@@ -13,25 +13,7 @@ use Aura\Auth\User;
 
 /**
  * 
- * Authenticate against .ini style files.
- * 
- * Each group is a user handle, with keys for 'password'
- * and the optional keys: 'hash_algo', 'hash_salt', 'email', 'uri', 'avatar' and
- * 'full_name'.  For example ...
- * 
- *     [pmjones]
- *     password = plaintextpass
- * 
- *     # Optional values:
- * 
- *     hash_algo = sha512          # hashing algorithm to use on the password
- *     hash_salt = a_random_string # hash this users password with this salt. Format: hash_algo("{$password}{$hash_salt}")
- *     
- *     email     = pmjones@solarphp.com
- *     uri       = http://paul-m-jones.com/
- *     avatar    = http://paul-m-jones.com/avator.jpg
- *     full_name = Paul M. Jones
- * 
+ * Authenticate against an ini file.
  * 
  * @package Aura.Auth
  * 
@@ -43,7 +25,7 @@ class Ini implements AuthInterface
      * @var string Path to ini file.
      * 
      */
-    protected $ini_file;
+    protected $file;
 
     /**
      * 
@@ -59,11 +41,18 @@ class Ini implements AuthInterface
      * 
      * @param string $file The ini file to use for Auth.
      * 
+     * @throws Aura\Auth\Exception If $file does not exist.
+     * 
      */
     public function __construct(User $user, $file)
     {
-        $this->user     = $user;
-        $this->ini_file = realpath($file);
+        $this->user = $user;
+        $this->file = realpath($file);
+
+        // does the file exist?
+        if (! file_exists($this->file)) {
+            throw new Exception("File `{$this->file} does not exist.");
+        }
     }
 
     /**
@@ -75,7 +64,7 @@ class Ini implements AuthInterface
      * @throws Aura\Auth\Exception If $opts does not contain the 
      * keys `username` and `password`.
      * 
-     * @return boolean
+     * @return Aura\Auth\User|boolean
      * 
      */
     public function authenticate(array $opts = [])
@@ -94,13 +83,13 @@ class Ini implements AuthInterface
         }
 
         // does the file exist?
-        if (! file_exists($this->ini_file) || ! is_readable($this->ini_file)) {
-            $msg = "The ini file ({$this->ini_file}) is not readable.";
+        if (! file_exists($this->file) || ! is_readable($this->file)) {
+            $msg = "The ini file ({$this->file}) is not readable.";
             throw new Exception($msg);
         }
 
         // parse the file into an array
-        $data = parse_ini_file($this->ini_file, true);
+        $data = parse_ini_file($this->file, true);
         
         // get user info for the handle
         $user = empty($data[$opts['username']]) ? [] : $data[$opts['username']];

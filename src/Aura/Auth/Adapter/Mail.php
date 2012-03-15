@@ -64,7 +64,7 @@ class Mail implements AuthInterface
      * @throws Aura\Auth\Exception If $opts does not contain the 
      * keys `username` and `password`.
      * 
-     * @return boolean
+     * @return Aura\Auth\User|boolean
      * 
      */
     public function authenticate(array $opts = [])

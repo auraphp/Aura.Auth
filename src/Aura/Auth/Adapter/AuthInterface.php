@@ -26,7 +26,7 @@ interface AuthInterface
      * @param array $opts A list of optional parameters to pass to 
      * the Auth adapter.
      * 
-     * @return boolean
+     * @return Aura\Auth\User|boolean
      * 
      */
     public function authenticate(array $opts = []);
