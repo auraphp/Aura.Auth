@@ -18,7 +18,7 @@ use Aura\Auth\User;
  * @package Aura.Auth
  * 
  */
-class Htpassword implements AuthInterface
+class Htpasswd implements AuthInterface
 {
     /**
      * 
@@ -52,8 +52,9 @@ class Htpassword implements AuthInterface
         $this->file = realpath($file);
         
         // does the file exist?
-        if (! file_exists($this->file)) {
-            throw new Exception("File `{$this->file} does not exist.");
+        if (! file_exists($this->file) || ! is_readable($this->file)) {
+            $msg = "File `{$this->file}` does not exist or is not readable.";
+            throw new Exception($msg);
         }
     }
 
@@ -76,12 +77,10 @@ class Htpassword implements AuthInterface
             throw new Exception($msg);
         }
 
-        if (empty($opts['username'])) {
+        if (empty($opts['username']) || empty($opts['password'])) {
             return false;
         }
-        if (empty($opts['password'])) {
-            return false;
-        }
+
         $username = $opts['username'];
         $password = $opts['password'];
         
@@ -89,7 +88,7 @@ class Htpassword implements AuthInterface
         $fp = @fopen($this->file, 'r');
 
         if (! $fp) {
-            $msg = "The Htpassword file `{$this->file}` is not readable.";
+            $msg = "The Htpasswd file `{$this->file}` is not readable.";
             throw new Exception($msg);
         }
         
@@ -154,15 +153,17 @@ class Htpassword implements AuthInterface
                 $computed_hash = crypt($password, $stored_hash);
             }
         }
-        
+
         // did the hashes match?
         if ($stored_hash == $computed_hash) {
 
             $user['username'] = $opts['username'];
             $user_obj         = clone $this->user;
             $user_obj->setFromArray($user);
+
+            return $user_obj;
         }
-        
+
         return false;
     }
     
@@ -183,12 +184,7 @@ class Htpassword implements AuthInterface
      */
     protected function hashApr1($plain, $salt)
     {
-        if (preg_match('/^\$apr1\$/', $salt)) {
-            $salt = preg_replace('/^\$apr1\$([^$]+)\$.*/', '\\1', $salt);
-        } else {
-            $salt = substr($salt, 0,8);
-        }
-        
+        $salt    = preg_replace('/^\$apr1\$([^$]+)\$.*/', '\\1', $salt);
         $length  = strlen($plain);
         $context = $plain . '$apr1$' . $salt;
         $binary  = hash('md5', $plain . $salt . $plain, true);

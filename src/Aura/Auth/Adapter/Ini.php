@@ -50,8 +50,9 @@ class Ini implements AuthInterface
         $this->file = realpath($file);
 
         // does the file exist?
-        if (! file_exists($this->file)) {
-            throw new Exception("File `{$this->file} does not exist.");
+        if (! file_exists($this->file) || ! is_readable($this->file)) {
+            $msg = "File `{$this->file}` does not exist or is not readable.";
+            throw new Exception($msg);
         }
     }
 
@@ -74,18 +75,8 @@ class Ini implements AuthInterface
             throw new Exception($msg);
         }
 
-        if (empty($opts['username'])) {
+        if (empty($opts['username']) || empty($opts['password'])) {
             return false;
-        }
-
-        if (empty($opts['password'])) {
-            return false;
-        }
-
-        // does the file exist?
-        if (! file_exists($this->file) || ! is_readable($this->file)) {
-            $msg = "The ini file ({$this->file}) is not readable.";
-            throw new Exception($msg);
         }
 
         // parse the file into an array
@@ -99,24 +90,20 @@ class Ini implements AuthInterface
             return false;
         }
 
-        // plain-text password match.
-        if (empty($user['hash_algo']) && $user['password'] == $passwd) {
+        $valid = false;
 
-            $valid = true;
+        // plain-text password match.
+        if (empty($user['hash_algo'])) {
+
+            $valid = ($user['password'] == $opts['password']);
 
         // there is a hash algorithm
         } else {
 
             $salt  = empty($user['hash_salt']) ? false : $user['hash_salt'];
-            $hpass = hash($user['hash_algo'], $opts['password'], $salt);
-
-            if ($user['password'] == $hpass) {
-
-                $valid = true;
-            } else {
-                $valid = false;
-            }
-        } 
+            $hpass = $this->hash($user['hash_algo'], $opts['password'], $salt);
+            $valid = ($user['password'] == $hpass);
+        }
 
         if ($valid) {
             
@@ -126,7 +113,7 @@ class Ini implements AuthInterface
             $user_obj         = clone $this->user;
             $user_obj->setFromArray($user);
 
-            return $user;
+            return $user_obj;
         }
 
         return false;
@@ -140,7 +127,7 @@ class Ini implements AuthInterface
      * 
      * @param string $data The data to hash
      * 
-     * @param string $algo The hashing salt
+     * @param string $salt The hashing salt
      *
      * @return string
      *
@@ -152,10 +139,10 @@ class Ini implements AuthInterface
             throw new Exception($msg);
         }
 
-        if ($salt) {
-            $data = $data . $salt;
+        if (! empty($salt)) {
+            $data = "{$data}{$salt}";
         }
 
-        return hash($algo, $data)
+        return hash($algo, $data);
     }
 }

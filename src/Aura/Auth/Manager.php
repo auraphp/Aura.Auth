@@ -8,6 +8,8 @@
  */
 namespace Aura\Auth;
 
+use Aura\Auth\Adapter\AuthInterface;
+
 /**
  * 
  * 
@@ -34,7 +36,7 @@ class Manager
      * adapter_name => function () { return new Adapter(...); },
      * 
      */
-    public function __construct(array $adapters)
+    public function __construct(array $adapters = [])
     {
         $this->adapters = $adapters;
     }
@@ -66,15 +68,15 @@ class Manager
      */
     public function authenticate($adapter_name, array $opts = [])
     {
-        if (! isset($this->adapters[$adpater])) {
-            $adapter = htmlspecialchars($adapter);
-            throw new Exception("Adapter `{$adapter}` was not found.");
+        if (! isset($this->adapters[$adapter_name])) {
+            $adapter = htmlspecialchars($adapter_name);
+            throw new Exception("Adapter `{$adapter_name}` was not found.");
         }
 
-        if ($this->adapters[$adpater] instanceOf \Closure) {
-            $this->adapters[$adpater] = $this->adapters[$adpater]();
+        if ($this->adapters[$adapter_name] instanceOf \Closure) {
+            $this->adapters[$adapter_name] = $this->adapters[$adapter_name]();
         }
 
-        return $this->adapters[$adpater]->authenticate($opts);
+        return $this->adapters[$adapter_name]->authenticate($opts);
     }
 }

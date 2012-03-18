@@ -13,13 +13,15 @@ use Aura\Auth\User;
 
 /**
  * 
- * Authenticate against an IMAP or POP3 mail server.
+ * Authenticate using a user defined closure.
  * 
  * @package Aura.Auth
  * 
  */
-class Mail implements AuthInterface
+
+class Closure implements AuthInterface
 {
+
     /**
      * 
      * @var Aura\Auth\User
@@ -29,30 +31,34 @@ class Mail implements AuthInterface
 
     /**
      * 
-     * @var string
+     * @var \Closure
      * 
      */
-    protected $mailbox;
+    protected $closure;
 
 
     /**
      *
-     * @param Aura\Auth\User $user
-     *     
-     * @param string $mailbox An imap_open() mailbox string, for example
-     *   "mail.example.com:143/imap" orp "mail.example.com:110/pop3"
-     * 
-     * @throws Aura\Auth\Exception If the extension 'imap' is not available.
+     *
+     * @param 
+     *
+     * @return 
      *
      */
-    public function __construct(User $user, $mailbox)
+    public function __construct(User $user, $closure)
     {
-        if (! extension_loaded('imap')) {
-            throw new Exception('The extension imap is not available.');
-        }
-
-        $this->mailbox = $mailbox;
         $this->user    = $user;
+
+        if ($closure instanceOf \Closure 
+            || (is_object($closure) && method_exists($closure, '__invoke'))) {
+            
+            $this->closure = $closure;
+
+        } else {
+            $msg = '$closure must be an anonymous function or an object ' .
+                   'containing the method __invoke.';
+            throw new Exception($msg);
+        }
     }
 
     /**
@@ -63,6 +69,9 @@ class Mail implements AuthInterface
      * 
      * @throws Aura\Auth\Exception If $opts does not contain the 
      * keys `username` and `password`.
+     * 
+     * @throws Aura\Auth\Exception If the closure does not return an array or
+     * false.
      * 
      * @return Aura\Auth\User|boolean
      * 
@@ -78,27 +87,19 @@ class Mail implements AuthInterface
             return false;
         }
 
-        $username = $opts['username'];
-        $password = $opts['password'];
-        $mailbox  = '{' . $this->mailbox . '}';
-        $conn     = imap_open($mailbox, $username, $password, OP_HALFOPEN);
+        $closure = $this->closure;
+        $user    = $closure($opts['username'], $opts['password']);
 
-        if (is_resource($conn)) {
-            @imap_close($conn);
-
-            if (false === strpos($username, '@')) {
-                $user['username'] = $username;
-            } else {
-                $tmp  = explode('@', $username);
-                $user = ['username' => $tmp[0], 'email' => $username];
-            }
-
+        if (is_array($user)) {
             $user_obj = clone $this->user;
             $user_obj->setFromArray($user);
 
-            return $user;
+            return $user_obj;
+
+        } else if (false === $user) {
+            return false;
         }
-        
-        return false;
+
+        throw new Exception('The closure must return an array or false.');
     }
 }

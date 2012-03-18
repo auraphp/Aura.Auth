@@ -8,8 +8,6 @@
  */
 namespace Aura\Auth\Adapter;
 
-use Aura\Auth\UserFactory;
-
 /**
  * 
  * Interface for an Auth adapter.
