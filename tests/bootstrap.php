@@ -1,4 +1,5 @@
 <?php
+
 spl_autoload_register(function($class) {
     $dir   = dirname(__DIR__);
     $file  = str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
@@ -11,7 +12,7 @@ spl_autoload_register(function($class) {
         require $tests;
     }
 });
-error_reporting(-1);
+
 $GLOBALS['Aura\Auth\Adapter\Mail'] = [
     'mailbox'  => '', // 'imap.gmail.com:993/imap/ssl/novalidate-cert',
     'username' => '',

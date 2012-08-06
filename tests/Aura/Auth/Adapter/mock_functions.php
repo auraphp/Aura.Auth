@@ -4,7 +4,7 @@ namespace Aura\Auth\Adapter;
 
 function extension_loaded($ext)
 {
-    $return = empty($GLOBALS['extension_loaded']) ? \extension_loaded($ext) : $GLOBALS['extension_loaded'];
+    $return = isset($GLOBALS['extension_loaded']) ? $GLOBALS['extension_loaded'] : \extension_loaded($ext);
     
     unset($GLOBALS['extension_loaded']);
 

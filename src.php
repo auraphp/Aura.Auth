@@ -1,3 +1,3 @@
 <?php
 
-require_once __DIR__ . '/src/Aura/Authenticate/Exception.php';
+require_once __DIR__ . '/src/Aura/Auth/Exception.php';

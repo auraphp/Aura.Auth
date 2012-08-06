@@ -96,7 +96,7 @@ class Mail implements AuthInterface
             $user_obj = clone $this->user;
             $user_obj->setFromArray($user);
 
-            return $user;
+            return $user_obj;
         }
         
         return false;

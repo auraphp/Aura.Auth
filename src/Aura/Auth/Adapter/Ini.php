@@ -71,7 +71,7 @@ class Ini implements AuthInterface
     public function authenticate(array $opts = [])
     {
         if (! isset($opts['username']) || ! isset($opts['password'])) {
-            $msg = 'The option `username` or `password` is missing.';
+            $msg = 'The option `username` and / or `password` is missing.';
             throw new Exception($msg);
         }
 
@@ -109,8 +109,9 @@ class Ini implements AuthInterface
             
             unset($user['hash_algo'], $user['hash_salt'], $user['password']);
 
-            $user['username'] = $opts['username'];
-            $user_obj         = clone $this->user;
+            $user['username']  = $opts['username'];
+            $user['unique_id'] = $opts['username'];
+            $user_obj          = clone $this->user;
             $user_obj->setFromArray($user);
 
             return $user_obj;

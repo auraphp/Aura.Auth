@@ -14,7 +14,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
             'email'     => 'jane@example.com',
             'uri'       => 'jane.example.com',
             'avatar'    => 'jane.example.com/pic.jpg',
-
+            'unique_id' => 'jane'
         ];
 
         $usr->setFromArray($arr);
@@ -24,6 +24,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($arr['email'],     $usr->email);
         $this->assertSame($arr['uri'],       $usr->uri);
         $this->assertSame($arr['avatar'],    $usr->avatar);
+        $this->assertSame($arr['unique_id'], $usr->unique_id);
 
         $cloned = clone $usr;
 
@@ -32,12 +33,13 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($cloned->email);
         $this->assertEmpty($cloned->uri);
         $this->assertEmpty($cloned->avatar);
+        $this->assertEmpty($cloned->unique_id);
     }
 
     public function test__sleep()
     {
         $usr      = new User;
-        $expected = ['username', 'full_name', 'email', 'uri', 'avatar'];
+        $expected = ['username', 'full_name', 'email', 'uri', 'avatar', 'unique_id'];
 
         $this->assertEquals($expected, $usr->__sleep());
     }
@@ -51,7 +53,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
             'email'     => 'jane@example.com',
             'uri'       => 'jane.example.com',
             'avatar'    => 'jane.example.com/pic.jpg',
-
+            'unique_id' => 'jane'
         ];
 
         $usr->setFromArray($arr);
@@ -61,6 +63,7 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($arr['email'],     $usr->email);
         $this->assertSame($arr['uri'],       $usr->uri);
         $this->assertSame($arr['avatar'],    $usr->avatar);
+        $this->assertSame($arr['unique_id'], $usr->unique_id);
     }
 
     public function testSetFromArrayNoUsernameException()

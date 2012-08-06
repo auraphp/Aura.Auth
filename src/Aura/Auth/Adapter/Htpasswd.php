@@ -157,8 +157,9 @@ class Htpasswd implements AuthInterface
         // did the hashes match?
         if ($stored_hash == $computed_hash) {
 
-            $user['username'] = $opts['username'];
-            $user_obj         = clone $this->user;
+            $user['username']  = $opts['username'];
+            $user['unique_id'] = $opts['username'];
+            $user_obj          = clone $this->user;
             $user_obj->setFromArray($user);
 
             return $user_obj;

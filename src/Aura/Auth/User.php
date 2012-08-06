@@ -52,6 +52,13 @@ class User
      */
     protected $avatar    = null;
 
+    /**
+     * 
+     * @var string
+     * 
+     */
+    protected $unique_id = null;
+
 
     /**
      *
@@ -79,6 +86,7 @@ class User
         $this->email     = null;
         $this->uri       = null;
         $this->avatar    = null;
+        $this->unique_id = null;
     }
 
     /**
@@ -90,7 +98,7 @@ class User
      */
     public function __sleep()
     {
-        return ['username', 'full_name', 'email', 'uri', 'avatar'];
+        return ['username', 'full_name', 'email', 'uri', 'avatar', 'unique_id'];
     }
 
     /**
@@ -104,7 +112,8 @@ class User
      */
     public function setFromArray(array $set)
     {
-        $valid = ['username', 'full_name', 'email', 'uri', 'avatar'];
+        $valid = ['username', 'full_name', 'email', 
+                  'uri',      'avatar',    'unique_id'];
 
         foreach ($set as $key => $value) {
             if (in_array($key, $valid)) {
