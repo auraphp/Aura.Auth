@@ -9,6 +9,7 @@
 namespace Aura\Auth;
 
 use Aura\Auth\Exception\MissingOption;
+use Aura\Session\Manager as SessionManager;
 
 /**
  * 
@@ -104,21 +105,37 @@ class Auth
      */
     protected $user;
 
+    /**
+     * 
+     * @var string 
+     * 
+     */
     protected $status;
+
+    /**
+     * 
+     * @var Aura\Session\Manager
+     *
+     */
+    protected $session;
+
+    /**
+     * 
+     * @var Aura\Session\Segment
+     *
+     */
+    protected $auth_session;
 
 
     /**
      * 
-     * @param array $adapters List of available Auth adapters. Format:
-     * adapter_name => function () { return new Adapter(...); },
-     * 
      */
-    public function __construct(AdapterFactory $adapter_factory)
+    public function __construct(
+        AdapterFactory $adapter_factory, 
+        SessionManager $session)
     {
-        if (! isset($_SESSION)) {
-            session_start();
-            session_regenerate_id();
-        }
+        $this->session      = $session;
+        $this->auth_session = $session->getSegment(__CLASS__);
 
         // check max life before garbage collection on server vs. idle time
         $gc_maxlife = ini_get('session.gc_maxlifetime');
@@ -149,11 +166,25 @@ class Auth
         $this->updateIdleExpire();
     }
 
+    /**
+     * 
+     * Get the User object
+     * 
+     * @return Aura\Auth\User
+     *
+     */
     public function getUser()
     {
         return $this->user;
     }
 
+    /**
+     * 
+     * Get the authentication status.
+     * 
+     * @return string
+     *
+     */
     public function getStatus()
     {
         return $this->status;
@@ -246,19 +277,19 @@ class Auth
         if ($this->status == self::VALID) {
             // update the timers, leave user info alone
             $now = time();
-            $_SESSION[__CLASS__]['initial'] = $now;
-            $_SESSION[__CLASS__]['active']  = $now;
+            $this->auth_session->initial = $now;
+            $this->auth_session->active  = $now;
         } else {
             // clear the timers *and* the user info
-            $_SESSION[__CLASS__]['initial'] = null;
-            $_SESSION[__CLASS__]['active']  = null;
+            unset($this->auth_session->initial);
+            unset($this->auth_session->active);
             $info = null;
         }
         
         $this->setInfo($info);
                 
         // reset the session id and delete previous session
-        session_regenerate_id();
+        $this->session->regenerateId();
     }
 
     /**
@@ -280,7 +311,7 @@ class Auth
         if ($this->isValid()) {
             
             // Check if authentication has expired
-            $tmp = $_SESSION[__CLASS__]['initial'] + $this->expire;
+            $tmp = $this->auth_session->initial + $this->expire;
 
             if ($this->expire > 0 && $tmp < time()) {
                 // past the expiration time
@@ -289,7 +320,7 @@ class Auth
             }
     
             // Check if user has been idle for too long
-            $tmp = $_SESSION[__CLASS__]['active'] + $this->idle;
+            $tmp = $this->auth_session->active + $this->idle;
 
             if ($this->idle > 0 && $tmp < time()) {
                 // past the idle time
@@ -298,7 +329,7 @@ class Auth
             }
             
             // not expired, not idled, so update the active time
-            $_SESSION[__CLASS__]['active'] = time();
+            $this->auth_session->active = time();
             return true;
             
         }
@@ -318,13 +349,13 @@ class Auth
     {
         if ($user instanceOf User) {
 
-            $this->user                  = $user;
-            $_SESSION[__CLASS__]['user'] = $user;//serialize($user);
+            $this->user               = $user;
+            $this->auth_session->user = $user;
             return;
         }
 
         $this->user = null;
-        unset($_SESSION[__CLASS__]);
+        unset($this->auth_session->user);
     }
 
     /**
@@ -336,16 +367,16 @@ class Auth
      */
     protected function loadUser()
     {
-        if (empty($_SESSION[__CLASS__]['user'])    ||
-            empty($_SESSION[__CLASS__]['initial']) ||
-            empty($_SESSION[__CLASS__]['active'])) {
+        if (empty($this->auth_session->user)    ||
+            empty($this->auth_session->initial) ||
+            empty($this->auth_session->active)) {
 
-            unset($_SESSION[__CLASS__]);
+            $this->auth_session->clear();
             $this->reset(self::ANON);
             return;
         }
 
-        $result       = $_SESSION[__CLASS__]['user'];//unserialize($_SESSION[__CLASS__]['user']);
+        $result = $this->auth_session->user;
 
         $this->reset(self::VALID, $result);
     }

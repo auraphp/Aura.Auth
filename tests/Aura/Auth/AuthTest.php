@@ -3,18 +3,14 @@
 namespace Aura\Auth;
 
 use Aura\Auth\Adapter\MockAdapter;
+use Aura\Session\Manager;
+use Aura\Session\SegmentFactory;
+use Aura\Session\CsrfTokenFactory;
+use Aura\Session\MockSessionHandler;
 
-require_once 'session_mock_functions.php';
 require_once 'MockAdapter.php';
 
-/*[
-            'username' => 'jdoe',
-            'full_name' => 'john doe',
-            'email' => 'jdoe@example.com', 
-            'uri'  => 'example.com',
-            'avatar' => 'example.com/avatar.jpg',
-            'unique_id' => 'jdoe'
-        ]*/
+
 class AuthTest extends \PHPUnit_Framework_TestCase
 {
 
@@ -22,23 +18,25 @@ class AuthTest extends \PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
+        session_set_save_handler(new MockSessionHandler);
         // set to PHP defaults
         ini_set('session.gc_maxlifetime', 1440);
         ini_set('session.cookie_lifetime', 14400);
-
-        // reset / unset GLOBALS
-        $GLOBALS['session_regenerate_id'] = false;
-        $GLOBALS['session_start']         = false;
-
-        unset($GLOBALS['Aura\Auth']);
     }
 
-    protected function newInstance()
+    protected function newInstance($session = null)
     {
+        if (! $session) {
+            $session = new Manager(
+                new SegmentFactory,
+                new CsrfTokenFactory);
+        }
+
         return new Auth(
             new AdapterFactory([
                 'mock' => new MockAdapter
-            ])
+            ]),
+            $session
         );
     }
     protected function setUpUserSession()
@@ -54,20 +52,18 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $usr = new User;
         $usr->setFromArray($array);
 
-        $now = time() - 1;
-        $_SESSION["Aura\Auth\Auth"]['user']    = $usr;
-        $_SESSION["Aura\Auth\Auth"]['initial'] = $now;
-        $_SESSION["Aura\Auth\Auth"]['active']  = $now;
-    }
+        $now     = time() - 1;
+        $session = new Manager(
+            new SegmentFactory,
+            new CsrfTokenFactory
+        );
 
-    public function test__constructStartsSession()
-    {
-        unset($_SESSION);
+        $seg          = $session->getSegment('Aura\Auth\Auth');
+        $seg->user    = $usr;
+        $seg->initial = $now;
+        $seg->active  = $now;
 
-        $this->newInstance();
-
-        $this->assertTrue($GLOBALS["session_start"]);
-        $this->assertTrue($GLOBALS['session_regenerate_id']);
+        return $session;
     }
 
     public function test__constructIdleException()
@@ -88,10 +84,10 @@ class AuthTest extends \PHPUnit_Framework_TestCase
 
     public function test__constructUpdatesIdleExpireActiveTime()
     {
-        $this->setUpUserSession();
+        $session = $this->setUpUserSession();
+        $org     = $session->getSegment('Aura\Auth\Auth')->active;
+        $auth    = $this->newInstance($session);
 
-        $org  = $_SESSION["Aura\Auth\Auth"]['active'];
-        $auth = $this->newInstance();
         $this->assertTrue($_SESSION["Aura\Auth\Auth"]['active'] > $org);
     }
 
@@ -99,7 +95,6 @@ class AuthTest extends \PHPUnit_Framework_TestCase
     {
         $auth = $this->newInstance();
         $this->assertEmpty($auth->getUser());
-        $this->assertTrue($GLOBALS['session_regenerate_id']);
     }
 
     public function testGetUser()
@@ -108,17 +103,16 @@ class AuthTest extends \PHPUnit_Framework_TestCase
 
         $auth = $this->newInstance();
         $this->assertInstanceOf('\Aura\Auth\User', $auth->getUser());
-        $this->assertTrue($GLOBALS['session_regenerate_id']);
     }
 
     public function testUpdateIdleExpireExpired()
     {
-        $this->setUpUserSession();
-        $auth = $this->newInstance();
+        $session = $this->setUpUserSession();
+        $auth    = $this->newInstance($session);
 
         // set the time auth was initialized to 4 hours ago
-        $_SESSION["Aura\Auth\Auth"]['initial'] -= 14401; // plus 1 - setUpUserSession = time() - 1
-        $_SESSION["Aura\Auth\Auth"]['active']  -= 14401;
+        $session->getSegment('Aura\Auth\Auth')->initial -= 14401; // plus 1 - setUpUserSession = time() - 1
+        $session->getSegment('Aura\Auth\Auth')->active  -= 14401;
 
 
         $return = $auth->updateIdleExpire();
@@ -129,12 +123,12 @@ class AuthTest extends \PHPUnit_Framework_TestCase
 
     public function testUpdateIdleExpireIdled()
     {
-        $this->setUpUserSession();
-        $auth = $this->newInstance();
+        $session = $this->setUpUserSession();
+        $auth = $this->newInstance($session);
 
         // set the time auth was initialized to 24 min ago
-        $_SESSION["Aura\Auth\Auth"]['initial'] -= 1441; // plus 1 - setUpUserSession = time() - 1
-        $_SESSION["Aura\Auth\Auth"]['active']  -= 1441;
+        $session->getSegment('Aura\Auth\Auth')->initial -= 1441; // plus 1 - setUpUserSession = time() - 1
+        $session->getSegment('Aura\Auth\Auth')->active  -= 1441;
 
 
         $return = $auth->updateIdleExpire();

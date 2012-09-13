@@ -89,7 +89,7 @@ $di->params['Aura\Auth\AdapterFactory'] = [
 
 **Important Note on DES**
 
-    Note that `crypt()` will only check up to the first 8 characters of a password; chars after 8 are ignored. This means that if the real password is "atecharsnine", the word "atechars" would be valid. As a workaround, if the password provided by the user is longer than 8 characters, this adapter will *not* validate it.
+Note that `crypt()` will only check up to the first 8 characters of a password; chars after 8 are ignored. This means that if the real password is "atecharsnine", the word "atechars" would be valid. As a workaround, if the password provided by the user is longer than 8 characters, this adapter will *not* validate it.
 
 **Example Aura.Di config:**
 
