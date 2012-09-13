@@ -38,3 +38,4 @@ class AdapterFactory
         return $this->adapters[$name];
     }
 }
+

@@ -8,9 +8,12 @@
  */
 namespace Aura\Auth\Exception;
 
-/**.
+/**
  * 
  * @package Aura.Auth
  * 
  */
-class MissingOption extends \Exception {}
+class MissingOption extends \Exception
+{
+}
+

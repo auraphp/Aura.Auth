@@ -15,4 +15,7 @@ namespace Aura\Auth;
  * @package Aura.Auth
  * 
  */
-class Exception extends \Exception {}
+class Exception extends \Exception
+{
+}
+

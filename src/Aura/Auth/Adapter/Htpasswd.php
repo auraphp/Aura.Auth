@@ -46,11 +46,11 @@ class Htpasswd implements AuthInterface
      */
     public function __construct(User $user, $file)
     {
-        $this->user = $user;    
-    
+        $this->user = $user;
+
         // force the full, real path to the file
         $this->file = realpath($file);
-        
+
         // does the file exist?
         if (! file_exists($this->file) || ! is_readable($this->file)) {
             $msg = "File `{$this->file}` does not exist or is not readable.";
@@ -83,7 +83,7 @@ class Htpasswd implements AuthInterface
 
         $username = $opts['username'];
         $password = $opts['password'];
-        
+
         // open the file
         $fp = @fopen($this->file, 'r');
 
@@ -91,7 +91,7 @@ class Htpasswd implements AuthInterface
             $msg = "The Htpasswd file `{$this->file}` is not readable.";
             throw new Exception($msg);
         }
-        
+
         // find the user's line in the file
         $len = strlen($username) + 1;
         $ok  = false;
@@ -103,40 +103,40 @@ class Htpasswd implements AuthInterface
                 break;
             }
         }
-        
+
         // close the file
         fclose($fp);
-        
+
         // did we find the username?
         if (! $ok) {
             // username not in the file
             return false;
         }
-        
+
         // break up the pieces: 0 = username, 1 = encrypted (hashed)
         // password. may be more than that but we don't care.
         $tmp = explode(':', trim($line));
         $stored_hash = $tmp[1];
-        
+
         // what kind of encryption hash are we using?  look at the first
         // few characters of the hash to find out.
         if (substr($stored_hash, 0, 6) == '$apr1$') {
-        
+
             // use the apache-specific MD5 encryption
             $computed_hash = $this->hashApr1($password, $stored_hash);
-            
+
         } elseif (substr($stored_hash, 0, 5) == '{SHA}') {
-        
+
             // use SHA1 encryption.  pack SHA binary into hexadecimal,
             // then encode into characters using base64. this is per
             // Tomas V. V. Cox.
             $hex           = pack('H40', sha1($password));
             $computed_hash = '{SHA}' . base64_encode($hex);
-            
+
         } else {
-        
+
             // use DES encryption (the default).
-            // 
+            //
             // Note that crypt() will only check up to the first 8
             // characters of a password; chars after 8 are ignored. This
             // means that if the real password is "atecharsnine", the
@@ -167,7 +167,7 @@ class Htpasswd implements AuthInterface
 
         return false;
     }
-    
+
     /**
      * 
      * APR compatible MD5 encryption.
@@ -189,18 +189,18 @@ class Htpasswd implements AuthInterface
         $length  = strlen($plain);
         $context = $plain . '$apr1$' . $salt;
         $binary  = hash('md5', $plain . $salt . $plain, true);
-        
+
         for ($i = $length; $i > 0; $i -= 16) {
-            $context .= substr($binary, 0, min(16 , $i));
+            $context .= substr($binary, 0, min(16, $i));
         }
 
-        for ( $i = $length; $i > 0; $i >>= 1) {
+        for ($i = $length; $i > 0; $i >>= 1) {
             $context .= ($i & 1) ? chr(0) : $plain[0];
         }
-        
+
         $binary = hash('md5', $context, true);
-        
-        for($i = 0; $i < 1000; $i++) {
+
+        for ($i = 0; $i < 1000; $i++) {
             $new = ($i & 1) ? $plain : $binary;
 
             if ($i % 3) {
@@ -214,7 +214,7 @@ class Htpasswd implements AuthInterface
             $new   .= ($i & 1) ? $binary : $plain;
             $binary = hash('md5', $new, true);
         }
-        
+
         $p = array();
 
         for ($i = 0; $i < 5; $i++) {
@@ -232,11 +232,11 @@ class Htpasswd implements AuthInterface
                 5
             );
         }
-        
-        return '$apr1$' . $salt . '$' . implode($p) 
+
+        return '$apr1$' . $salt . '$' . implode($p)
              . $this->chars64(ord($binary[11]), 3);
     }
-    
+
     /**
      * 
      * Convert to allowed 64 characters for encryption.
@@ -255,11 +255,12 @@ class Htpasswd implements AuthInterface
     protected function chars64($value, $count)
     {
         $charset = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-        $result = '';
-        while(--$count) {
+        $result  = '';
+        while (--$count) {
             $result .= $charset[$value & 0x3f];
             $value >>= 6;
         }
         return $result;
     }
 }
+

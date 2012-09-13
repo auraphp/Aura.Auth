@@ -24,10 +24,8 @@ $is_valid = $factory->newInstance('ini')->authenticate(['username' => 'jane', 'p
 Auth
 ----
 
-If a session has not been started Auth will call `session_start` when instantiated.
-
 ```php
-$auth = new Auth($factory);
+$auth = new Auth($factory, new SessionManager(...));
 
 // Validating a user.
 

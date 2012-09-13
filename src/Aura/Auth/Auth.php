@@ -29,7 +29,7 @@ class Auth
      * 
      */
     const ANON = 'AURA\AUTH\AUTH\ANON';
-    
+
     /**
      * 
      * The max time for authentication has expired.
@@ -38,7 +38,7 @@ class Auth
      * 
      */
     const EXPIRED = 'AURA\AUTH\AUTH\EXPIRED';
-    
+
     /**
      * 
      * The authenticated user has been idle for too long.
@@ -47,7 +47,7 @@ class Auth
      * 
      */
     const IDLED = 'AURA\AUTH\AUTH\IDLED';
-    
+
     /**
      * 
      * The user is authenticated and has not timed out.
@@ -56,7 +56,7 @@ class Auth
      * 
      */
     const VALID = 'AURA\AUTH\AUTH\VALID';
-    
+
     /**
      * 
      * The user attempted authentication but failed.
@@ -65,7 +65,6 @@ class Auth
      * 
      */
     const WRONG = 'AURA\AUTH\AUTH\WRONG';
-
 
     /**
      * 
@@ -131,9 +130,9 @@ class Auth
      * 
      */
     public function __construct(
-        AdapterFactory $adapter_factory, 
-        SessionManager $session)
-    {
+        AdapterFactory $adapter_factory,
+        SessionManager $session
+    ) {
         $this->session      = $session;
         $this->auth_session = $session->getSegment(__CLASS__);
 
@@ -147,7 +146,7 @@ class Auth
 
             throw new Exception($msg);
         }
-        
+
         // check life at client vs. exipire time;
         // if life at client is zero, cookie never expires.
         $cookie_life = ini_get('session.cookie_lifetime');
@@ -226,7 +225,7 @@ class Auth
 
         try {
             $result = $adapter->authenticate($opts);
-        
+
         } catch (Exception $e) {
             throw new MissingOption($e->getMessage());
         }
@@ -262,14 +261,14 @@ class Auth
     {
         // canonicalize the status value
         $status = strtoupper($status);
-        
+
         if (($this->status == self::ANON) && ($status == self::ANON)) {
             // If we are transitioning between anonymous and anonymous,
             // don't attempt to store information which would trigger
             // a session to start
             return null; // return null to make testing easer
         }
-        
+
         // change the current status
         $this->status = $status;
 
@@ -285,9 +284,9 @@ class Auth
             unset($this->auth_session->active);
             $info = null;
         }
-        
+
         $this->setInfo($info);
-                
+
         // reset the session id and delete previous session
         $this->session->regenerateId();
     }
@@ -309,7 +308,7 @@ class Auth
     {
         // is the current user already authenticated?
         if ($this->isValid()) {
-            
+
             // Check if authentication has expired
             $tmp = $this->auth_session->initial + $this->expire;
 
@@ -318,7 +317,7 @@ class Auth
                 $this->reset(self::EXPIRED);
                 return false;
             }
-    
+
             // Check if user has been idle for too long
             $tmp = $this->auth_session->active + $this->idle;
 
@@ -327,13 +326,12 @@ class Auth
                 $this->reset(self::IDLED);
                 return false;
             }
-            
+
             // not expired, not idled, so update the active time
             $this->auth_session->active = time();
             return true;
-            
         }
-        
+
         return false;
     }
 
@@ -381,3 +379,4 @@ class Auth
         $this->reset(self::VALID, $result);
     }
 }
+

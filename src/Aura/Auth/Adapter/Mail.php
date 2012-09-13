@@ -98,7 +98,8 @@ class Mail implements AuthInterface
 
             return $user_obj;
         }
-        
+
         return false;
     }
 }
+

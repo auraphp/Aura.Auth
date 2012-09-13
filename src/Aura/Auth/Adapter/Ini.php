@@ -81,10 +81,10 @@ class Ini implements AuthInterface
 
         // parse the file into an array
         $data = parse_ini_file($this->file, true);
-        
+
         // get user info for the handle
         $user = empty($data[$opts['username']]) ? [] : $data[$opts['username']];
-        
+
         // there must be an entry for the username and a password
         if (empty($user['password'])) {
             return false;
@@ -97,16 +97,16 @@ class Ini implements AuthInterface
 
             $valid = ($user['password'] == $opts['password']);
 
-        // there is a hash algorithm
         } else {
 
+            // there is a hash algorithm
             $salt  = empty($user['hash_salt']) ? false : $user['hash_salt'];
             $hpass = $this->hash($user['hash_algo'], $opts['password'], $salt);
             $valid = ($user['password'] == $hpass);
         }
 
         if ($valid) {
-            
+
             unset($user['hash_algo'], $user['hash_salt'], $user['password']);
 
             $user['username']  = $opts['username'];
@@ -147,3 +147,4 @@ class Ini implements AuthInterface
         return hash($algo, $data);
     }
 }
+

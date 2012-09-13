@@ -29,3 +29,4 @@ interface AuthInterface
      */
     public function authenticate(array $opts = []);
 }
+

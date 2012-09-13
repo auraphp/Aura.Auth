@@ -112,7 +112,7 @@ class User
      */
     public function setFromArray(array $set)
     {
-        $valid = ['username', 'full_name', 'email', 
+        $valid = ['username', 'full_name', 'email',
                   'uri',      'avatar',    'unique_id'];
 
         foreach ($set as $key => $value) {
@@ -123,7 +123,8 @@ class User
         }
 
         if (! $this->username) {
-            throw new Exception('Username is required');   
+            throw new Exception('Username is required');
         }
     }
 }
+
