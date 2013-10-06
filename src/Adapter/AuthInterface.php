@@ -1,7 +1,9 @@
 <?php
 /**
  * 
- * This file is part of the Aura project for PHP.
+ * This file is part of Aura for PHP.
+ * 
+ * @package Aura.Auth
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
@@ -21,12 +23,11 @@ interface AuthInterface
      * 
      * Authenticate a user.
      * 
-     * @param array $opts A list of optional parameters to pass to 
-     * the Auth adapter.
+     * @param void
      * 
-     * @return Aura\Auth\User|boolean
+     * @return boolean
      * 
      */
-    public function authenticate(array $opts = []);
+    public function authenticate();
 }
 

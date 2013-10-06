@@ -1,15 +1,17 @@
 <?php
 /**
  * 
- * This file is part of the Aura project for PHP.
+ * This file is part of Aura for PHP.
+ * 
+ * @package Aura.Auth
  * 
  * @license http://opensource.org/licenses/bsd-license.php BSD
  * 
  */
 namespace Aura\Auth\Adapter;
 
-use Aura\Auth\Exception;
-use Aura\Auth\User;
+use Aura\Auth\Exception\FileNotReadable;
+use Aura\Auth\Exception\MissingUsernameOrPassword;
 
 /**
  * 
@@ -18,88 +20,33 @@ use Aura\Auth\User;
  * @package Aura.Auth
  * 
  */
-class Htpasswd implements AuthInterface
+class Htpasswd extends FileAdapter
 {
-    /**
-     * 
-     * @var string Path to Htpasswd file.
-     * 
-     */
-    protected $file;
-
-    /**
-     * 
-     * @var Aura\Auth\User
-     * 
-     */
-    protected $user;
-
-
-    /**
-     *
-     * @param Aura\Auth\User $user
-     * 
-     * @param string $file The htpasswd file to use.
-     * 
-     * @throws Aura\Auth\Exception If $file does not exist.
-     *
-     */
-    public function __construct(User $user, $file)
+    public function authenticate()
     {
-        $this->user = $user;
-
-        // force the full, real path to the file
-        $this->file = realpath($file);
-
-        // does the file exist?
-        if (! file_exists($this->file) || ! is_readable($this->file)) {
-            $msg = "File `{$this->file}` does not exist or is not readable.";
-            throw new Exception($msg);
-        }
-    }
-
-    /**
-     * 
-     * Authenticate a user using a Htpasswd file.
-     * 
-     * @param array $opts An array containing the keys `username` and `password`.
-     * 
-     * @throws Aura\Auth\Exception If $opts does not contain the 
-     * keys `username` and `password`.
-     * 
-     * @return Aura\Auth\User|boolean
-     * 
-     */
-    public function authenticate(array $opts = [])
-    {
-        if (! isset($opts['username']) || ! isset($opts['password'])) {
-            $msg = 'The option `username` or `password` is missing.';
-            throw new Exception($msg);
+        if (! isset($this->username) || ! isset($this->password)) {
+            throw new MissingUsernameOrPassword();
         }
 
-        if (empty($opts['username']) || empty($opts['password'])) {
+        if (empty($this->username) || empty($this->password)) {
             return false;
         }
 
-        $username = $opts['username'];
-        $password = $opts['password'];
-
         // open the file
-        $fp = @fopen($this->file, 'r');
+        $fp = fopen($this->file, 'r');
 
         if (! $fp) {
-            $msg = "The Htpasswd file `{$this->file}` is not readable.";
-            throw new Exception($msg);
+            throw new FileNotReadable();
         }
 
         // find the user's line in the file
-        $len = strlen($username) + 1;
-        $ok  = false;
+        $len = strlen($this->username) + 1;
+        $found  = false;
 
         while ($line = fgets($fp)) {
-            if (substr($line, 0, $len) == "{$username}:") {
+            if (substr($line, 0, $len) == "{$this->username}:") {
                 // found the line, leave the loop
-                $ok = true;
+                $found = true;
                 break;
             }
         }
@@ -108,7 +55,7 @@ class Htpasswd implements AuthInterface
         fclose($fp);
 
         // did we find the username?
-        if (! $ok) {
+        if (! $found) {
             // username not in the file
             return false;
         }
@@ -123,14 +70,14 @@ class Htpasswd implements AuthInterface
         if (substr($stored_hash, 0, 6) == '$apr1$') {
 
             // use the apache-specific MD5 encryption
-            $computed_hash = $this->hashApr1($password, $stored_hash);
+            $computed_hash = $this->hashApr1($this->password, $stored_hash);
 
         } elseif (substr($stored_hash, 0, 5) == '{SHA}') {
 
             // use SHA1 encryption.  pack SHA binary into hexadecimal,
             // then encode into characters using base64. this is per
             // Tomas V. V. Cox.
-            $hex           = pack('H40', sha1($password));
+            $hex           = pack('H40', sha1($this->password));
             $computed_hash = '{SHA}' . base64_encode($hex);
 
         } else {
@@ -146,25 +93,18 @@ class Htpasswd implements AuthInterface
             // it.
             //
             // is the password longer than 8 characters?
-            if (strlen($password) > 8) {
+            if (strlen($this->password) > 8) {
                 // automatically reject
                 return false;
             } else {
-                $computed_hash = crypt($password, $stored_hash);
+                $computed_hash = crypt($this->password, $stored_hash);
             }
         }
 
         // did the hashes match?
         if ($stored_hash == $computed_hash) {
-
-            $user['username']  = $opts['username'];
-            $user['unique_id'] = $opts['username'];
-            $user_obj          = clone $this->user;
-            $user_obj->setFromArray($user);
-
-            return $user_obj;
+            return true;
         }
-
         return false;
     }
 
