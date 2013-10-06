@@ -47,7 +47,7 @@ class Ini extends FileAdapter
         $data = parse_ini_file($this->file, true);
 
         // get user info for the handle
-        $user = empty($data[$this->username]) ? [] : $data[$this->username];
+        $user = empty($data[$this->username]) ? array() : $data[$this->username];
 
         // there must be an entry for the username and a password
         if (empty($user['password'])) {
