@@ -1,5 +1,5 @@
 {
-    "name": "Aura/Auth",
+    "name": "aura/auth",
     "type": "library",
     "description": "Aura Auth provides a unified interface to authenticate a user with local or remote authentication systems.",
     "keywords": [
@@ -7,13 +7,13 @@
         "authenticate",
         "authentication"
     ],
-    "homepage": "http://auraphp.github.com/Aura.Auth",
-    "version": "1.0.0-dev",
+    "homepage": "http://auraphp.com/Aura.Auth",
+    "version": "2.0.0-dev",
     "license": "BSD",
     "authors": [
         {
             "name": "Aura Contributors",
-            "homepage": "https://github.com/auraphp/Aura.Http/contributors"
+            "homepage": "https://github.com/auraphp/Aura.Auth/contributors"
         }
     ],
     "require": {
