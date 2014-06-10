@@ -19,6 +19,16 @@ class FakeAdapter extends AbstractAdapter
             && $this->checkPassword($cred);
     }
 
+    public function logout($user, array $info = array())
+    {
+        if (isset($info['logout_error'])) {
+            $this->error = 'Triggered logout error.';
+            return false;
+        }
+
+        return parent::logout($user, $info);
+    }
+
     protected function checkUsername($cred)
     {
         if (empty($cred['username'])) {
@@ -38,13 +48,18 @@ class FakeAdapter extends AbstractAdapter
 
     protected function checkPassword($cred)
     {
+        if (! $this->user) {
+            $this->error = 'Username missing.';
+            return false;
+        }
+
         if (empty($cred['password'])) {
             $this->error = 'Password missing.';
             return false;
         }
 
         $password = $cred['password'];
-        if ($this->accounts[$username] !== $password) {
+        if ($this->accounts[$this->user] !== $password) {
             $this->error = 'Password mismatch.';
             return false;
         }

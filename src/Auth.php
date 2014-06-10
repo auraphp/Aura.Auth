@@ -187,12 +187,12 @@ class Auth
         }
 
         if ($this->timer->hasExpired($this->session->initial)) {
-            $this->logout(self::EXPIRE);
+            $this->logout(self::EXPIRED);
             return false;
         }
 
         if ($this->timer->hasIdled($this->session->active)) {
-            $this->logout(self::IDLE);
+            $this->logout(self::IDLED);
             return false;
         }
 
@@ -239,8 +239,6 @@ class Auth
      */
     public function login($cred)
     {
-        $this->error = null;
-
         $success = $this->adapter->login($cred);
         if ($success) {
             $this->forceLogin(
@@ -269,6 +267,7 @@ class Auth
     public function forceLogin($user, $info = array())
     {
         $now = time();
+        $this->error = null;
         $this->session->start();
         $this->setStatus(self::VALID);
         $this->session->user = $user;
@@ -288,15 +287,13 @@ class Auth
      */
     public function logout($status = self::ANON)
     {
-        $this->error = null;
-
         $success = $this->adapter->logout(
             $this->getUser(),
             $this->getInfo()
         );
 
         if ($success) {
-            $this->forceLogout(self::ANON);
+            $this->forceLogout($status);
             return true;
         }
 
@@ -316,11 +313,14 @@ class Auth
      */
     public function forceLogout($status = self::ANON)
     {
-        $this->setSatus($status);
+        $this->error = null;
+        $this->setStatus($status);
         unset($this->session->user);
         unset($this->session->info);
         unset($this->session->initial);
         unset($this->session->active);
+
+        // @TODO destroy the session
     }
 
     /**
