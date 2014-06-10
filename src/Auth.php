@@ -10,6 +10,8 @@
  */
 namespace Aura\Auth;
 
+use Aura\Auth\Adapter\AdapterInterface;
+
 /**
  *
  * Authentication manager.
@@ -85,6 +87,15 @@ class Auth
 
     /**
      *
+     * A session manager.
+     *
+     * @var Session
+     *
+     */
+    protected $session;
+
+    /**
+     *
      * A idle/expire timer.
      *
      * @var Timer
@@ -105,9 +116,9 @@ class Auth
      * @return self
      *
      */
-    public function _construct(
-        Adapter $adapter,
-        Session $session,
+    public function __construct(
+        AdapterInterface $adapter,
+        SessionInterface $session,
         Timer $timer
     ) {
         $this->adapter = $adapter;

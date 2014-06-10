@@ -7,6 +7,12 @@ class FakeSession implements SessionInterface
 
     public $__regenerated = false;
 
+    public $status;
+    public $initial;
+    public $active;
+    public $user;
+    public $info;
+
     public function start()
     {
         $this->started = true;

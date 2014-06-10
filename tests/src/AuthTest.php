@@ -19,8 +19,10 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $this->auth = new Auth($this->adapter, $this->session, $this->timer);
     }
 
-    public function testInstance()
+    public function testGetProperties()
     {
-        $this->assertInstanceOf('Aura\Auth\Auth', $this->auth);
+        $this->assertSame($this->adapter, $this->auth->getAdapter());
+        $this->assertSame($this->session, $this->auth->getSession());
+        $this->assertSame($this->timer, $this->auth->getTimer());
     }
 }
