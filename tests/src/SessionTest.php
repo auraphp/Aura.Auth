@@ -7,7 +7,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->session = new Session('Aura\Auth\Auth');
+        $this->session = new Session;
     }
 
     public function testInstance()

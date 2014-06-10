@@ -5,7 +5,7 @@ class Session implements SessionInterface
 {
     protected $segment;
 
-    public function __construct($segment)
+    public function __construct($segment = 'Aura\Auth\Session')
     {
         $this->segment = $segment;
     }
