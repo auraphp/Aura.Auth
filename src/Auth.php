@@ -186,12 +186,12 @@ class Auth
             return false;
         }
 
-        if ($this->timer->hasExpired()) {
+        if ($this->timer->hasExpired($this->session->initial)) {
             $this->logout(self::EXPIRE);
             return false;
         }
 
-        if ($this->timer->hasIdled()) {
+        if ($this->timer->hasIdled($this->session->active)) {
             $this->logout(self::IDLE);
             return false;
         }

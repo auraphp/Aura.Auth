@@ -25,4 +25,6 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($this->session, $this->auth->getSession());
         $this->assertSame($this->timer, $this->auth->getTimer());
     }
+
+
 }

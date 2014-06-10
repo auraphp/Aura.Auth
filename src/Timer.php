@@ -37,15 +37,15 @@ class Timer
      *
      */
     public function __construct(
-        $ini_gc_maxlifetime,
-        $ini_cookie_lifetime,
+        $ini_gc_maxlifetime = 1440,
+        $ini_cookie_lifetime = 0,
         $idle_ttl = 1440,
         $expire_ttl = 14400
     ) {
         $this->ini_gc_maxlifetime = $ini_gc_maxlifetime;
         $this->ini_cookie_lifetime = $ini_cookie_lifetime;
-        $this->idle_ttl = $idle_ttl;
-        $this->expire_ttl = $expire_ttl;
+        $this->setIdleTtl($idle_ttl);
+        $this->setExpireTtl($expire_ttl);
     }
 
     /**
@@ -62,11 +62,10 @@ class Timer
      */
     public function setIdleTtl($idle_ttl)
     {
-        $this->idle_ttl = $idle_ttl;
-        $gc_maxlifetime = ini_get('session.gc_maxlifetime');
-        if ($gc_maxlifetime < $this->idle_ttl) {
-            throw new Exception('gc_maxlifetime less than idle time');
+        if ($this->ini_gc_maxlifetime < $idle_ttl) {
+            throw new Exception('session.gc_maxlifetime less than idle time');
         }
+        $this->idle_ttl = $idle_ttl;
     }
 
     /**
@@ -95,11 +94,12 @@ class Timer
      */
     public function setExpireTtl($expire_ttl)
     {
-        $this->expire_ttl = $expire_ttl;
-        $cookie_life = ini_get('session.cookie_lifetime');
-        if ($cookie_life > 0 && $cookie_life < $this->expire_ttl) {
-            throw new Exception('cookie_lifetime less than expire time');
+        $bad = $this->ini_cookie_lifetime > 0
+            && $this->ini_cookie_lifetime < $expire_ttl;
+        if ($bad) {
+            throw new Exception('session.cookie_lifetime less than expire time');
         }
+        $this->expire_ttl = $expire_ttl;
     }
 
     /**
@@ -121,10 +121,10 @@ class Timer
      * @return bool
      *
      */
-    public function hasExpired()
+    public function hasExpired($initial)
     {
-        return $this->expire_ttl > 0
-            && ($this->session->initial + $this->expire_ttl) < time();
+        return $this->expire_ttl <= 0
+            || ($initial + $this->getExpireTtl()) < time();
     }
 
     /**
@@ -134,10 +134,9 @@ class Timer
      * @return bool
      *
      */
-    public function hasIdled()
+    public function hasIdled($active)
     {
-        return $this->idle_ttl > 0
-            && ($this->session->active + $this->idle_ttl) < time();
+        return $this->idle_ttl <= 0
+            || ($active + $this->getIdleTtl()) < time();
     }
-
 }
