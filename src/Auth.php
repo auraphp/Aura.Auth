@@ -76,7 +76,7 @@ class Auth
 
     /**
      *
-     * The last error reported by the adapter system.
+     * The last error reported by the adapter.
      *
      * @var mixed
      *
@@ -215,13 +215,13 @@ class Auth
 
     /**
      *
-     * Authenticate by passing credentials to the adapter system.
+     * Logs the user in via the adapter.
      *
      * On success, this will start the session and populate it with the user
-     * and info returned by the adapter system. On failure, it will populate
-     * the error property with the error value reported by the adapter system.
+     * and info returned by the adapter. On failure, it will populate
+     * the error property with the error value reported by the adapter.
      *
-     * @param mixed $cred The credentials to pass to the adapter system.
+     * @param mixed $cred The credentials to pass to the adapter.
      *
      * @return bool True on success, false on failure.
      *
@@ -246,7 +246,7 @@ class Auth
 
     /**
      *
-     * Forces a successful authentication, bypassing the adapter system.
+     * Forces a successful login, bypassing the adapter.
      *
      * @param string $user The authenticated user.
      *
@@ -257,15 +257,24 @@ class Auth
      */
     public function forceLogin($user, $info = array())
     {
+        $now = time();
         $this->session->start();
         $this->setStatus(self::VALID);
         $this->session->user = $user;
         $this->session->info = $info;
-        $now = time();
         $this->session->initial = $now;
         $this->session->active = $now;
     }
 
+    /**
+     *
+     * Logs the user out via the adapter.
+     *
+     * @param string $status The status after successful logout.
+     *
+     * @return bool True on success, false on failure.
+     *
+     */
     public function logout($status = self::ANON)
     {
         $this->error = null;
@@ -285,6 +294,15 @@ class Auth
         return false;
     }
 
+    /**
+     *
+     * Forces a successful logout, bypassing the adapter.
+     *
+     * @param string $status The status after logout.
+     *
+     * @return null
+     *
+     */
     public function forceLogout($status = self::ANON)
     {
         $this->setSatus($status);
@@ -294,6 +312,15 @@ class Auth
         unset($this->session->active);
     }
 
+    /**
+     *
+     * Sets the current status, regenerating the session ID on status changes.
+     *
+     * @param string $status The new status.
+     *
+     * @return null
+     *
+     */
     protected function setStatus($status)
     {
         $old = $this->getStatus();
@@ -303,6 +330,13 @@ class Auth
         }
     }
 
+    /**
+     *
+     * Gets the current status.
+     *
+     * @return string
+     *
+     */
     public function getStatus()
     {
         $status = $this->session->status;
@@ -312,21 +346,49 @@ class Auth
         return $status;
     }
 
+    /**
+     *
+     * Gets the initial authentication time.
+     *
+     * @return int
+     *
+     */
     public function getInitial()
     {
         return $this->session->initial;
     }
 
+    /**
+     *
+     * Gets the last active time.
+     *
+     * @return int
+     *
+     */
     public function getActive()
     {
         return $this->session->active;
     }
 
+    /**
+     *
+     * Gets the current user name.
+     *
+     * @return string
+     *
+     */
     public function getUser()
     {
         return $this->session->user;
     }
 
+    /**
+     *
+     * Gets the current user information.
+     *
+     * @return array()
+     *
+     */
     public function getInfo()
     {
         $info = $this->session->info;
@@ -336,11 +398,13 @@ class Auth
         return $info;
     }
 
-    public function hasError()
-    {
-        return (bool) $this->error;
-    }
-
+    /**
+     *
+     * Gets the last error reported by the adapter.
+     *
+     * @return mixed
+     *
+     */
     public function getError()
     {
         return $this->error;

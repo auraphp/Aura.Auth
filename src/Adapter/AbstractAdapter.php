@@ -13,6 +13,7 @@ abstract class AbstractAdapter implements AdapterInterface
 
     public function logout($user, array $info = array())
     {
+        $this->reset();
         return true;
     }
 
