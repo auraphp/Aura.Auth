@@ -3,7 +3,7 @@
  *
  * This file is part of Aura for PHP.
  *
- * @package Aura.Autoload
+ * @package Aura.Auth
  *
  * @license http://opensource.org/licenses/bsd-license.php BSD
  *
@@ -76,24 +76,6 @@ class Auth
 
     /**
      *
-     * Maximum idle time in seconds; zero is forever.
-     *
-     * @var int
-     *
-     */
-    protected $idle_ttl = 1440;
-
-    /**
-     *
-     * Maximum authentication lifetime in seconds; zero is forever.
-     *
-     * @var int
-     *
-     */
-    protected $expire_ttl = 14400;
-
-    /**
-     *
      * The last error reported by the adapter system.
      *
      * @var mixed
@@ -103,12 +85,12 @@ class Auth
 
     /**
      *
-     * A session manager.
+     * A idle/expire timer.
      *
-     * @var SessionInterface
+     * @var Timer
      *
      */
-    protected $error;
+    protected $timer;
 
     /**
      *
@@ -118,9 +100,7 @@ class Auth
      *
      * @param SessionInterface $session A session manager.
      *
-     * @param int $idle_ttl The maximum idle time in seconds.
-     *
-     * @param int $expire_ttl The maximum authentication time in seconds.
+     * @param Timer $timer An idle/expire timer.
      *
      * @return self
      *
@@ -128,13 +108,11 @@ class Auth
     public function _construct(
         Adapter $adapter,
         Session $session,
-        $idle_ttl = 1440,
-        $expire_ttl = 14400
+        Timer $timer
     ) {
         $this->adapter = $adapter;
         $this->session = $session;
-        $this->setIdleTtl($idle_ttl);
-        $this->setExpireTtl($expire_ttl);
+        $this->timer = $timer;
         $this->updateActive();
     }
 
@@ -164,68 +142,14 @@ class Auth
 
     /**
      *
-     * Sets the maximum idle time.
+     * Returns the timer.
      *
-     * @param int $idle_ttl The maximum idle time in seconds.
-     *
-     * @throws Exception when the session garbage collection max lifetime is
-     * less than the idle time.
-     *
-     * @return null
+     * @return AdapterInterface
      *
      */
-    public function setIdleTtl($idle_ttl)
+    public function getTimer()
     {
-        $this->idle_ttl = $idle_ttl;
-        $gc_maxlifetime = ini_get('session.gc_maxlifetime');
-        if ($gc_maxlifetime < $this->idle_ttl) {
-            throw new Exception('gc_maxlifetime less than idle time');
-        }
-    }
-
-    /**
-     *
-     * Returns the maximum idle time.
-     *
-     * @return int
-     *
-     */
-    public function getIdleTtl()
-    {
-        return $this->idle_ttl;
-    }
-
-    /**
-     *
-     * Sets the maximum authentication lifetime.
-     *
-     * @param int $expire_ttl The maximum authentication lifetime in seconds.
-     *
-     * @throws Exception when the session cookie lifetime is less than the
-     * authentication lifetime.
-     *
-     * @return null
-     *
-     */
-    public function setExpireTtl($expire_ttl)
-    {
-        $this->expire_ttl = $expire_ttl;
-        $cookie_life = ini_get('session.cookie_lifetime');
-        if ($cookie_life > 0 && $cookie_life < $this->expire_ttl) {
-            throw new Exception('cookie_lifetime less than expire time');
-        }
-    }
-
-    /**
-     *
-     * Returns the maximum authentication lifetime.
-     *
-     * @return int
-     *
-     */
-    public function getExpireTtl()
-    {
-        return $this->expire_ttl;
+        return $this->timer;
     }
 
     /**
@@ -251,13 +175,13 @@ class Auth
             return false;
         }
 
-        if ($this->hasExpired()) {
-            $this->logout(static::EXPIRE);
+        if ($this->timer->hasExpired()) {
+            $this->logout(self::EXPIRE);
             return false;
         }
 
-        if ($this->hasIdled()) {
-            $this->logout(static::IDLE);
+        if ($this->timer->hasIdled()) {
+            $this->logout(self::IDLE);
             return false;
         }
 
@@ -274,7 +198,7 @@ class Auth
      */
     public function isAnon()
     {
-        return $this->getStatus() != static::VALID;
+        return $this->getStatus() != self::VALID;
     }
 
     /**
@@ -286,33 +210,7 @@ class Auth
      */
     public function isValid()
     {
-        return $this->getStatus() == static::VALID;
-    }
-
-    /**
-     *
-     * Has the authentication time expired?
-     *
-     * @return bool
-     *
-     */
-    public function hasExpired()
-    {
-        return $this->expire_ttl > 0
-            && ($this->session->initial + $this->expire_ttl) < time()
-    }
-
-    /**
-     *
-     * Has the idle time been exceeded?
-     *
-     * @return bool
-     *
-     */
-    public function hasIdled()
-    {
-        return $this->idle_ttl > 0
-            && ($this->session->active + $this->idle_ttl) < time();
+        return $this->getStatus() == self::VALID;
     }
 
     /**
@@ -323,16 +221,16 @@ class Auth
      * and info returned by the adapter system. On failure, it will populate
      * the error property with the error value reported by the adapter system.
      *
-     * @param mixed $creds The credentials to pass to the adapter system.
+     * @param mixed $cred The credentials to pass to the adapter system.
      *
      * @return bool True on success, false on failure.
      *
      */
-    public function login($creds)
+    public function login($cred)
     {
         $this->error = null;
 
-        $success = $this->adapter->login($creds);
+        $success = $this->adapter->login($cred);
         if ($success) {
             $this->forceLogin(
                 $this->adapter->getUser(),
@@ -341,7 +239,7 @@ class Auth
             return true;
         }
 
-        $this->setStatus(static::ERROR);
+        $this->setStatus(self::ERROR);
         $this->error = $this->adapter->getError();
         return false;
     }
@@ -360,7 +258,7 @@ class Auth
     public function forceLogin($user, $info = array())
     {
         $this->session->start();
-        $this->setStatus(static::VALID);
+        $this->setStatus(self::VALID);
         $this->session->user = $user;
         $this->session->info = $info;
         $now = time();
@@ -368,7 +266,7 @@ class Auth
         $this->session->active = $now;
     }
 
-    public function logout($status = static::ANON)
+    public function logout($status = self::ANON)
     {
         $this->error = null;
 
@@ -378,16 +276,16 @@ class Auth
         );
 
         if ($success) {
-            $this->forceLogout(static::ANON);
+            $this->forceLogout(self::ANON);
             return true;
         }
 
-        $this->setStatus(static::ERROR);
+        $this->setStatus(self::ERROR);
         $this->error = $this->adapter->getError();
         return false;
     }
 
-    public function forceLogout($status = static::ANON)
+    public function forceLogout($status = self::ANON)
     {
         $this->setSatus($status);
         unset($this->session->user);
@@ -409,7 +307,7 @@ class Auth
     {
         $status = $this->session->status;
         if (! $status) {
-            $status = static::ANON;
+            $status = self::ANON;
         }
         return $status;
     }
