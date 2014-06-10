@@ -5,4 +5,5 @@ interface SessionInterface
 {
     public function start();
     public function regenerateId();
+    public function destroy();
 }

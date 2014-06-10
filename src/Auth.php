@@ -319,8 +319,7 @@ class Auth
         unset($this->session->info);
         unset($this->session->initial);
         unset($this->session->active);
-
-        // @TODO destroy the session
+        $this->session->destroy();
     }
 
     /**

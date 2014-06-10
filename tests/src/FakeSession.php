@@ -21,4 +21,9 @@ class FakeSession implements SessionInterface
     {
         $this->regenerated = true;
     }
+
+    public function destroy()
+    {
+        $this->started = false;
+    }
 }

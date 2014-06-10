@@ -32,11 +32,19 @@ class Session implements SessionInterface
 
     public function start()
     {
-        session_start();
+        // only start if not already started
+        if (! session_id()) {
+            session_start();
+        }
     }
 
     public function regenerateId()
     {
         session_regenerate_id(true);
+    }
+
+    public function destroy()
+    {
+        session_destroy();
     }
 }
