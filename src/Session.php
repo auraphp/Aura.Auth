@@ -3,6 +3,8 @@ namespace Aura\Auth;
 
 class Session implements SessionInterface
 {
+    protected $segment;
+
     public function __construct($segment)
     {
         $this->segment = $segment;
