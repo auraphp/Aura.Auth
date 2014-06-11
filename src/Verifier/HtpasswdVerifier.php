@@ -1,45 +1,9 @@
 <?php
-namespace Aura\Auth;
+namespace Aura\Auth\Verifier;
 
-class Verifier
+class HtpasswdVerifier
 {
-    protected $method;
-
-    protected $algo;
-
-    protected $opts;
-
-    public function __construct($method, $algo = null, array $opts = array())
-    {
-        if (! method_exists($this, $method)) {
-            throw new Exception("Unrecognized method: '$method'");
-        }
-        $this->method = $method;
-        $this->algo = $algo;
-        $this->opts = $opts;
-    }
-
     public function __invoke($plaintext, $encrypted)
-    {
-        $method = $this->method;
-        return $this->$method($plaintext, $encrypted);
-    }
-
-    public function hash($plaintext, $encrypted)
-    {
-        return hash($this->algo, $plaintext) === $encrypted;
-    }
-
-    public function passwordHash($plaintext, $encrypted)
-    {
-        return password_verify($encrypted, password_hash(
-            $plaintext,
-            $this->algo,
-            $this->opts
-        ));
-    }
-
-    public function htpasswd($plaintext, $encrypted)
     {
         // what kind of encryption hash are we using?  look at the first
         // few characters of the hash to find out.

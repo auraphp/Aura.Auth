@@ -2,7 +2,7 @@
 namespace Aura\Auth\Adapter;
 
 use PDO;
-use Aura\Auth\Verifier;
+use Aura\Auth\Verifier\HashVerifier;
 
 class PdoAdapterTest extends \PHPUnit_Framework_TestCase
 {
@@ -22,7 +22,7 @@ class PdoAdapterTest extends \PHPUnit_Framework_TestCase
     {
         $this->adapter = new PdoAdapter(
             $this->pdo,
-            new Verifier('hash', 'md5'),
+            new HashVerifier('md5'),
             array('username', 'password', 'active'),
             'accounts',
             $where

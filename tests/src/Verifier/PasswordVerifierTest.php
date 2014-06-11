@@ -1,5 +1,5 @@
 <?php
-namespace Aura\Auth;
+namespace Aura\Auth\Verifier;
 
 /**
  * For PHP < 5.5 without ircmaxell/password_compat, fake the password_hash()
@@ -16,18 +16,9 @@ if (! defined('PASSWORD_BCRYPT')) {
     }
 }
 
-class VerifierTest extends \PHPUnit_Framework_TestCase
+class PasswordVerifierTest extends \PHPUnit_Framework_TestCase
 {
-    public function testHash()
-    {
-        $verifier = new Verifier('hash', 'md5');
-        $plaintext = 'password';
-        $encrypted = hash('md5', $plaintext);
-        $this->assertTrue($verifier($plaintext, $encrypted));
-        $this->assertFalse($verifier('wrong', $encrypted));
-    }
-
-    public function testPasswordHash()
+    public function test()
     {
         if (defined('PASSWORD_BCRYPT')) {
             // use the real password_hash()
@@ -37,16 +28,10 @@ class VerifierTest extends \PHPUnit_Framework_TestCase
             $algo = 'md5';
         }
 
-        $verifier = new Verifier('passwordHash', $algo);
+        $verifier = new PasswordVerifier($algo);
         $plaintext = 'password';
         $encrypted = password_hash($plaintext, $algo);
         $this->assertTrue($verifier($plaintext, $encrypted));
         $this->assertFalse($verifier('wrong', $encrypted));
-    }
-
-    public function testUnrecognized()
-    {
-        $this->setExpectedException('Aura\Auth\Exception');
-        $verifier = new Verifier('no-such-function', 'no-such-algo');
     }
 }
