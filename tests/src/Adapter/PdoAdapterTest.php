@@ -90,6 +90,16 @@ class PdoAdapterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('Password empty.', $this->adapter->getError());
     }
 
+    public function testLogin_failed()
+    {
+        $this->assertFalse($this->adapter->login(array(
+            'username' => 'missing',
+            'password' => '------',
+        )));
+
+        $this->assertSame('Credentials failed.', $this->adapter->getError());
+    }
+
     public function testLogin_incorrect()
     {
         $this->assertFalse($this->adapter->login(array(
