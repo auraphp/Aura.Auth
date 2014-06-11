@@ -5,7 +5,7 @@ class Session implements SessionInterface
 {
     protected $segment;
 
-    public function __construct($segment = 'Aura\Auth\Session')
+    public function __construct($segment = 'Aura\Auth\Auth')
     {
         $this->segment = $segment;
     }
@@ -24,7 +24,7 @@ class Session implements SessionInterface
 
     public function __isset($key)
     {
-        $_SESSION[$this->segment][$key] = $val;
+        return isset($_SESSION[$this->segment][$key]);
     }
 
     public function __unset($key)
