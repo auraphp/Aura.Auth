@@ -16,11 +16,11 @@ if (! defined('PASSWORD_BCRYPT')) {
     }
 }
 
-class PasswordVerifierTest extends \PHPUnit_Framework_TestCase
+class VerifierTest extends \PHPUnit_Framework_TestCase
 {
     public function testHash()
     {
-        $verifier = new PasswordVerifier('hash', 'md5');
+        $verifier = new Verifier('hash', 'md5');
         $plaintext = 'password';
         $encrypted = hash('md5', $plaintext);
         $this->assertTrue($verifier($plaintext, $encrypted));
@@ -37,7 +37,7 @@ class PasswordVerifierTest extends \PHPUnit_Framework_TestCase
             $algo = 'md5';
         }
 
-        $verifier = new PasswordVerifier('password_hash', $algo);
+        $verifier = new Verifier('passwordHash', $algo);
         $plaintext = 'password';
         $encrypted = password_hash($plaintext, $algo);
         $this->assertTrue($verifier($plaintext, $encrypted));
@@ -47,6 +47,6 @@ class PasswordVerifierTest extends \PHPUnit_Framework_TestCase
     public function testUnrecognized()
     {
         $this->setExpectedException('Aura\Auth\Exception');
-        $verifier = new PasswordVerifier('no-such-function', 'no-such-algo');
+        $verifier = new Verifier('no-such-function', 'no-such-algo');
     }
 }

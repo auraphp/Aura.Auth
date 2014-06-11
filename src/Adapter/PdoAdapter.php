@@ -82,17 +82,17 @@ class PdoAdapter extends AbstractAdapter
      * @var callable
      *
      */
-    protected $password_verifier;
+    protected $verifier;
 
     public function __construct(
         PDO $pdo,
-        $password_verifier,
+        $verifier,
         array $cols,
         $from,
         $where = null
     ) {
         $this->pdo = $pdo;
-        $this->password_verifier = $password_verifier;
+        $this->verifier = $verifier;
         $this->username_col = array_shift($cols);
         $this->password_col = array_shift($cols);
         $this->info_cols = $cols;
@@ -189,7 +189,7 @@ class PdoAdapter extends AbstractAdapter
 
     protected function verifyPassword($creds, $row)
     {
-        $verifier = $this->password_verifier;
+        $verifier = $this->verifier;
         $verified = $verifier($creds['password'], $row['password'], $row);
         if (! $verified) {
             $this->error = 'Password incorrect.';
