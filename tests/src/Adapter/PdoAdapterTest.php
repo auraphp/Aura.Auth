@@ -2,6 +2,7 @@
 namespace Aura\Auth\Adapter;
 
 use PDO;
+use Aura\Auth\PasswordVerifier;
 
 class PdoAdapterTest extends \PHPUnit_Framework_TestCase
 {
@@ -21,6 +22,7 @@ class PdoAdapterTest extends \PHPUnit_Framework_TestCase
     {
         $this->adapter = new PdoAdapter(
             $this->pdo,
+            new PasswordVerifier('hash', 'md5'),
             array('username', 'password', 'active'),
             'accounts',
             $where
@@ -88,14 +90,14 @@ class PdoAdapterTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('Password empty.', $this->adapter->getError());
     }
 
-    public function testLogin_failed()
+    public function testLogin_incorrect()
     {
         $this->assertFalse($this->adapter->login(array(
             'username' => 'boshag',
             'password' => '------',
         )));
 
-        $this->assertSame('Credentials failed.', $this->adapter->getError());
+        $this->assertSame('Password incorrect.', $this->adapter->getError());
     }
 
     public function testLogin_duplicates()

@@ -77,43 +77,27 @@ class PdoAdapter extends AbstractAdapter
 
     /**
      *
-     * The hash() algorithm to use for the password.
+     * A callable to verify passwords.
      *
-     * @todo Make this an injection so we can support more/better hashing,
-     * such as password_compat.
-     *
-     * @var string
+     * @var callable
      *
      */
-    protected $hash_algo;
-
-    /**
-     *
-     * A salt for the hash algo.
-     *
-     * @var string
-     *
-     * @todo Remove this when we inject the hashing system.
-     *
-     */
-    protected $salt;
+    protected $password_verifier;
 
     public function __construct(
         PDO $pdo,
+        $password_verifier,
         array $cols,
         $from,
-        $where = null,
-        $hash_algo = 'md5',
-        $salt = ''
+        $where = null
     ) {
         $this->pdo = $pdo;
+        $this->password_verifier = $password_verifier;
         $this->username_col = array_shift($cols);
         $this->password_col = array_shift($cols);
         $this->info_cols = $cols;
         $this->from = $from;
         $this->where = $where;
-        $this->hash_algo = $hash_algo;
-        $this->salt = $salt;
     }
 
     /**
@@ -128,7 +112,7 @@ class PdoAdapter extends AbstractAdapter
      */
     public function login($creds)
     {
-        if (! $this->fixCredentials($creds)) {
+        if (! $this->checkCredentials($creds)) {
             return false;
         }
 
@@ -137,13 +121,19 @@ class PdoAdapter extends AbstractAdapter
             return false;
         }
 
+        $verified = $this->verifyPassword($creds, $row);
+        if (! $verified) {
+            return false;
+        }
+
         $this->info = $row;
         $this->user = $this->info['username'];
         unset($this->info['username']);
+        unset($this->info['password']);
         return true;
     }
 
-    protected function fixCredentials(&$creds)
+    protected function checkCredentials(&$creds)
     {
         if (empty($creds['username'])) {
             $this->error = 'Username empty.';
@@ -155,11 +145,6 @@ class PdoAdapter extends AbstractAdapter
             return false;
         }
 
-        $creds['password'] = hash(
-            $this->hash_algo,
-            $this->salt . $creds['password']
-        );
-
         return true;
     }
 
@@ -167,6 +152,7 @@ class PdoAdapter extends AbstractAdapter
     {
         $stm = $this->buildSelect();
         $sth = $this->pdo->prepare($stm);
+        unset($creds['password']);
         $sth->execute($creds);
         $rows = $sth->fetchAll(PDO::FETCH_ASSOC);
 
@@ -186,15 +172,31 @@ class PdoAdapter extends AbstractAdapter
     protected function buildSelect()
     {
         $cols = implode(', ', array_merge(
-            array("{$this->username_col} AS username"),
+            array(
+                "{$this->username_col} AS username",
+                "{$this->password_col} AS password",
+            ),
             $this->info_cols
         ));
 
-        $where = "username = :username AND {$this->password_col} = :password";
+        $where = "username = :username";
         if ($this->where) {
             $where .= " AND ({$this->where})";
         }
 
         return "SELECT {$cols} FROM {$this->from} WHERE {$where}";
     }
+
+    protected function verifyPassword($creds, $row)
+    {
+        $verifier = $this->password_verifier;
+        $verified = $verifier($creds['password'], $row['password'], $row);
+        if (! $verified) {
+            $this->error = 'Password incorrect.';
+            return false;
+        }
+
+        return true;
+    }
+
 }
