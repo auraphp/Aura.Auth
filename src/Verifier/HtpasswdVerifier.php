@@ -43,37 +43,30 @@ class HtpasswdVerifier
      */
     protected function apr1($plaintext, $encrypted)
     {
-        $salt = $encrypted;
-
-        if (preg_match('/^\$apr1\$/', $salt)) {
-            $salt = preg_replace('/^\$apr1\$([^$]+)\$.*/', '\\1', $salt);
-        } else {
-            $salt = substr($salt, 0,8);
-        }
-
-        $length  = strlen($plain);
-        $context = $plain . '$apr1$' . $salt;
-
-        $binary = hash('md5', $plain . $salt . $plain, true);
+        $salt = preg_replace('/^\$apr1\$([^$]+)\$.*/', '\\1', $encrypted);
+        $length  = strlen($plaintext);
+        $context = $plaintext . '$apr1$' . $salt;
+        $binary = hash('md5', $plaintext . $salt . $plaintext, true);
 
         for ($i = $length; $i > 0; $i -= 16) {
             $context .= substr($binary, 0, min(16 , $i));
         }
+
         for ( $i = $length; $i > 0; $i >>= 1) {
-            $context .= ($i & 1) ? chr(0) : $plain[0];
+            $context .= ($i & 1) ? chr(0) : $plaintext[0];
         }
 
         $binary = hash('md5', $context, true);
 
         for($i = 0; $i < 1000; $i++) {
-            $new = ($i & 1) ? $plain : $binary;
+            $new = ($i & 1) ? $plaintext : $binary;
             if ($i % 3) {
                 $new .= $salt;
             }
             if ($i % 7) {
-                $new .= $plain;
+                $new .= $plaintext;
             }
-            $new .= ($i & 1) ? $binary : $plain;
+            $new .= ($i & 1) ? $binary : $plaintext;
             $binary = hash('md5', $new, true);
         }
 
@@ -84,7 +77,7 @@ class HtpasswdVerifier
             if ($j == 16) {
                 $j = 5;
             }
-            $p[] = $this->_64(
+            $p[] = $this->convert64(
                 (ord($binary[$i]) << 16) |
                 (ord($binary[$k]) << 8) |
                 (ord($binary[$j])),
