@@ -30,7 +30,7 @@ use Aura\Auth\Exception;
  * @package Aura.Auth
  *
  */
-class HtpasswordAdapter extends AbstractAdapter
+class HtpasswdAdapter extends AbstractAdapter
 {
     protected $file;
 
@@ -38,7 +38,10 @@ class HtpasswordAdapter extends AbstractAdapter
 
     public function __construct($file, $verifier)
     {
-        $this->file = $file;
+        $this->file = realpath($file);
+        if (! $this->file) {
+            throw new Exception("File not found: '{$file}'");
+        }
         $this->verifier = $verifier;
     }
 
@@ -55,10 +58,12 @@ class HtpasswordAdapter extends AbstractAdapter
     public function login($creds)
     {
         if (empty($creds['username'])) {
+            $this->error = 'Username empty.';
             return false;
         }
 
         if (empty($creds['password'])) {
+            $this->error = 'Password empty.';
             return false;
         }
 
@@ -66,20 +71,9 @@ class HtpasswordAdapter extends AbstractAdapter
         $password = $creds['password'];
 
         // force the full, real path to the file
-        $file = realpath($this->file);
-
-        // does the file exist?
-        if (! file_exists($file)) {
-            throw new Exception("File not found: '{$this->file}'");
-        }
-
-        // open the file
-        $fp = @fopen($file, 'r');
-        if (! $fp) {
-            throw new Exception("File not readable: '{$this->file}'");
-        }
 
         // find the user's line in the file
+        $fp = fopen($this->file, 'r');
         $len = strlen($username) + 1;
         $ok = false;
         while ($line = fgets($fp)) {
@@ -95,7 +89,7 @@ class HtpasswordAdapter extends AbstractAdapter
 
         // did we find the username?
         if (! $ok) {
-            // username not in the file
+            $this->error = 'Credentials failed.';
             return false;
         }
 

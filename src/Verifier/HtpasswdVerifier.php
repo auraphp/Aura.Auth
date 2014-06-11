@@ -5,44 +5,25 @@ class HtpasswdVerifier
 {
     public function __invoke($plaintext, $encrypted)
     {
-        // what kind of encryption hash are we using?  look at the first
-        // few characters of the hash to find out.
-        if (substr($encrypted, 0, 6) == '$apr1$') {
-
-            // use the apache-specific MD5 encryption
-            $computed_hash = $this->htpasswdApr1($plaintext, $encrypted);
-
-        } elseif (substr($encrypted, 0, 5) == '{SHA}') {
-
-            // use SHA1 encryption.  pack SHA binary into hexadecimal,
-            // then encode into characters using base64. this is per
-            // Tomas V. V. Cox.
-            $hex = pack('H40', sha1($plaintext));
-            $computed_hash = '{SHA}' . base64_encode($hex);
-
-        } else {
-
-            // use DES encryption (the default).
-            //
-            // Note that crypt() will only check up to the first 8
-            // characters of a password; chars after 8 are ignored. This
-            // means that if the real password is "atecharsnine", the
-            // word "atechars" would be valid.  This is bad.  As a
-            // workaround, if the password provided by the user is
-            // longer than 8 characters, this method will *not* validate
-            // it.
-            //
-            // is the password longer than 8 characters?
-            if (strlen($plaintext) > 8) {
-                // automatically reject
-                return false;
-            } else {
-                $computed_hash = crypt($plaintext, $encrypted);
-            }
+        if (substr($encrypted, 0, 5) == '{SHA}') {
+            return $this->sha($plaintext, $encrypted);
         }
 
-        // did the hashes match?
-        return $encrypted == $computed_hash;
+        if (substr($encrypted, 0, 6) == '$apr1$') {
+            return $this->apr1($plaintext, $encrypted);
+        }
+
+        return $this->des($plaintext, $encrypted);
+    }
+
+    // use SHA1 encryption.  pack SHA binary into hexadecimal,
+    // then encode into characters using base64. this is per
+    // Tomas V. V. Cox.
+    protected function sha($plaintext, $encrypted)
+    {
+        $hex = pack('H40', sha1($plaintext));
+        $computed_hash = '{SHA}' . base64_encode($hex);
+        return $computed_hash === $encrypted;
     }
 
     /**
@@ -60,8 +41,10 @@ class HtpasswdVerifier
      * @return string The APR MD5 encrypted string.
      *
      */
-    protected function htpasswdApr1($plain, $salt)
+    protected function apr1($plaintext, $encrypted)
     {
+        $salt = $encrypted;
+
         if (preg_match('/^\$apr1\$/', $salt)) {
             $salt = preg_replace('/^\$apr1\$([^$]+)\$.*/', '\\1', $salt);
         } else {
@@ -109,8 +92,10 @@ class HtpasswdVerifier
             );
         }
 
-        return '$apr1$' . $salt . '$' . implode($p)
-             . $this->htpasswd64(ord($binary[11]), 3);
+        $computed_hash = '$apr1$' . $salt . '$' . implode($p)
+                       . $this->convert64(ord($binary[11]), 3);
+
+        return $computed_hash === $encrypted;
     }
 
     /**
@@ -128,7 +113,7 @@ class HtpasswdVerifier
      * @return string The converted value.
      *
      */
-    protected function htpasswd64($value, $count)
+    protected function convert64($value, $count)
     {
         $charset = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
         $result = '';
@@ -137,5 +122,22 @@ class HtpasswdVerifier
             $value >>= 6;
         }
         return $result;
+    }
+
+    // Note that crypt() will only check up to the first 8
+    // characters of a password; chars after 8 are ignored. This
+    // means that if the real password is "atecharsnine", the
+    // word "atechars" would be valid.  This is bad.  As a
+    // workaround, if the password provided by the user is
+    // longer than 8 characters, this method will *not* validate
+    // it.
+    protected function des($plaintext, $encrypted)
+    {
+        if (strlen($plaintext) > 8) {
+            return false;
+        }
+
+        $computed_hash = crypt($plaintext, $encrypted);
+        return $computed_hash === $encrypted;
     }
 }
