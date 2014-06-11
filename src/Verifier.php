@@ -11,6 +11,9 @@ class Verifier
 
     public function __construct($method, $algo = null, array $opts = array())
     {
+        if (! method_exists($this, $method)) {
+            throw new Exception("Unrecognized method: '$method'");
+        }
         $this->method = $method;
         $this->algo = $algo;
         $this->opts = $opts;
