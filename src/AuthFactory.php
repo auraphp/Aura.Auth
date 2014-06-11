@@ -1,6 +1,7 @@
 <?php
 namespace Aura\Auth;
 
+use Aura\Auth\Adapter\AdapterInterface;
 use PDO;
 
 class AuthFactory
