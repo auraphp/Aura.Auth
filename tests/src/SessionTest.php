@@ -1,6 +1,9 @@
 <?php
 namespace Aura\Auth;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class SessionTest extends \PHPUnit_Framework_TestCase
 {
     protected $session;
@@ -29,6 +32,7 @@ class SessionTest extends \PHPUnit_Framework_TestCase
     {
         $this->session->start();
         $this->assertFalse(isset($this->session->foo));
+        $this->assertNull($this->session->foo);
         $this->session->foo = 'bar';
         $this->assertTrue(isset($this->session->foo));
         $this->assertSame('bar', $this->session->foo);
