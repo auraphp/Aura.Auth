@@ -8,7 +8,7 @@
  * @license http://opensource.org/licenses/bsd-license.php BSD
  *
  */
-namespace Aura\Auth;
+namespace Aura\Auth\Adapter;
 
 /**
  *
@@ -23,7 +23,7 @@ namespace Aura\Auth;
  * @package Aura.Auth
  *
  */
-class Auth_Storage_Adapter_Post extends Solar_Auth_Storage_Adapter
+class PostAdapter extends AbstractAdapter
 {
     /**
      *

@@ -17,7 +17,7 @@ namespace Aura\Auth\Adapter;
  * @package Aura.Auth
  *
  */
-class Auth_Storage_Adapter_Mail extends Solar_Auth_Storage_Adapter
+class Mail extends AbstractAdapter
 {
     /**
      *
