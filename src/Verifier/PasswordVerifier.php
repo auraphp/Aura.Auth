@@ -15,10 +15,6 @@ class PasswordVerifier
 
     public function __invoke($plaintext, $encrypted)
     {
-        return password_verify($encrypted, password_hash(
-            $plaintext,
-            $this->algo,
-            $this->opts
-        ));
+        return password_verify($plaintext, $encrypted);
     }
 }

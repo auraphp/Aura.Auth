@@ -12,7 +12,7 @@ if (! defined('PASSWORD_BCRYPT')) {
     }
     function password_verify($password, $hash)
     {
-        return $password === $hash;
+        return md5($password) === $hash;
     }
 }
 
