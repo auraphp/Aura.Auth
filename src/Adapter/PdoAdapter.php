@@ -33,30 +33,12 @@ class PdoAdapter extends AbstractAdapter
 
     /**
      *
-     * The username column.
-     *
-     * @var string
-     *
-     */
-    protected $username_col;
-
-    /**
-     *
-     * The hashed-password column.
-     *
-     * @var string
-     *
-     */
-    protected $password_col;
-
-    /**
-     *
-     * Columns for additional user information.
+     * Columns to be selected.
      *
      * @param array
      *
      */
-    protected $info_cols = array();
+    protected $cols = array();
 
     /**
      *
@@ -77,19 +59,19 @@ class PdoAdapter extends AbstractAdapter
     protected $where;
 
     /**
-     * 
+     *
      * Constructor
-     * 
+     *
      * @param \PDO $pdo
-     * 
+     *
      * @param VerifierInterface $verifier
-     * 
+     *
      * @param array $cols
-     * 
+     *
      * @param string $from
-     * 
+     *
      * @param string $where
-     * 
+     *
      */
     public function __construct(
         PDO $pdo,
@@ -100,9 +82,7 @@ class PdoAdapter extends AbstractAdapter
     ) {
         $this->pdo = $pdo;
         $this->verifier = $verifier;
-        $this->username_col = array_shift($cols);
-        $this->password_col = array_shift($cols);
-        $this->info_cols = $cols;
+        $this->cols = $cols;
         $this->from = $from;
         $this->where = $where;
     }
@@ -141,11 +121,11 @@ class PdoAdapter extends AbstractAdapter
     }
 
     /**
-     * 
+     *
      * @param array $creds
-     * 
+     *
      * @return bool
-     * 
+     *
      */
     protected function checkCredentials(&$creds)
     {
@@ -163,13 +143,13 @@ class PdoAdapter extends AbstractAdapter
     }
 
     /**
-     * 
+     *
      * Fetch a row from the table
-     * 
+     *
      * @param array $creds
-     * 
+     *
      * @return bool / row
-     * 
+     *
      */
     protected function fetchRow($creds)
     {
@@ -194,40 +174,57 @@ class PdoAdapter extends AbstractAdapter
 
 
     /**
-     * 
+     *
      * Build SQL query
-     * 
+     *
      * @return string
-     * 
+     *
      */
     protected function buildSelect()
     {
-        $cols = implode(', ', array_merge(
-            array(
-                "{$this->username_col} AS username",
-                "{$this->password_col} AS password",
-            ),
-            $this->info_cols
-        ));
+        $cols = $this->buildSelectCols();
+        $from = $this->buildSelectFrom();
+        $where = $this->buildSelectWhere();
+        return "SELECT {$cols} FROM {$from} WHERE {$where}";
+    }
 
+    protected function buildSelectCols()
+    {
+        $cols = $this->cols;
+        $cols[0] .= ' AS username';
+        $cols[1] .= ' AS password';
+        return implode(', ', $cols);
+    }
+
+    protected function buildSelectFrom()
+    {
+        return $this->from;
+    }
+
+    protected function buildSelectWhere()
+    {
         $where = "username = :username";
         if ($this->where) {
             $where .= " AND ({$this->where})";
         }
-
-        return "SELECT {$cols} FROM {$this->from} WHERE {$where}";
+        return $where;
     }
 
     /**
-     * 
+     *
      * Password verification
-     * 
+     *
      * @return bool
-     * 
+     *
      */
     protected function verify($creds, $row)
     {
-        $verified = $this->verifier->verify($creds['password'], $row['password'], $row);
+        $verified = $this->verifier->verify(
+            $creds['password'],
+            $row['password'],
+            $row
+        );
+
         if (! $verified) {
             $this->error = 'Password incorrect.';
             return false;
