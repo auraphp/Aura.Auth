@@ -62,7 +62,7 @@ Then choose the authenticate soure you want to use.
 
 ### Via Htpasswd
 
-To create an _Auth_ object that uses the _HtpasswdAdapter_, use the `newHtpasswdInstace()` method and pass the file path of the Apache htpasswd file.
+To create an _Auth_ object that uses the _HtpasswdAdapter_, call the `newHtpasswdInstace()` method and pass the file path of the Apache htpasswd file.
 
 ```
 <?php
@@ -75,7 +75,7 @@ This will automatically use the _HtpasswdVerifier_ to check DES, MD5, and SHA pa
 
 ### Via PDO Connection
 
-To create an _Auth_ object that uses the _HtpasswdAdapter_, use the `newHtpasswdInstace()` method and pass these parameters in order:
+To create an _Auth_ object that uses the _PdoAdapter_, call the `newPdoInstace()` method and pass these parameters in order:
 
 - a _PDO_ connection instance
 
