@@ -76,6 +76,21 @@ class PdoAdapter extends AbstractAdapter
      */
     protected $where;
 
+    /**
+     * 
+     * Constructor
+     * 
+     * @param \PDO $pdo
+     * 
+     * @param VerifierInterface $verifier
+     * 
+     * @param array $cols
+     * 
+     * @param string $from
+     * 
+     * @param string $where
+     * 
+     */
     public function __construct(
         PDO $pdo,
         VerifierInterface $verifier,
@@ -125,6 +140,13 @@ class PdoAdapter extends AbstractAdapter
         return true;
     }
 
+    /**
+     * 
+     * @param array $creds
+     * 
+     * @return bool
+     * 
+     */
     protected function checkCredentials(&$creds)
     {
         if (empty($creds['username'])) {
@@ -140,6 +162,15 @@ class PdoAdapter extends AbstractAdapter
         return true;
     }
 
+    /**
+     * 
+     * Fetch a row from the table
+     * 
+     * @param array $creds
+     * 
+     * @return bool / row
+     * 
+     */
     protected function fetchRow($creds)
     {
         $stm = $this->buildSelect();
@@ -161,6 +192,14 @@ class PdoAdapter extends AbstractAdapter
         return $rows[0];
     }
 
+
+    /**
+     * 
+     * Build SQL query
+     * 
+     * @return string
+     * 
+     */
     protected function buildSelect()
     {
         $cols = implode(', ', array_merge(
@@ -179,6 +218,13 @@ class PdoAdapter extends AbstractAdapter
         return "SELECT {$cols} FROM {$this->from} WHERE {$where}";
     }
 
+    /**
+     * 
+     * Password verification
+     * 
+     * @return bool
+     * 
+     */
     protected function verify($creds, $row)
     {
         $verified = $this->verifier->verify($creds['password'], $row['password'], $row);
