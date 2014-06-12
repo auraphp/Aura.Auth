@@ -11,6 +11,7 @@
 namespace Aura\Auth;
 
 use Aura\Auth\Adapter\AdapterInterface;
+use Aura\Auth\Session\SessionInterface;
 
 /**
  *
@@ -124,7 +125,7 @@ class Auth
         $this->adapter = $adapter;
         $this->session = $session;
         $this->timer = $timer;
-        $this->updateActive();
+        $this->refresh();
     }
 
     /**
@@ -143,7 +144,7 @@ class Auth
      *
      * Returns the session manager.
      *
-     * @return AdapterInterface
+     * @return SessionInterface
      *
      */
     public function getSession()
@@ -165,8 +166,8 @@ class Auth
 
     /**
      *
-     * Updates the "last active" time, logging out the user as idled or expired
-     * if needed.
+     * Refreshes the "last active" time, logging out the user as idled or
+     * expired if needed.
      *
      * Multiple calls to this method may result in idled or expired
      * authentication in the middle of script execution.
@@ -180,7 +181,7 @@ class Auth
      * @see logout()
      *
      */
-    public function updateActive()
+    public function refresh()
     {
         if ($this->isAnon()) {
             return false;
@@ -268,7 +269,6 @@ class Auth
     {
         $now = time();
         $this->error = null;
-        $this->session->start();
         $this->setStatus(self::VALID);
         $this->session->user = $user;
         $this->session->info = $info;
@@ -319,7 +319,6 @@ class Auth
         unset($this->session->info);
         unset($this->session->initial);
         unset($this->session->active);
-        $this->session->destroy();
     }
 
     /**

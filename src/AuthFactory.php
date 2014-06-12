@@ -6,11 +6,27 @@ use PDO;
 
 class AuthFactory
 {
+    protected $globals;
+
+    public function __construct(&$globals)
+    {
+        $this->globals = &$globals;
+    }
+
     public function newInstance(AdapterInterface $adapter)
     {
+        if (! isset($this->globals['_SESSION'])) {
+            throw new Exception('Cannot instantiate without $_SESSION.');
+        }
+
+        $segment = 'Aura\Auth\Auth';
+        if (! isset($this->globals['_SESSION'][$segment])) {
+            $this->globals['_SESSION'][$segment] = array();
+        }
+
         return new Auth(
             $adapter,
-            new Session('Aura\Auth\Auth'),
+            new Session\SessionArray($this->globals['_SESSION'][$segment]),
             new Timer
         );
     }

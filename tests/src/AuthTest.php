@@ -3,18 +3,25 @@ namespace Aura\Auth;
 
 class AuthTest extends \PHPUnit_Framework_TestCase
 {
+    protected $data = array();
+
     protected $auth;
 
     protected $adapter;
 
     protected $session;
 
+    protected $session_id = 1;
+
     protected $timer;
 
     protected function setUp()
     {
         $this->adapter = new Adapter\FakeAdapter(array('boshag' => '123456'));
-        $this->session = new FakeSession;
+        $this->session = new Session\SessionArray(
+            $this->data,
+            array($this, 'regenerateId')
+        );
         $this->timer = new Timer(1440, 14400);
         $this->auth = new Auth($this->adapter, $this->session, $this->timer);
     }
@@ -72,7 +79,7 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expect, $actual);
     }
 
-    public function testUpdateActive()
+    public function testRefresh()
     {
         $this->assertAnon();
 
@@ -85,7 +92,7 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $this->session->active -= 100;
         $this->assertSame(time() - 100, $this->auth->getActive());
 
-        $this->auth->updateActive();
+        $this->auth->refresh();
         $this->assertSame(time(), $this->auth->getActive());
     }
 
@@ -101,7 +108,7 @@ class AuthTest extends \PHPUnit_Framework_TestCase
 
         $this->session->active -= 1441;
 
-        $this->auth->updateActive();
+        $this->auth->refresh();
         $this->assertAnon();
 
         $this->assertSame(Auth::IDLED, $this->auth->getStatus());
@@ -119,7 +126,7 @@ class AuthTest extends \PHPUnit_Framework_TestCase
 
         $this->session->initial -= 14441;
 
-        $this->auth->updateActive();
+        $this->auth->refresh();
         $this->assertAnon();
 
         $this->assertSame(Auth::EXPIRED, $this->auth->getStatus());
@@ -149,4 +156,9 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($now, $this->auth->getActive());
     }
 
+    public function regenerateId()
+    {
+        $this->session_id ++;
+        return true;
+    }
 }

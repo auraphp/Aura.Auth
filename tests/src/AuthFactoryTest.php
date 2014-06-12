@@ -5,11 +5,14 @@ use PDO;
 
 class AuthFactoryTest extends \PHPUnit_Framework_TestCase
 {
+    protected $globals;
+
     protected $factory;
 
     protected function setUp()
     {
-        $this->factory = new AuthFactory;
+        $this->globals = array('_SESSION' => array());
+        $this->factory = new AuthFactory($this->globals);
     }
 
     public function testNewPdoInstance_hashVerifier()
@@ -78,5 +81,14 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
 
         $adapter = $auth->getAdapter();
         $this->assertInstanceOf('Aura\Auth\Adapter\HtpasswdAdapter', $adapter);
+    }
+
+    public function testNewInstance_noSession()
+    {
+        unset($this->globals['_SESSION']);
+        $file = __DIR__ . DIRECTORY_SEPARATOR . 'fake.htpasswd';
+
+        $this->setExpectedException('Aura\Auth\Exception');
+        $auth = $this->factory->newHtpasswdInstance($file);
     }
 }
