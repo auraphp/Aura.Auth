@@ -49,6 +49,8 @@ This package is in a very early development stage and as such is still in flux. 
 
 ## Getting Started
 
+### Instantiation
+
 Instantiate _Auth_ objects via an _AuthFactory_. (The factory will take care of all the object setup for you.)
 
 ```php
@@ -60,7 +62,7 @@ $auth_factory = new \Aura\Auth\AuthFactory;
 
 Then choose the authenticate soure you want to use.
 
-### Via Htpasswd
+#### Via Htpasswd
 
 To create an _Auth_ object that uses the _HtpasswdAdapter_, call the `newHtpasswdInstace()` method and pass the file path of the Apache htpasswd file.
 
@@ -73,7 +75,7 @@ $auth = $auth_factory->newHtpasswdInstance('/path/to/accounts.htpasswd');
 This will automatically use the _HtpasswdVerifier_ to check DES, MD5, and SHA passwords from the htpasswd file on a per-user basis.
 
 
-### Via PDO Connection
+#### Via PDO Connection
 
 To create an _Auth_ object that uses the _PdoAdapter_, call the `newPdoInstace()` method and pass these parameters in order:
 
@@ -126,3 +128,7 @@ $auth = $auth_factory->newPdoInstance($pdo, $hash, $cols, $from);
 ```
 
 (The additional information columns will be retained in the session data after successful authentication.)
+
+### Login and Logout Functionality
+
+TBD
