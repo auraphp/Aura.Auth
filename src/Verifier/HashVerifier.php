@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Verifier;
 
-class HashVerifier
+class HashVerifier implements PasswordVerifierInterface
 {
     protected $algo;
 
@@ -15,6 +15,16 @@ class HashVerifier
 
     public function __invoke($plaintext, $encrypted)
     {
-        return hash($this->algo, $this->salt . $plaintext) === $encrypted;
+        return $this->verifyPassword($plaintext, $encrypted);
+    }
+
+    public function verifyPassword($plaintext, $encrypted)
+    {
+        return ($this->hashPassword($plaintext) === $encrypted);
+    }
+
+    public function hashPassword($plaintext)
+    {
+        return hash($this->algo, $this->salt . $plaintext);
     }
 }

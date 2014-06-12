@@ -11,6 +11,7 @@
 namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Exception;
+use Aura\Auth\Verifier\PasswordVerifierInterface;
 
 /**
  *
@@ -36,7 +37,7 @@ class HtpasswdAdapter extends AbstractAdapter
 
     protected $verifier;
 
-    public function __construct($file, $verifier)
+    public function __construct($file, PasswordVerifierInterface $verifier)
     {
         $this->file = realpath($file);
         if (! $this->file) {
@@ -98,8 +99,7 @@ class HtpasswdAdapter extends AbstractAdapter
         $tmp = explode(':', trim($line));
         $encrypted = $tmp[1];
 
-        $verifier = $this->verifier;
-        $verified = $verifier($password, $encrypted);
+        $verified = $this->verifier->verifyPassword($password, $encrypted);
 
         if (! $verified) {
             $this->error = 'Incorrect password.';
