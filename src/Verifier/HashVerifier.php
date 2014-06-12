@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Verifier;
 
-class HashVerifier implements PasswordVerifierInterface
+class HashVerifier implements VerifierInterface
 {
     protected $algo;
 

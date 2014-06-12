@@ -11,7 +11,7 @@
 namespace Aura\Auth\Adapter;
 
 use PDO;
-use Aura\Auth\Verifier\PasswordVerifierInterface;
+use Aura\Auth\Verifier\VerifierInterface;
 
 /**
  *
@@ -87,7 +87,7 @@ class PdoAdapter extends AbstractAdapter
 
     public function __construct(
         PDO $pdo,
-        PasswordVerifierInterface $verifier,
+        VerifierInterface $verifier,
         array $cols,
         $from,
         $where = null

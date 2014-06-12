@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Verifier;
 
-class HtpasswdVerifier implements PasswordVerifierInterface
+class HtpasswdVerifier implements VerifierInterface
 {
     public function __invoke($plaintext, $encrypted)
     {

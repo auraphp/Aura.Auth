@@ -11,7 +11,7 @@
 namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Exception;
-use Aura\Auth\Verifier\PasswordVerifierInterface;
+use Aura\Auth\Verifier\VerifierInterface;
 
 /**
  *
@@ -37,7 +37,7 @@ class HtpasswdAdapter extends AbstractAdapter
 
     protected $verifier;
 
-    public function __construct($file, PasswordVerifierInterface $verifier)
+    public function __construct($file, VerifierInterface $verifier)
     {
         $this->file = realpath($file);
         if (! $this->file) {

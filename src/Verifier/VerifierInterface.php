@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Verifier;
 
-interface PasswordVerifierInterface
+interface VerifierInterface
 {
     public function verifyPassword($plaintext, $encrypted);
     public function hashPassword($plaintext);
