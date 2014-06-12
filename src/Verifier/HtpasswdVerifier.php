@@ -3,7 +3,7 @@ namespace Aura\Auth\Verifier;
 
 class HtpasswdVerifier implements VerifierInterface
 {
-    public function verify($plaintext, $encrypted)
+    public function verify($plaintext, $encrypted, array $extra = array())
     {
         if (substr($encrypted, 0, 5) == '{SHA}') {
             return $this->sha($plaintext, $encrypted);

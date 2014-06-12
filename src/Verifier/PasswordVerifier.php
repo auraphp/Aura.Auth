@@ -13,7 +13,7 @@ class PasswordVerifier implements VerifierInterface
         $this->opts = $opts;
     }
 
-    public function verify($plaintext, $encrypted)
+    public function verify($plaintext, $encrypted, array $extra = array())
     {
         return password_verify($plaintext, $encrypted);
     }

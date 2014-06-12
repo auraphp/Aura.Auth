@@ -13,7 +13,7 @@ class HashVerifier implements VerifierInterface
         $this->salt = $salt;
     }
 
-    public function verify($plaintext, $encrypted)
+    public function verify($plaintext, $encrypted, array $extra = array())
     {
         return hash($this->algo, $this->salt . $plaintext) === $encrypted;
     }
