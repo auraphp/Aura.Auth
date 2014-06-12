@@ -1,52 +1,42 @@
 <?php
-namespace Aura\Auth;
+namespace Aura\Auth\Adapter;
 
 use PDO;
+use Aura\Auth\Verifier\FakeVerifier;
 
 class AuthFactoryTest extends \PHPUnit_Framework_TestCase
 {
-    protected $globals;
-
     protected $factory;
 
     protected function setUp()
     {
-        $this->globals = array('_SESSION' => array());
-        $this->factory = new AuthFactory($this->globals);
+        $this->factory = new AdapterFactory;
     }
 
     public function testNewPdoInstance_hashVerifier()
     {
         $pdo = new PDO('sqlite::memory:');
-        $auth = $this->factory->newPdoInstance(
+        $adapter = $this->factory->newPdoInstance(
             $pdo,
             'md5',
             array('username', 'password'),
             'accounts'
         );
-
-        $this->assertInstanceOf('Aura\Auth\Auth', $auth);
-
-        $adapter = $auth->getAdapter();
         $this->assertInstanceOf('Aura\Auth\Adapter\PdoAdapter', $adapter);
 
         $verifier = $adapter->getVerifier();
-        $this->assertInstanceOf('Aura\Auth\Verifier\HashVerifier',$verifier);
+        $this->assertInstanceOf('Aura\Auth\Verifier\HashVerifier', $verifier);
     }
 
     public function testNewPdoInstance_passwordVerifier()
     {
         $pdo = new PDO('sqlite::memory:');
-        $auth = $this->factory->newPdoInstance(
+        $adapter = $this->factory->newPdoInstance(
             $pdo,
             1,
             array('username', 'password'),
             'accounts'
         );
-
-        $this->assertInstanceOf('Aura\Auth\Auth', $auth);
-
-        $adapter = $auth->getAdapter();
         $this->assertInstanceOf('Aura\Auth\Adapter\PdoAdapter', $adapter);
 
         $verifier = $adapter->getVerifier();
@@ -56,39 +46,25 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
     public function testNewPdoInstance_customVerifier()
     {
         $pdo = new PDO('sqlite::memory:');
-        $auth = $this->factory->newPdoInstance(
+        $adapter = $this->factory->newPdoInstance(
             $pdo,
-            new Verifier\FakeVerifier,
+            new FakeVerifier,
             array('username', 'password'),
             'accounts'
         );
-
-        $this->assertInstanceOf('Aura\Auth\Auth', $auth);
-
-        $adapter = $auth->getAdapter();
         $this->assertInstanceOf('Aura\Auth\Adapter\PdoAdapter', $adapter);
 
         $verifier = $adapter->getVerifier();
-        $this->assertInstanceOf('Aura\Auth\Verifier\FakeVerifier',$verifier);
+        $this->assertInstanceOf('Aura\Auth\Verifier\FakeVerifier', $verifier);
     }
 
     public function testNewHtpasswdInstance()
     {
-        $file = __DIR__ . DIRECTORY_SEPARATOR . 'fake.htpasswd';
-        $auth = $this->factory->newHtpasswdInstance($file);
-
-        $this->assertInstanceOf('Aura\Auth\Auth', $auth);
-
-        $adapter = $auth->getAdapter();
+        $file = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'fake.htpasswd';
+        $adapter = $this->factory->newHtpasswdInstance($file);
         $this->assertInstanceOf('Aura\Auth\Adapter\HtpasswdAdapter', $adapter);
-    }
 
-    public function testNewInstance_noSession()
-    {
-        unset($this->globals['_SESSION']);
-        $file = __DIR__ . DIRECTORY_SEPARATOR . 'fake.htpasswd';
-
-        $this->setExpectedException('Aura\Auth\Exception');
-        $auth = $this->factory->newHtpasswdInstance($file);
+        $verifier = $adapter->getVerifier();
+        $this->assertInstanceOf('Aura\Auth\Verifier\HtpasswdVerifier', $verifier);
     }
 }
