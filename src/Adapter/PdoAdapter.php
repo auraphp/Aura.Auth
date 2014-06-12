@@ -72,6 +72,10 @@ class PdoAdapter extends AbstractAdapter
      *
      * @param string $where
      *
+     * @return self
+     *
+     * @todo Throw exception when count($cols) < 2.
+     *
      */
     public function __construct(
         PDO $pdo,
