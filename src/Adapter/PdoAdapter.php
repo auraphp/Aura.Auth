@@ -11,6 +11,7 @@
 namespace Aura\Auth\Adapter;
 
 use PDO;
+use Aura\Auth\Verifier\PasswordVerifierInterface;
 
 /**
  *
@@ -86,7 +87,7 @@ class PdoAdapter extends AbstractAdapter
 
     public function __construct(
         PDO $pdo,
-        $verifier,
+        PasswordVerifierInterface $verifier,
         array $cols,
         $from,
         $where = null
@@ -189,8 +190,7 @@ class PdoAdapter extends AbstractAdapter
 
     protected function verifyPassword($creds, $row)
     {
-        $verifier = $this->verifier;
-        $verified = $verifier($creds['password'], $row['password'], $row);
+        $verified = $this->verifier->verifyPassword($creds['password'], $row['password'], $row);
         if (! $verified) {
             $this->error = 'Password incorrect.';
             return false;
