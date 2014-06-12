@@ -13,11 +13,6 @@ class HashVerifier implements VerifierInterface
         $this->salt = $salt;
     }
 
-    public function __invoke($plaintext, $encrypted)
-    {
-        return $this->verify($plaintext, $encrypted);
-    }
-
     public function verify($plaintext, $encrypted)
     {
         return hash($this->algo, $this->salt . $plaintext) === $encrypted;

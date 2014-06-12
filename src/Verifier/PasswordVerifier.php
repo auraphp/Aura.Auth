@@ -13,11 +13,6 @@ class PasswordVerifier implements VerifierInterface
         $this->opts = $opts;
     }
 
-    public function __invoke($plaintext, $encrypted)
-    {
-        return $this->verify($plaintext, $encrypted);
-    }
-
     public function verify($plaintext, $encrypted)
     {
         return password_verify($plaintext, $encrypted);
