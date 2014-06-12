@@ -20,11 +20,6 @@ class HashVerifier implements VerifierInterface
 
     public function verifyPassword($plaintext, $encrypted)
     {
-        return ($this->hashPassword($plaintext) === $encrypted);
-    }
-
-    public function hashPassword($plaintext)
-    {
-        return hash($this->algo, $this->salt . $plaintext);
+        return hash($this->algo, $this->salt . $plaintext) === $encrypted;
     }
 }

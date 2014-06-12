@@ -21,10 +21,6 @@ class HtpasswdVerifier implements VerifierInterface
         return $this->des($plaintext, $encrypted);
     }
 
-    public function hashPassword($plaintext)
-    {
-    }
-
     // use SHA1 encryption.  pack SHA binary into hexadecimal,
     // then encode into characters using base64. this is per
     // Tomas V. V. Cox.

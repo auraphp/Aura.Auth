@@ -18,15 +18,6 @@ class PasswordVerifier implements VerifierInterface
         return $this->verifyPassword($plaintext, $encrypted);
     }
 
-    public function hashPassword($plaintext)
-    {
-        $encrypted = password_hash($plaintext, $this->algo, $this->opts);
-        if ($this->verifyPassword($plaintext, $encrypted)) {
-            return $hash;
-        }
-        return false;
-    }
-
     public function verifyPassword($plaintext, $encrypted)
     {
         return password_verify($plaintext, $encrypted);
