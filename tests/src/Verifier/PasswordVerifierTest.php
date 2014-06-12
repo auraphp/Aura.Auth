@@ -31,7 +31,7 @@ class PasswordVerifierTest extends \PHPUnit_Framework_TestCase
         $verifier = new PasswordVerifier($algo);
         $plaintext = 'password';
         $encrypted = password_hash($plaintext, $algo);
-        $this->assertTrue($verifier($plaintext, $encrypted));
-        $this->assertFalse($verifier('wrong', $encrypted));
+        $this->assertTrue($verifier->verify($plaintext, $encrypted));
+        $this->assertFalse($verifier->verify('wrong', $encrypted));
     }
 }

@@ -15,10 +15,10 @@ class HashVerifier implements VerifierInterface
 
     public function __invoke($plaintext, $encrypted)
     {
-        return $this->verifyPassword($plaintext, $encrypted);
+        return $this->verify($plaintext, $encrypted);
     }
 
-    public function verifyPassword($plaintext, $encrypted)
+    public function verify($plaintext, $encrypted)
     {
         return hash($this->algo, $this->salt . $plaintext) === $encrypted;
     }

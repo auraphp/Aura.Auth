@@ -8,7 +8,7 @@ class HashVerifierTest extends \PHPUnit_Framework_TestCase
         $verifier = new HashVerifier('md5');
         $plaintext = 'password';
         $encrypted = hash('md5', $plaintext);
-        $this->assertTrue($verifier($plaintext, $encrypted));
-        $this->assertFalse($verifier('wrong', $encrypted));
+        $this->assertTrue($verifier->verify($plaintext, $encrypted));
+        $this->assertFalse($verifier->verify('wrong', $encrypted));
     }
 }

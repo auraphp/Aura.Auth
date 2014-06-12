@@ -99,7 +99,7 @@ class HtpasswdAdapter extends AbstractAdapter
         $tmp = explode(':', trim($line));
         $encrypted = $tmp[1];
 
-        $verified = $this->verifier->verifyPassword($password, $encrypted);
+        $verified = $this->verifier->verify($password, $encrypted);
 
         if (! $verified) {
             $this->error = 'Incorrect password.';

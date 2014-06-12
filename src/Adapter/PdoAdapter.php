@@ -122,7 +122,7 @@ class PdoAdapter extends AbstractAdapter
             return false;
         }
 
-        $verified = $this->verifyPassword($creds, $row);
+        $verified = $this->verify($creds, $row);
         if (! $verified) {
             return false;
         }
@@ -188,9 +188,9 @@ class PdoAdapter extends AbstractAdapter
         return "SELECT {$cols} FROM {$this->from} WHERE {$where}";
     }
 
-    protected function verifyPassword($creds, $row)
+    protected function verify($creds, $row)
     {
-        $verified = $this->verifier->verifyPassword($creds['password'], $row['password'], $row);
+        $verified = $this->verifier->verify($creds['password'], $row['password'], $row);
         if (! $verified) {
             $this->error = 'Password incorrect.';
             return false;
