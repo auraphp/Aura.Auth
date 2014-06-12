@@ -9,6 +9,20 @@ abstract class AbstractAdapter implements AdapterInterface
 
     protected $error;
 
+    /**
+     *
+     * A verifier for passwords.
+     *
+     * @var VerifierInterface
+     *
+     */
+    protected $verifier;
+
+    public function getVerifier()
+    {
+        return $this->verifier;
+    }
+
     abstract public function login($cred);
 
     public function logout($user, array $info = array())

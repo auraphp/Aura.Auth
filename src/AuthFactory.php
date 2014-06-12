@@ -26,7 +26,7 @@ class AuthFactory
             $verifier = new Verifier\HashVerifier($verifier_spec);
         } elseif (is_int($verifier_spec)) {
             $verifier = new Verifier\PasswordVerifier($verifier_spec);
-        } elseif {
+        } else {
             $verifier = $verifier_spec;
         }
 
@@ -42,7 +42,7 @@ class AuthFactory
     public function newHtpasswdInstance($file)
     {
         $verifier = new Verifier\HtpasswdVerifier;
-        return $this->newInstance(new Adapter\HtpassdAdapter(
+        return $this->newInstance(new Adapter\HtpasswdAdapter(
             $file,
             $verifier
         ));

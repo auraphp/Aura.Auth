@@ -76,15 +76,6 @@ class PdoAdapter extends AbstractAdapter
      */
     protected $where;
 
-    /**
-     *
-     * A callable to verify passwords.
-     *
-     * @var callable
-     *
-     */
-    protected $verifier;
-
     public function __construct(
         PDO $pdo,
         VerifierInterface $verifier,

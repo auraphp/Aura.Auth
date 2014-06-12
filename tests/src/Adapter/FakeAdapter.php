@@ -1,7 +1,5 @@
 <?php
-namespace Aura\Auth;
-
-use Aura\Auth\Adapter\AbstractAdapter;
+namespace Aura\Auth\Adapter;
 
 class FakeAdapter extends AbstractAdapter
 {

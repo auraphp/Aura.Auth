@@ -35,8 +35,6 @@ class HtpasswdAdapter extends AbstractAdapter
 {
     protected $file;
 
-    protected $verifier;
-
     public function __construct($file, VerifierInterface $verifier)
     {
         $this->file = realpath($file);

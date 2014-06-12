@@ -13,7 +13,7 @@ class AuthTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->adapter = new FakeAdapter(array('boshag' => '123456'));
+        $this->adapter = new Adapter\FakeAdapter(array('boshag' => '123456'));
         $this->session = new FakeSession;
         $this->timer = new Timer(1440, 14400);
         $this->auth = new Auth($this->adapter, $this->session, $this->timer);
