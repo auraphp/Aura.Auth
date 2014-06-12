@@ -1,9 +1,14 @@
 <?php
 namespace Aura\Auth\Verifier;
 
-class HtpasswdVerifier
+class HtpasswdVerifier implements PasswordVerifierInterface
 {
     public function __invoke($plaintext, $encrypted)
+    {
+        return $this->verifyPassword($plaintext, $encrypted);
+    }
+
+    public function verifyPassword($plaintext, $encrypted)
     {
         if (substr($encrypted, 0, 5) == '{SHA}') {
             return $this->sha($plaintext, $encrypted);
@@ -14,6 +19,10 @@ class HtpasswdVerifier
         }
 
         return $this->des($plaintext, $encrypted);
+    }
+
+    public function hashPassword($plaintext)
+    {
     }
 
     // use SHA1 encryption.  pack SHA binary into hexadecimal,
