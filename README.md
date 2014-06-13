@@ -11,7 +11,7 @@ Note that the purpose of this package is only to authenticate user credentials; 
 
 ### Installation
 
-This library requires PHP 5.4 or later, and has no userland dependencies.
+This library requires PHP 5.3 or later, and has no userland dependencies.
 
 > NOT YET: It is installable and autoloadable via Composer as [aura/auth](https://packagist.org/packages/aura/auth).
 
@@ -51,11 +51,31 @@ This package is in a very early development stage and as such is still in flux. 
 
 THIS DOCUMENTATION IS INCOMPLETE AND WRONG.
 
-### Instantiation
+### Authentication State Tracking
 
-TBD
+To track the user authentication state and related information, create an _Auth_ object using the _AuthFactory_.  (The _AuthFactory_ needs a copy of the `$_COOKIES` superglobal to track session continuation.)
 
-### Login and Logout Functionality
+```php
+<?php
+$auth_factory = new \Aura\Auth\AuthFactory($_COOKIES);
+$auth = $auth_factory->newInstance();
+?>
+```
+
+You can now use the _Auth_ object to discover authentication information:
+
+#### `getStatus()`
+
+The `$auth->getStatus()` returns one of these constants:
+
+- `Auth::ANON` -- the user is currently anonymous/unauthenticated.
+
+- `Auth::IDLE` -- the user has been idle for too long, and has become
+
+### Forcing Login And Logout
+
+
+### Login and Logout Adapters
 
 #### Via Htpasswd
 
