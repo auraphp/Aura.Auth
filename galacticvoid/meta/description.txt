@@ -1,1 +1,0 @@
-Aura Auth provides a unified interface to authenticate a user with local or remote authentication systems.
