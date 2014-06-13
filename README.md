@@ -43,9 +43,9 @@ To ask questions, provide feedback, or otherwise communicate with the Aura commu
 
 Because this package is still in very early development, THE FOLLOWING DOCUMENTATION IS INCOMPLETE AND SOMETIMES WRONG.
 
-### Authentication State Tracking
+### Instantiation
 
-To track the user authentication state and related information, create an _Auth_ object using the _AuthFactory_.  (The _AuthFactory_ needs a copy of the `$_COOKIES` superglobal to track session continuation.)
+To track the user authentication state and related information, create an _Auth_ object using the _AuthFactory_.
 
 ```php
 <?php
@@ -54,24 +54,71 @@ $auth = $auth_factory->newInstance();
 ?>
 ```
 
-You can now use the _Auth_ object to discover authentication information:
+Creating the _Auth_ object has the side effect of resuming a previous session, if one exists; this is why it needs a copy of `$_COOKIES`. It does so through the _SessionManager_. If a previous session was resumed, the _Auth_ object will refresh the authentication status as needed to mark the session as idle or expired. If no previous session exists, creating the _Auth_ object will not start a new one. (Please see the [session management](#session-management) section for more about session handling.)
 
-#### `getStatus()`
+### Forcing Login
 
-The `$auth->getStatus()` returns one of these constants:
+You can force the _Auth_ object to recognize the user as authenticated by calling the `forceLogin()` method with a user name and optional arbitrary user information.
 
-- `Auth::ANON` -- the user is currently anonymous/unauthenticated.
+```php
+<?php
+$user = 'bolivar';
+$info = array(
+    'first_name' => 'Bolivar',
+    'last_name' => 'Shagnasty',
+    'email' => 'boshag@example.com',
+);
+$auth->forceLogin($user, $info);
+?>
+```
 
-- `Auth::IDLE` -- the user has been idle for too long, and has become
+Using `forceLogin()` has the side effect of starting a new session through the _SessionManager_ if one has not already been started, and of regenerating the session ID. (Please see the [session management](#session-management) section for more about session handling.)
 
-### Forcing Login And Logout
+The user name and user information will then be stored in the session, along with an authentication status of `Auth::VALID`.
+
+Note that `forceLogin()` does not check any credential sources. You as the application owner are telling the _Auth_ object to treat the user as authenticated.
+
+### Forcing Logout
+
+You can force the _Auth_ object to dismiss the existing authenticated user back to anonymity by calling the `forceLogout()` method.
+
+```php
+<?php
+$auth->forceLogout();
+?>
+```
+This clears any existing user name and user information from the session, regenerates the session ID, and sets the authentication status to `Auth::ANON`. It does **not** destroy the session. (Please see the [session management](#session-management) section for more about session handling.)
+
+Note that `forceLogout()` does not check any credential sources. You as the application owner are telling the _Auth_ object to dismiss the user as anonymous.
+
+### Getting Authentication Information
+
+At any time, you can retrieve authentication information using the following methods:
+
+- `getStatus()`: returns the current authentication status constant. These constants are:
+
+    - `Auth::ANON` -- the user is currently anonymous (unauthenticated).
+
+    - `Auth::IDLE` -- the authenticated user has been idle for too long, and has become invalid. However, the _Auth_ object does not automatically log the user out, so the previous authentication information is still available.
+
+    - `Auth::EXPIRED` -- the authenticated session has lasted too long, making the user invalid. However, the _Auth_ object does not automatically log the user out, so the previous authentication information is still available.
+
+    - `Auth::VALID` -- The user is currently authenticated and is valid.
+
+- `isValid()`, `isAnon()`, `isIdle()`, `isExpired()`: these return true or false, based on the current authentication status.
+
+- `getUser()`: returns the authenticated username string
+
+- `getInfo()`: returns the array of optional arbitrary user information
 
 
-### Login and Logout Adapters
+### Login and Logout Handlers
 
-#### Via Htpasswd
+TBD
 
-To create an _Auth_ object that uses the _HtpasswdAdapter_, call the `newHtpasswdInstace()` method and pass the file path of the Apache htpasswd file.
+#### Htpasswd Adapter
+
+To create an adapter for Apache htpasswd files, call the `$adapter_factory->newHtpasswdInstace()` method and pass the file path of the Apache htpasswd file.
 
 ```
 <?php
@@ -82,17 +129,17 @@ $auth = $auth_factory->newHtpasswdInstance('/path/to/accounts.htpasswd');
 This will automatically use the _HtpasswdVerifier_ to check DES, MD5, and SHA passwords from the htpasswd file on a per-user basis.
 
 
-#### Via PDO Connection
+#### PDO Adapter
 
-To create an _Auth_ object that uses the _PdoAdapter_, call the `newPdoInstace()` method and pass these parameters in order:
+To create an adapter for PDO connections to SQL tables, call the `newPdoInstace()` method and pass these parameters in order:
 
 - a _PDO_ connection instance
 
 - a specification to indicate how passwords are hashed in the database:
 
-    - if a string, it is treated as a `hash()` algorithm for a _HashVerifier_ instance
+    - if a `PASSWORD_*` constant from PHP 5.5 and up, it is treated as `password_hash()` algorithm for a _PasswordVerifier_ instance (this is the preferred method)
 
-    - if a `PASSWORD_*` constant from PHP 5.5 and up, it is treated as `password_hash()` algorithm for a _PasswordVerifier_ instance
+    - if a string, it is treated as a `hash()` algorithm for a _HashVerifier_ instance
 
     - otherwise, it is expected to be an implementation of _VerifierInterface_
 
@@ -102,7 +149,7 @@ To create an _Auth_ object that uses the _PdoAdapter_, call the `newPdoInstace()
 
 - an optional `WHERE` condition string; use this to add extra conditions to the `SELECT` statement built by the adapter
 
-Here is a straightforward example where passwords are MD5 hashed in an accounts table:
+Here is a legacy example where passwords are MD5 hashed in an accounts table:
 
 ```
 <?php
@@ -114,7 +161,7 @@ $auth = $auth_factory->newPdoInstance($pdo, $hash, $cols, $from);
 ?>
 ```
 
-Here is a more complex example that uses bcrypt instead of md5, retrieves extra user information columns from joined tables, and filters for active accounts:
+Here is a modern, more complex example that uses bcrypt instead of md5, retrieves extra user information columns from joined tables, and filters for active accounts:
 
 ```
 <?php
@@ -128,7 +175,7 @@ $cols = array(
     'userinfo.uri AS website',
     'userinfo.fullname AS display_name',
 );
-$from = 'accounts JOIN userinfo ON accounts.uid = userinfo.uid';
+$from = 'accounts JOIN profiles ON accounts.uid = profiles.uid';
 $where = 'accounts.active = 1';
 $auth = $auth_factory->newPdoInstance($pdo, $hash, $cols, $from);
 ?>
@@ -136,7 +183,7 @@ $auth = $auth_factory->newPdoInstance($pdo, $hash, $cols, $from);
 
 (The additional information columns will be retained in the session data after successful authentication.)
 
-### Custom Session Integration
+### Session Management
 
 TBD
 
