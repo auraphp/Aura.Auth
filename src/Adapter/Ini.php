@@ -1,12 +1,12 @@
 <?php
 /**
- * 
+ *
  * This file is part of Aura for PHP.
- * 
+ *
  * @package Aura.Auth
- * 
+ *
  * @license http://opensource.org/licenses/bsd-license.php BSD
- * 
+ *
  */
 namespace Aura\Auth\Adapter;
 
@@ -14,24 +14,24 @@ use Aura\Auth\Exception\AlgorithmNotAvailable;
 use Aura\Auth\Exception\MissingUsernameOrPassword;
 
 /**
- * 
+ *
  * Authenticate against an ini file.
- * 
+ *
  * @package Aura.Auth
- * 
+ *
  */
 class Ini extends FileAdapter
 {
 
     /**
-     * 
+     *
      * Auth a user.
-     * 
-     * @throws Aura\Auth\Exception If $opts does not contain the 
+     *
+     * @throws Aura\Auth\Exception If $opts does not contain the
      * keys `username` and `password`.
-     * 
+     *
      * @return boolean
-     * 
+     *
      */
     public function authenticate()
     {
@@ -81,9 +81,9 @@ class Ini extends FileAdapter
      * Hash data with optional salt.
      *
      * @param string $algo The hashing algorithm
-     * 
+     *
      * @param string $data The data to hash
-     * 
+     *
      * @param string $salt The hashing salt
      *
      * @return string
@@ -102,4 +102,3 @@ class Ini extends FileAdapter
         return hash($algo, $data);
     }
 }
-

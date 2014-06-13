@@ -1,12 +1,12 @@
 <?php
 /**
- * 
+ *
  * This file is part of Aura for PHP.
- * 
+ *
  * @package Aura.Auth
- * 
+ *
  * @license http://opensource.org/licenses/bsd-license.php BSD
- * 
+ *
  */
 namespace Aura\Auth\Adapter;
 
@@ -14,11 +14,11 @@ use Aura\Auth\Exception\FileNotReadable;
 use Aura\Auth\Exception\MissingUsernameOrPassword;
 
 /**
- * 
- * Authenticate 
- * 
+ *
+ * Authenticate
+ *
  * @package Aura.Auth
- * 
+ *
  */
 class Htpasswd extends FileAdapter
 {
@@ -109,19 +109,19 @@ class Htpasswd extends FileAdapter
     }
 
     /**
-     * 
+     *
      * APR compatible MD5 encryption.
-     * 
+     *
      * @author Mike Wallner <mike@php.net>
-     * 
+     *
      * @author Paul M. Jones (minor modfications) <pmjones@solarphp.com>
-     * 
+     *
      * @param string $plain Plaintext to crypt.
-     * 
+     *
      * @param string $salt The salt to use for encryption.
-     * 
+     *
      * @return string The APR MD5 encrypted string.
-     * 
+     *
      */
     protected function hashApr1($plain, $salt)
     {
@@ -178,19 +178,19 @@ class Htpasswd extends FileAdapter
     }
 
     /**
-     * 
+     *
      * Convert to allowed 64 characters for encryption.
-     * 
+     *
      * @author Mike Wallner <mike@php.net>
-     * 
+     *
      * @author Paul M. Jones (minor modfications) <pmjones@solarphp.com>
-     * 
+     *
      * @param string $value The value to convert.
-     * 
+     *
      * @param int $count The number of characters.
-     * 
+     *
      * @return string The converted value.
-     * 
+     *
      */
     protected function chars64($value, $count)
     {
@@ -203,4 +203,3 @@ class Htpasswd extends FileAdapter
         return $result;
     }
 }
-
