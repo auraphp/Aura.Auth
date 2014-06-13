@@ -10,8 +10,8 @@
  */
 namespace Aura\Auth;
 
-use Aura\Auth\Adapter\AdapterInterface;
-use Aura\Auth\Session\SessionInterface;
+use Aura\Auth\Session\SessionDataInterface;
+use Aura\Auth\Session\SessionManagerInterface;
 
 /**
  *
@@ -24,8 +24,7 @@ class Auth
 {
     /**
      *
-     * The user is anonymous/unauthenticated, with no current attempt to
-     * authenticate.
+     * The user is anonymous/unauthenticated.
      *
      * @const string
      *
@@ -48,7 +47,7 @@ class Auth
      * @const string
      *
      */
-    const IDLED = 'IDLED';
+    const IDLE = 'IDLE';
 
     /**
      *
@@ -61,39 +60,21 @@ class Auth
 
     /**
      *
-     * There was an error when attempting authentication.
-     *
-     * @const string
-     *
-     */
-    const ERROR = 'ERROR';
-
-    /**
-     *
-     * A adapter object for checking credentials.
-     *
-     * @var AdapterInterface
-     *
-     */
-    protected $adapter;
-
-    /**
-     *
-     * The last error reported by the adapter.
-     *
-     * @var mixed
-     *
-     */
-    protected $error;
-
-    /**
-     *
      * A session manager.
      *
      * @var Session
      *
      */
-    protected $session;
+    protected $manager;
+
+    /**
+     *
+     * Session data.
+     *
+     * @var SessionDataInterface
+     *
+     */
+    protected $data;
 
     /**
      *
@@ -108,9 +89,9 @@ class Auth
      *
      * Constructor.
      *
-     * @param AdapterInterface $adapter A credential adapter object.
+     * @param SessionManagerInterface $manager A session manager.
      *
-     * @param SessionInterface $session A session manager.
+     * @param SessionDataInterface $data A session data store.
      *
      * @param Timer $timer An idle/expire timer.
      *
@@ -118,50 +99,16 @@ class Auth
      *
      */
     public function __construct(
-        AdapterInterface $adapter,
-        SessionInterface $session,
+        SessionManagerInterface $manager,
+        SessionDataInterface $data,
         Timer $timer
     ) {
-        $this->adapter = $adapter;
-        $this->session = $session;
+        $this->manager = $manager;
+        $this->data = $data;
         $this->timer = $timer;
+
+        $this->manager->resume();
         $this->refresh();
-    }
-
-    /**
-     *
-     * Returns the authentication adapter.
-     *
-     * @return AdapterInterface
-     *
-     */
-    public function getAdapter()
-    {
-        return $this->adapter;
-    }
-
-    /**
-     *
-     * Returns the session manager.
-     *
-     * @return SessionInterface
-     *
-     */
-    public function getSession()
-    {
-        return $this->session;
-    }
-
-    /**
-     *
-     * Returns the timer.
-     *
-     * @return AdapterInterface
-     *
-     */
-    public function getTimer()
-    {
-        return $this->timer;
     }
 
     /**
@@ -183,75 +130,24 @@ class Auth
      */
     public function refresh()
     {
-        if ($this->isAnon()) {
+        if (! $this->isValid()) {
             return false;
         }
 
-        if ($this->timer->hasExpired($this->session->initial)) {
-            $this->logout(self::EXPIRED);
+        if ($this->timer->hasExpired($this->data->initial)) {
+            $this->data->status = self::EXPIRED;
+            $this->manager->regenerateId();
             return false;
         }
 
-        if ($this->timer->hasIdled($this->session->active)) {
-            $this->logout(self::IDLED);
+        if ($this->timer->hasIdled($this->data->active)) {
+            $this->data->status = self::IDLE;
+            $this->manager->regenerateId();
             return false;
         }
 
-        $this->session->active = time();
+        $this->data->active = time();
         return true;
-    }
-
-    /**
-     *
-     * Is the user anonymous?
-     *
-     * @return bool
-     *
-     */
-    public function isAnon()
-    {
-        return $this->getStatus() != self::VALID;
-    }
-
-    /**
-     *
-     * Is the user authentication valid?
-     *
-     * @return bool
-     *
-     */
-    public function isValid()
-    {
-        return $this->getStatus() == self::VALID;
-    }
-
-    /**
-     *
-     * Logs the user in via the adapter.
-     *
-     * On success, this will start the session and populate it with the user
-     * and info returned by the adapter. On failure, it will populate
-     * the error property with the error value reported by the adapter.
-     *
-     * @param mixed $cred The credentials to pass to the adapter.
-     *
-     * @return bool True on success, false on failure.
-     *
-     */
-    public function login($cred)
-    {
-        $success = $this->adapter->login($cred);
-        if ($success) {
-            $this->forceLogin(
-                $this->adapter->getUser(),
-                $this->adapter->getInfo()
-            );
-            return true;
-        }
-
-        $this->setStatus(self::ERROR);
-        $this->error = $this->adapter->getError();
-        return false;
     }
 
     /**
@@ -267,88 +163,92 @@ class Auth
      */
     public function forceLogin($user, $info = array())
     {
-        $now = time();
-        $this->error = null;
-        $this->setStatus(self::VALID);
-        $this->session->user = $user;
-        $this->session->info = $info;
-        $this->session->initial = $now;
-        $this->session->active = $now;
-    }
+        $this->manager->start();
+        $this->manager->regenerateId();
 
-    /**
-     *
-     * Logs the user out via the adapter.
-     *
-     * @param string $status The status after successful logout.
-     *
-     * @return bool True on success, false on failure.
-     *
-     */
-    public function logout($status = self::ANON)
-    {
-        $success = $this->adapter->logout(
-            $this->getUser(),
-            $this->getInfo()
-        );
-
-        if ($success) {
-            $this->forceLogout($status);
-            return true;
-        }
-
-        $this->setStatus(self::ERROR);
-        $this->error = $this->adapter->getError();
-        return false;
+        $this->data->status = self::VALID;
+        $this->data->initial = time();
+        $this->data->active = $this->data->initial;
+        $this->data->user = $user;
+        $this->data->info = $info;
     }
 
     /**
      *
      * Forces a successful logout, bypassing the adapter.
      *
-     * @param string $status The status after logout.
-     *
      * @return null
      *
      */
     public function forceLogout($status = self::ANON)
     {
-        $this->error = null;
-        $this->setStatus($status);
-        unset($this->session->user);
-        unset($this->session->info);
-        unset($this->session->initial);
-        unset($this->session->active);
+        $this->manager->regenerateId();
+
+        $this->data->status = $status;
+        unset($this->data->initial);
+        unset($this->data->active);
+        unset($this->data->user);
+        unset($this->data->info);
     }
 
     /**
      *
-     * Sets the current status, regenerating the session ID on status changes.
+     * Is the user authenticated?
      *
-     * @param string $status The new status.
-     *
-     * @return null
+     * @return bool
      *
      */
-    protected function setStatus($status)
+    public function isValid()
     {
-        $old = $this->getStatus();
-        $this->session->status = strtoupper($status);
-        if ($this->session->status != $old) {
-            $this->session->regenerateId();
-        }
+        return $this->getStatus() == self::VALID;
     }
 
     /**
      *
-     * Gets the current status.
+     * Is the user anonymous?
+     *
+     * @return bool
+     *
+     */
+    public function isAnon()
+    {
+        return $this->getStatus() == self::ANON;
+    }
+
+    /**
+     *
+     * Has the user been idle for too long?
+     *
+     * @return bool
+     *
+     */
+    public function isIdle()
+    {
+        return $this->getStatus() == self::IDLE;
+    }
+
+    /**
+     *
+     * Has the authentication time expired?
+     *
+     * @return bool
+     *
+     */
+    public function isExpired()
+    {
+        return $this->getStatus() == self::EXPIRED;
+    }
+
+    /**
+     *
+     * Gets the current authentication status.
      *
      * @return string
      *
      */
     public function getStatus()
     {
-        $status = $this->session->status;
+        $status = $this->data->status;
         if (! $status) {
             $status = self::ANON;
         }
@@ -364,7 +264,7 @@ class Auth
      */
     public function getInitial()
     {
-        return $this->session->initial;
+        return $this->data->initial;
     }
 
     /**
@@ -376,7 +276,7 @@ class Auth
      */
     public function getActive()
     {
-        return $this->session->active;
+        return $this->data->active;
     }
 
     /**
@@ -388,7 +288,7 @@ class Auth
      */
     public function getUser()
     {
-        return $this->session->user;
+        return $this->data->user;
     }
 
     /**
@@ -400,22 +300,10 @@ class Auth
      */
     public function getInfo()
     {
-        $info = $this->session->info;
+        $info = $this->data->info;
         if (! $info) {
             $info = array();
         }
         return $info;
-    }
-
-    /**
-     *
-     * Gets the last error reported by the adapter.
-     *
-     * @return mixed
-     *
-     */
-    public function getError()
-    {
-        return $this->error;
     }
 }
