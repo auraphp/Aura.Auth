@@ -34,4 +34,14 @@ abstract class AbstractHandlerTest extends \PHPUnit_Framework_TestCase
             'boshag' => '123456',
         ));
     }
+
+    public function testGetAuth()
+    {
+        $this->assertSame($this->auth, $this->handler->getAuth());
+    }
+
+    public function testGetAdapter()
+    {
+        $this->assertSame($this->adapter, $this->handler->getAdapter());
+    }
 }

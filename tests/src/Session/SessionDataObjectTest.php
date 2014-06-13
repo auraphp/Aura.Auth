@@ -5,10 +5,11 @@ class SessionDataObjectTest extends AbstractSessionDataTest
 {
     protected $object;
 
-    protected function setUp()
+    public function test()
     {
         $this->object = (object) array();
         $this->data = new SessionDataObject($this->object);
+        parent::test();
     }
 
     protected function getData($key)

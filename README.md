@@ -49,6 +49,34 @@ This package is in a very early development stage and as such is still in flux. 
 
 ## Getting Started
 
+### Session Integration
+
+Native session arrays, or use a custom object.
+
+With native session arrays, *must* have $_SESSION available *prior* to creating an _Auth_object.
+
+```php
+<?php
+// start a session if not already started
+if (session_id() === '') {
+    session_start(); // creates $_SESSION
+}
+
+// create auth instance
+$auth = $auth_factory->newPdoInstance(...);
+?>
+```
+
+Then you can resume an existing session like so:
+
+EXCEPT, the problem is that you have to make a PDO connection, even if you don't actually need the connection for auth purposes.
+
+What we need is to create the adapter on-the-fly, and the session connection on-the-fly.
+
+* * *
+
+Perhaps dual session objects: NativeSessionData, CustomSessionData, NativeSessionManager, CustomSessionManager.
+
 ### Instantiation
 
 Instantiate _Auth_ objects via an _AuthFactory_. (The factory will take care of all the object setup for you.)

@@ -5,7 +5,7 @@ abstract class AbstractSessionDataTest extends \PHPUnit_Framework_TestCase
 {
     protected $data;
 
-    public function testMagic()
+    public function test()
     {
         $this->assertFalse(isset($this->data->foo));
         $this->assertNull($this->data->foo);

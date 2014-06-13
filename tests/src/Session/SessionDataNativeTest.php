@@ -6,10 +6,18 @@ namespace Aura\Auth\Session;
  */
 class SessionDataNativeTest extends AbstractSessionDataTest
 {
-    protected function setUp()
+    public function test()
     {
-        session_start();
+        // create the data object before the session starts
         $this->data = new SessionDataNative(__CLASS__);
+
+        // before the session starts
+        $this->data->foo = 'bar';
+        $this->assertNull($this->data->foo);
+
+        // after the session starts
+        session_start();
+        parent::test();
     }
 
     protected function getData($key)

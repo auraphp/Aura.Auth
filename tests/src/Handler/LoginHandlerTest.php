@@ -21,6 +21,23 @@ class LoginHandlerTest extends AbstractHandlerTest
         $this->assertTrue($this->auth->isValid());
     }
 
+    public function testLogin_error()
+    {
+        $this->assertTrue($this->auth->isAnon());
+
+        $this->assertFalse($this->handler->login(array(
+            'username' => 'boshag',
+            'password' => '------',
+        )));
+
+        $this->assertTrue($this->auth->isAnon());
+
+        $this->assertSame(
+            $this->adapter->getError(),
+            $this->handler->getError()
+        );
+    }
+
     // public function testLogin_bad()
     // {
     //     $this->assertAnon();
