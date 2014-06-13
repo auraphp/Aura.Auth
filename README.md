@@ -15,11 +15,13 @@ This library requires PHP 5.3 or later, and has no userland dependencies.
 
 > NOT YET: It is installable and autoloadable via Composer as [aura/auth](https://packagist.org/packages/aura/auth).
 
-> NOT YET: Alternatively, [download a release](https://github.com/auraphp/Aura.Auth/releases) or clone this repository, then require or include its _autoload.php_ file.
+Alternatively, [download a release](https://github.com/auraphp/Aura.Auth/releases) or clone this repository, then require or include its _autoload.php_ file.
 
 ### Quality
 
-> NOT YET: Quality Badges
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/auraphp/Aura.Auth/badges/quality-score.png?b=develop-2)](https://scrutinizer-ci.com/g/auraphp/Aura.Auth/?branch=develop-2)
+[![Code Coverage](https://scrutinizer-ci.com/g/auraphp/Aura.Auth/badges/coverage.png?b=develop-2)](https://scrutinizer-ci.com/g/auraphp/Aura.Auth/?branch=develop-2)
+[![Build Status](https://travis-ci.org/auraphp/Aura.Auth.png?branch=develop-2)](https://travis-ci.org/auraphp/Aura.Auth)
 
 To run the [PHPUnit][] tests at the command line, go to the _tests_ directory and issue `phpunit`.
 
@@ -36,20 +38,10 @@ you notice compliance oversights, please send a patch via pull request.
 
 To ask questions, provide feedback, or otherwise communicate with the Aura community, please join our [Google Group](http://groups.google.com/group/auraphp), follow [@auraphp on Twitter](http://twitter.com/auraphp), or chat with us on #auraphp on Freenode.
 
-### TODO
-
-This package is in a very early development stage and as such is still in flux. Some things remain to be decided:
-
-- The _Auth_ object embeds a _Session_ manager for starting/destoying sessions, regenerating IDs, and tracking session data specific to the Aura.Auth package. This behavior may be removed, modified, or otherwise broken in future commits; for example, we may decide it is best for the developer to manage the session lifecycle manually.
-
-- Automatic resumption of previous sessions is currently not incorporated. Depending on how we decide to deal with session management, this may or may not be added.
-
-- We still need to add IMAP and LDAP adapters. The ports of these from [Solar](http://solarphp.com) are still unfinished and are in the `hold/` directory.
-
 
 ## Getting Started
 
-THIS DOCUMENTATION IS INCOMPLETE AND WRONG.
+Because this package is still in very early development, THE FOLLOWING DOCUMENTATION IS INCOMPLETE AND SOMETIMES WRONG.
 
 ### Authentication State Tracking
 
