@@ -12,21 +12,51 @@ namespace Aura\Auth\Adapter;
 
 /**
  *
- * Interface for an Auth adapter.
+ * Abstract Authentication Storage.
  *
  * @package Aura.Auth
  *
  */
-interface AuthInterface
+interface AdapterInterface
 {
     /**
-     *
-     * Authenticate a user.
-     *
-     * @param void
-     *
-     * @return boolean
-     *
+     * 
+     * @param mixed $cred
+     * 
+     * @return bool
+     * 
      */
-    public function authenticate();
+    public function login($cred);
+
+    /**
+     * 
+     * Logout a user resetting all the values
+     * 
+     * @return bool
+     * 
+     */
+    public function logout($user, array $info = array());
+
+    /**
+     * 
+     * @return $user
+     * 
+     */
+    public function getUser();
+
+    /**
+     * 
+     * Return user details
+     * 
+     * @return array
+     * 
+     */
+    public function getInfo();
+
+    /**
+     * 
+     * @return string
+     * 
+     */
+    public function getError();
 }
