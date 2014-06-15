@@ -34,9 +34,10 @@ class AuthFactory
         $this->expire_ttl = $expire_ttl;
     }
 
-    public function newInstance()
+    public function newInstance(AdapterInterface $adapter)
     {
         return new Auth(
+            $this->adapter,
             $this->manager,
             $this->data,
             new Timer(

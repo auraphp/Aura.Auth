@@ -10,6 +10,7 @@
  */
 namespace Aura\Auth;
 
+use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Auth\Session\SessionDataInterface;
 use Aura\Auth\Session\SessionManagerInterface;
 
@@ -99,10 +100,12 @@ class Auth
      *
      */
     public function __construct(
+        AdapterInterface $adapter,
         SessionManagerInterface $manager,
         SessionDataInterface $data,
         Timer $timer
     ) {
+        $this->adapter = $adapter;
         $this->manager = $manager;
         $this->data = $data;
         $this->timer = $timer;
@@ -152,6 +155,34 @@ class Auth
 
     /**
      *
+     * Logs the user in via the adapter.
+     *
+     * On success, this will start the session and populate it with the user
+     * and info returned by the adapter. On failure, it will populate
+     * the error property with the error value reported by the adapter.
+     *
+     * @param mixed $cred The credentials to pass to the adapter.
+     *
+     * @return bool True on success, false on failure.
+     *
+     */
+    public function login($cred)
+    {
+        $success = $this->adapter->login($cred);
+        if ($success) {
+            $this->forceLogin(
+                $this->adapter->getUser(),
+                $this->adapter->getInfo()
+            );
+            return true;
+        }
+
+        $this->error = $this->adapter->getError();
+        return false;
+    }
+
+    /**
+     *
      * Forces a successful login, bypassing the adapter.
      *
      * @param string $user The authenticated user.
@@ -163,6 +194,8 @@ class Auth
      */
     public function forceLogin($user, $info = array())
     {
+        $this->error = null;
+
         $this->manager->start();
         $this->manager->regenerateId();
 
@@ -175,6 +208,29 @@ class Auth
 
     /**
      *
+     * Logs the user out via the adapter.
+     *
+     * @return bool True on success, false on failure.
+     *
+     */
+    public function logout()
+    {
+        $success = $this->adapter->logout(
+            $this->getUser(),
+            $this->getInfo()
+        );
+
+        if ($success) {
+            $this->forceLogout();
+            return true;
+        }
+
+        $this->error = $this->adapter->getError();
+        return false;
+    }
+
+    /**
+     *
      * Forces a successful logout, bypassing the adapter.
      *
      * @return null
@@ -182,6 +238,8 @@ class Auth
      */
     public function forceLogout($status = self::ANON)
     {
+        $this->error = null;
+
         $this->manager->regenerateId();
 
         $this->data->status = $status;
@@ -305,5 +363,10 @@ class Auth
             $info = array();
         }
         return $info;
+    }
+
+    public function getError()
+    {
+        return $this->error;
     }
 }
