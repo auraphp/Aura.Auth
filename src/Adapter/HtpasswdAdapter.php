@@ -35,12 +35,11 @@ class HtpasswdAdapter extends AbstractAdapter
 {
     protected $file;
 
+    protected $real;
+
     public function __construct($file, VerifierInterface $verifier)
     {
-        $this->file = realpath($file);
-        if (! $this->file) {
-            throw new Exception("File not found: '{$file}'");
-        }
+        $this->file = $file;
         $this->verifier = $verifier;
     }
 
@@ -70,9 +69,13 @@ class HtpasswdAdapter extends AbstractAdapter
         $password = $creds['password'];
 
         // force the full, real path to the file
+        $real = realpath($this->file);
+        if (! $real) {
+            throw new Exception("File not found: '{$this->file}'");
+        }
 
         // find the user's line in the file
-        $fp = fopen($this->file, 'r');
+        $fp = fopen($real, 'r');
         $len = strlen($username) + 1;
         $ok = false;
         while ($line = fgets($fp)) {

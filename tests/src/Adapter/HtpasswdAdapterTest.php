@@ -18,8 +18,12 @@ class HtpasswdAdapterTest extends \PHPUnit_Framework_TestCase
 
     public function testfileNotFound()
     {
-        $this->setExpectedException('Aura\Auth\Exception');
         $this->setAdapter('no-such-file');
+        $this->setExpectedException('Aura\Auth\Exception');
+        $this->assertTrue($this->adapter->login(array(
+            'username' => 'boshag',
+            'password' => '123456',
+        )));
     }
 
     public function testLogin()
