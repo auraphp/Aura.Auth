@@ -158,10 +158,7 @@ class PdoAdapter extends AbstractAdapter
     protected function fetchRow($creds)
     {
         $stm = $this->buildSelect();
-        $sth = $this->pdo->prepare($stm);
-        unset($creds['password']);
-        $sth->execute($creds);
-        $rows = $sth->fetchAll(PDO::FETCH_ASSOC);
+        $rows = $this->fetchRows($stm, $creds);
 
         if (count($rows) < 1) {
             $this->error = 'Credentials failed.';
@@ -176,6 +173,13 @@ class PdoAdapter extends AbstractAdapter
         return $rows[0];
     }
 
+    protected function fetchRows($stm, $bind)
+    {
+        $sth = $this->pdo->prepare($stm);
+        unset($bind['password']);
+        $sth->execute($bind);
+        return $sth->fetchAll(PDO::FETCH_ASSOC);
+    }
 
     /**
      *
