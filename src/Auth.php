@@ -138,14 +138,12 @@ class Auth
         }
 
         if ($this->timer->hasExpired($this->data->initial)) {
-            $this->data->status = self::EXPIRED;
-            $this->manager->regenerateId();
+            $this->forceLogout(self::EXPIRED);
             return false;
         }
 
         if ($this->timer->hasIdled($this->data->active)) {
-            $this->data->status = self::IDLE;
-            $this->manager->regenerateId();
+            $this->forceLogout(self::IDLE);
             return false;
         }
 
