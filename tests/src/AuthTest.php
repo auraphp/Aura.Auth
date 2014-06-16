@@ -1,6 +1,7 @@
 <?php
 namespace Aura\Auth;
 
+use Aura\Auth\Adapter\FakeAdapter;
 use Aura\Auth\Session\FakeSessionManager;
 use Aura\Auth\Session\SessionDataObject;
 
@@ -20,10 +21,18 @@ class AuthTest extends \PHPUnit_Framework_TestCase
     {
         $this->object = (object) array();
 
+        $this->adapter = new FakeAdapter(array(
+            'boshag' => '123456',
+        ));
         $this->manager = new FakeSessionManager;
         $this->data = new SessionDataObject($this->object);
         $this->timer = new Timer(1440, 14400);
-        $this->auth = new Auth($this->manager, $this->data, $this->timer);
+        $this->auth = new Auth(
+            $this->adapter,
+            $this->manager,
+            $this->data,
+            $this->timer
+        );
     }
 
     public function testForceLoginAndLogout()
@@ -35,6 +44,62 @@ class AuthTest extends \PHPUnit_Framework_TestCase
 
         $this->auth->forceLogout();
         $this->assertAnon();
+    }
+
+    public function testLogin()
+    {
+        $this->assertTrue($this->auth->isAnon());
+
+        $this->assertTrue($this->auth->login(array(
+            'username' => 'boshag',
+            'password' => '123456',
+        )));
+
+        $this->assertTrue($this->auth->isValid());
+    }
+
+    public function testLogin_error()
+    {
+        $this->assertTrue($this->auth->isAnon());
+
+        $this->assertFalse($this->auth->login(array(
+            'username' => 'boshag',
+            'password' => '------',
+        )));
+
+        $this->assertTrue($this->auth->isAnon());
+
+        $this->assertSame(
+            $this->adapter->getError(),
+            $this->auth->getError()
+        );
+    }
+
+    public function testLogout()
+    {
+        $this->assertTrue($this->auth->isAnon());
+        $this->auth->forceLogin('boshag');
+        $this->assertTrue($this->auth->isValid());
+
+        $this->auth->logout();
+        $this->assertTrue($this->auth->isAnon());
+    }
+
+    public function testLogout_error()
+    {
+        $this->assertTrue($this->auth->isAnon());
+        $this->auth->forceLogin('boshag', array(
+            'logout_error' => true,
+        ));
+        $this->assertTrue($this->auth->isValid());
+
+        $this->auth->logout();
+        $this->assertTrue($this->auth->isValid());
+
+        $this->assertSame(
+            $this->adapter->getError(),
+            $this->auth->getError()
+        );
     }
 
     public function testRefresh()
