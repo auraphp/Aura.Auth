@@ -1,14 +1,59 @@
 <?php
+/**
+ *
+ * This file is part of Aura for PHP.
+ *
+ * @package Aura.Auth
+ *
+ * @license http://opensource.org/licenses/bsd-license.php BSD
+ *
+ */
 namespace Aura\Auth\Session;
 
+/**
+ *
+ * Session manager.
+ *
+ * @package Aura.Auth
+ *
+ */
 class SessionManager implements SessionManagerInterface
 {
+    /**
+     * start
+     *
+     * @var mixed
+     *
+     */
     protected $start;
 
+    /**
+     * resume
+     *
+     * @var mixed
+     *
+     */
     protected $resume;
 
+    /**
+     * regenerate_id
+     *
+     * @var mixed
+     *
+     */
     protected $regenerate_id;
 
+    /**
+     *
+     * @param array $cookies
+     *
+     * @param callable $start
+     *
+     * @param callable $resume
+     *
+     * @param callable $regenerate_id
+     *
+     */
     public function __construct(
         array $cookies,
         $start = null,
@@ -21,6 +66,13 @@ class SessionManager implements SessionManagerInterface
         $this->regenerate_id = $regenerate_id;
     }
 
+    /**
+     *
+     * Start Session
+     *
+     * @return bool
+     *
+     */
     public function start()
     {
         if ($this->start) {
@@ -34,6 +86,13 @@ class SessionManager implements SessionManagerInterface
         return false;
     }
 
+    /**
+     *
+     * Start / resume session
+     *
+     * @return bool
+     *
+     */
     public function resume()
     {
         if ($this->resume) {
@@ -47,6 +106,13 @@ class SessionManager implements SessionManagerInterface
         return false;
     }
 
+    /**
+     *
+     * Re generate session id
+     *
+     * @return mixed
+     *
+     */
     public function regenerateId()
     {
         if ($this->regenerate_id) {

@@ -20,27 +20,27 @@ namespace Aura\Auth\Verifier;
 class PasswordVerifier implements VerifierInterface
 {
     /**
-     * 
+     *
      * @var string
-     * 
+     *
      */
     protected $algo;
 
     /**
-     * 
+     *
      * @var array
-     * 
+     *
      */
     protected $opts;
 
     /**
-     * 
+     *
      * Constructor
-     * 
+     *
      * @param string $algo
-     * 
+     *
      * @param array $opts
-     * 
+     *
      */
     public function __construct($algo, array $opts = array())
     {
@@ -49,15 +49,15 @@ class PasswordVerifier implements VerifierInterface
     }
 
     /**
-     * 
+     *
      * @param string $plaintext Plaintext
-     * 
+     *
      * @param string $encrypted encrypted string
-     * 
+     *
      * @param array $extra Optional array if used by verify
-     * 
+     *
      * @return bool
-     * 
+     *
      */
     public function verify($plaintext, $encrypted, array $extra = array())
     {

@@ -33,10 +33,21 @@ use Aura\Auth\Verifier\VerifierInterface;
  */
 class HtpasswdAdapter extends AbstractAdapter
 {
+    /**
+     *
+     * @var string
+     *
+     */
     protected $file;
 
-    protected $real;
-
+    /**
+     *
+     * @param string $file
+     *
+     * @param VerifierInterface $verifier
+     *
+     * @return void
+     */
     public function __construct($file, VerifierInterface $verifier)
     {
         $this->file = $file;

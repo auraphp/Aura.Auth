@@ -20,23 +20,23 @@ namespace Aura\Auth\Adapter;
 abstract class AbstractAdapter implements AdapterInterface
 {
     /**
-     * 
+     *
      * @var string
-     * 
+     *
      */
     protected $user;
 
     /**
-     * 
+     *
      * @var array
-     * 
+     *
      */
     protected $info = array();
 
     /**
-     * 
+     *
      * @var string
-     * 
+     *
      */
     protected $error;
 
@@ -50,11 +50,11 @@ abstract class AbstractAdapter implements AdapterInterface
     protected $verifier;
 
     /**
-     * 
+     *
      * Return object of type VerifierInterface
-     * 
+     *
      * @return VerifierInterface
-     * 
+     *
      */
     public function getVerifier()
     {
@@ -62,20 +62,20 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
-     * 
+     *
      * @param mixed $cred
-     * 
+     *
      * @return bool
-     * 
+     *
      */
     abstract public function login($cred);
 
     /**
-     * 
+     *
      * Logout a user resetting all the values
-     * 
+     *
      * @return bool
-     * 
+     *
      */
     public function logout($user, array $info = array())
     {
@@ -84,9 +84,9 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
-     * 
+     *
      * @return $user
-     * 
+     *
      */
     public function getUser()
     {
@@ -94,11 +94,11 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
-     * 
+     *
      * Return user details
-     * 
+     *
      * @return array
-     * 
+     *
      */
     public function getInfo()
     {
@@ -106,9 +106,9 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
-     * 
+     *
      * @return string
-     * 
+     *
      */
     public function getError()
     {
@@ -116,11 +116,11 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
-     * 
+     *
      * Reset the user information and errors
-     * 
+     *
      * @return void
-     * 
+     *
      */
     protected function reset()
     {

@@ -173,6 +173,16 @@ class PdoAdapter extends AbstractAdapter
         return $rows[0];
     }
 
+    /**
+     * Fetch Rows
+     *
+     * @param mixed $stm
+     *
+     * @param mixed $bind
+     *
+     * @return array
+     *
+     */
     protected function fetchRows($stm, $bind)
     {
         $sth = $this->pdo->prepare($stm);
@@ -196,6 +206,13 @@ class PdoAdapter extends AbstractAdapter
         return "SELECT {$cols} FROM {$from} WHERE {$where}";
     }
 
+    /**
+     *
+     * Build Select Cols
+     *
+     * @return string
+     *
+     */
     protected function buildSelectCols()
     {
         $cols = $this->cols;
@@ -204,11 +221,22 @@ class PdoAdapter extends AbstractAdapter
         return implode(', ', $cols);
     }
 
+    /**
+     * Get the select from
+     *
+     * @return string
+     *
+     */
     protected function buildSelectFrom()
     {
         return $this->from;
     }
 
+    /**
+     * Build where
+     *
+     * @return string
+     */
     protected function buildSelectWhere()
     {
         $where = "username = :username";
