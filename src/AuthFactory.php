@@ -1,25 +1,25 @@
 <?php
 namespace Aura\Auth;
 
-use Aura\Auth\Session\SessionManager;
-use Aura\Auth\Session\SessionManagerInterface;
-use Aura\Auth\Session\SessionDataNative;
-use Aura\Auth\Session\SessionDataInterface;
+use Aura\Auth\Session\Session;
+use Aura\Auth\Session\SessionInterface;
+use Aura\Auth\Session\Segment;
+use Aura\Auth\Session\SegmentInterface;
 
 class AuthFactory
 {
     public function __construct(array $cookies)
     {
-        $this->manager = new SessionManager($cookies);
-        $this->data = new SessionDataNative;
+        $this->manager = new Session($cookies);
+        $this->data = new Segment;
     }
 
-    public function setSessionManager(SessionManagerInterface $manager)
+    public function setSession(SessionInterface $manager)
     {
         $this->manager = $manager;
     }
 
-    public function setSessionData(SessionDataInterface $data)
+    public function setSessionData(SegmentInterface $data)
     {
         $this->data = $data;
     }

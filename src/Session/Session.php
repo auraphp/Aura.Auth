@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Session;
 
-class SessionManager implements SessionManagerInterface
+class Session implements SessionInterface
 {
     protected $start;
 

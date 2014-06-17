@@ -54,7 +54,7 @@ $auth = $auth_factory->newInstance();
 ?>
 ```
 
-Creating the _Auth_ object has the side effect of resuming a previous session, if one exists; this is why it needs a copy of `$_COOKIES`. It does so through the _SessionManager_. If a previous session was resumed, the _Auth_ object will refresh the authentication status as needed to mark the session as idle or expired. If no previous session exists, creating the _Auth_ object will not start a new one. (Please see the [session management](#session-management) section for more about session handling.)
+Creating the _Auth_ object has the side effect of resuming a previous session, if one exists; this is why it needs a copy of `$_COOKIES`. It does so through the _Session_. If a previous session was resumed, the _Auth_ object will refresh the authentication status as needed to mark the session as idle or expired. If no previous session exists, creating the _Auth_ object will not start a new one. (Please see the [session management](#session-management) section for more about session handling.)
 
 ### Forcing Login
 
@@ -72,7 +72,7 @@ $auth->forceLogin($user, $info);
 ?>
 ```
 
-Using `forceLogin()` has the side effect of starting a new session through the _SessionManager_ if one has not already been started, and of regenerating the session ID. (Please see the [session management](#session-management) section for more about session handling.)
+Using `forceLogin()` has the side effect of starting a new session through the _Session_ if one has not already been started, and of regenerating the session ID. (Please see the [session management](#session-management) section for more about session handling.)
 
 The user name and user information will then be stored in the session, along with an authentication status of `Auth::VALID`.
 

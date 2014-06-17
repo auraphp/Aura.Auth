@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Session;
 
-class FakeSessionManager implements SessionManagerInterface
+class FakeSession implements SessionInterface
 {
     public $start = false;
     public $resume = false;

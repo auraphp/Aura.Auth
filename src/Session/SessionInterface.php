@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Session;
 
-interface SessionManagerInterface
+interface SessionInterface
 {
     // start only if not already started
     public function start();

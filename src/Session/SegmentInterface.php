@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Session;
 
-interface SessionDataInterface
+interface SegmentInterface
 {
     public function __get($key);
     public function __set($key, $val);

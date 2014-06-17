@@ -11,8 +11,8 @@
 namespace Aura\Auth;
 
 use Aura\Auth\Adapter\AdapterInterface;
-use Aura\Auth\Session\SessionDataInterface;
-use Aura\Auth\Session\SessionManagerInterface;
+use Aura\Auth\Session\SegmentInterface;
+use Aura\Auth\Session\SessionInterface;
 
 /**
  *
@@ -72,7 +72,7 @@ class Auth
      *
      * Session data.
      *
-     * @var SessionDataInterface
+     * @var SegmentInterface
      *
      */
     protected $data;
@@ -90,9 +90,9 @@ class Auth
      *
      * Constructor.
      *
-     * @param SessionManagerInterface $manager A session manager.
+     * @param SessionInterface $manager A session manager.
      *
-     * @param SessionDataInterface $data A session data store.
+     * @param SegmentInterface $data A session data store.
      *
      * @param Timer $timer An idle/expire timer.
      *
@@ -101,8 +101,8 @@ class Auth
      */
     public function __construct(
         AdapterInterface $adapter,
-        SessionManagerInterface $manager,
-        SessionDataInterface $data,
+        SessionInterface $manager,
+        SegmentInterface $data,
         Timer $timer
     ) {
         $this->adapter = $adapter;

@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Session;
 
-class SessionDataNative implements SessionDataInterface
+class Segment implements SegmentInterface
 {
     protected $segment;
 

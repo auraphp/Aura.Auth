@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Session;
 
-class SessionManagerTest extends \PHPUnit_Framework_TestCase
+class SessionTest extends \PHPUnit_Framework_TestCase
 {
     protected $start = false;
     protected $resume = false;
@@ -13,7 +13,7 @@ class SessionManagerTest extends \PHPUnit_Framework_TestCase
     public function testStart()
     {
         $cookies = array();
-        $manager = new SessionManager($cookies);
+        $manager = new Session($cookies);
 
         // no session yet
         $this->assertTrue(session_id() === '');
@@ -36,7 +36,7 @@ class SessionManagerTest extends \PHPUnit_Framework_TestCase
     {
         // fake a previous session cookie
         $cookies = array(session_name() => true);
-        $manager = new SessionManager($cookies);
+        $manager = new Session($cookies);
 
         // no session yet
         $this->assertTrue(session_id() === '');
@@ -55,7 +55,7 @@ class SessionManagerTest extends \PHPUnit_Framework_TestCase
     {
         // no previous session cookie
         $cookies = array();
-        $manager = new SessionManager($cookies);
+        $manager = new Session($cookies);
 
         // no session yet
         $this->assertTrue(session_id() === '');
@@ -73,7 +73,7 @@ class SessionManagerTest extends \PHPUnit_Framework_TestCase
     public function testRegenerateId()
     {
         $cookies = array();
-        $manager = new SessionManager($cookies);
+        $manager = new Session($cookies);
 
         $manager->start();
         $old_id = session_id();
@@ -90,7 +90,7 @@ class SessionManagerTest extends \PHPUnit_Framework_TestCase
         $start = array($this, 'start');
         $resume = array($this, 'resume');
         $regenerate_id = array($this, 'regenerateId');
-        $manager = new SessionManager(
+        $manager = new Session(
             $cookies,
             $start,
             $resume,

@@ -2,35 +2,33 @@
 namespace Aura\Auth;
 
 use Aura\Auth\Adapter\FakeAdapter;
-use Aura\Auth\Session\FakeSessionManager;
-use Aura\Auth\Session\SessionDataObject;
+use Aura\Auth\Session\FakeSession;
+use Aura\Auth\Session\FakeSegment;
 
 class AuthTest extends \PHPUnit_Framework_TestCase
 {
     protected $auth;
 
-    protected $manager;
+    protected $session;
 
-    protected $data;
+    protected $segment;
 
-    protected $object;
+    protected $adapter;
 
     protected $timer;
 
     protected function setUp()
     {
-        $this->object = (object) array();
-
         $this->adapter = new FakeAdapter(array(
             'boshag' => '123456',
         ));
-        $this->manager = new FakeSessionManager;
-        $this->data = new SessionDataObject($this->object);
+        $this->session = new FakeSession;
+        $this->segment = new FakeSegment;
         $this->timer = new Timer(1440, 14400);
         $this->auth = new Auth(
             $this->adapter,
-            $this->manager,
-            $this->data,
+            $this->session,
+            $this->segment,
             $this->timer
         );
     }
@@ -109,7 +107,7 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $this->auth->forceLogin('boshag', array('foo' => 'bar'));
         $this->assertTrue($this->auth->isValid());
 
-        $this->data->active -= 100;
+        $this->segment->active -= 100;
         $this->assertSame(time() - 100, $this->auth->getActive());
 
         $this->auth->refresh();
@@ -123,7 +121,7 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $this->auth->forceLogin('boshag', array('foo' => 'bar'));
         $this->assertTrue($this->auth->isValid());
 
-        $this->data->active -= 1441;
+        $this->segment->active -= 1441;
         $this->auth->refresh();
         $this->assertTrue($this->auth->isIdle());
     }
@@ -135,7 +133,7 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $this->auth->forceLogin('boshag', array('foo' => 'bar'));
         $this->assertValid();
 
-        $this->data->initial -= 14441;
+        $this->segment->initial -= 14441;
         $this->auth->refresh();
         $this->assertTrue($this->auth->isExpired());
     }
