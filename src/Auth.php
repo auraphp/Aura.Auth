@@ -108,8 +108,8 @@ class Auth
 
         if ($this->adapter->login($cred)) {
             $this->user->forceLogin(
-                $this->adapter->getUser(),
-                $this->adapter->getInfo()
+                $this->adapter->getName(),
+                $this->adapter->getData()
             );
             return true;
         }

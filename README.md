@@ -107,9 +107,9 @@ At any time, you can retrieve authentication information using the following met
 
 - `isValid()`, `isAnon()`, `isIdle()`, `isExpired()`: these return true or false, based on the current authentication status.
 
-- `getUser()`: returns the authenticated username string
+- `getName()`: returns the authenticated username string
 
-- `getInfo()`: returns the array of optional arbitrary user information
+- `getData()`: returns the array of optional arbitrary user data
 
 
 ### Login and Logout Handlers

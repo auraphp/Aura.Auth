@@ -107,7 +107,7 @@ class HtpasswdAdapter extends AbstractAdapter
             return false;
         }
 
-        $this->user = $username;
+        $this->name = $username;
         return true;
     }
 }

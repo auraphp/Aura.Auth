@@ -26,14 +26,14 @@ abstract class AbstractAdapter implements AdapterInterface
      * @var string
      *
      */
-    protected $user;
+    protected $name;
 
     /**
      *
      * @var array
      *
      */
-    protected $info = array();
+    protected $data = array();
 
     /**
      *
@@ -87,12 +87,12 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      *
-     * @return $user
+     * @return string
      *
      */
-    public function getUser()
+    public function getName()
     {
-        return $this->user;
+        return $this->name;
     }
 
     /**
@@ -102,9 +102,9 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return array
      *
      */
-    public function getInfo()
+    public function getData()
     {
-        return $this->info;
+        return $this->data;
     }
 
     /**

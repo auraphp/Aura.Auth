@@ -44,7 +44,7 @@ interface AdapterInterface
      * @return $user
      *
      */
-    public function getUser();
+    public function getName();
 
     /**
      *
@@ -53,7 +53,7 @@ interface AdapterInterface
      * @return array
      *
      */
-    public function getInfo();
+    public function getData();
 
     /**
      *
