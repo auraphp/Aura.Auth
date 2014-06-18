@@ -87,8 +87,9 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         ));
         $this->assertTrue($this->user->isValid());
 
-        $this->auth->logout();
-        $this->assertFalse($this->user->isValid());
+        // cannot log out, stays valid
+        $this->assertFalse($this->auth->logout());
+        $this->assertTrue($this->user->isValid());
 
         $this->assertSame(
             $this->adapter->getError(),
