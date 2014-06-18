@@ -11,8 +11,7 @@
 namespace Aura\Auth;
 
 use Aura\Auth\Adapter\AdapterInterface;
-use Aura\Auth\Session\SegmentInterface;
-use Aura\Auth\Session\SessionInterface;
+use Aura\Auth\User;
 
 /**
  *
@@ -25,30 +24,23 @@ class Auth
 {
     /**
      *
-     * A session manager.
+     * A credential storage adapter.
      *
-     * @var Session
+     * @var AdapterInterface
      *
      */
-    protected $manager;
+    protected $adapter;
+
+    protected $error;
 
     /**
      *
-     * Session data.
+     * The current user.
      *
-     * @var SegmentInterface
-     *
-     */
-    protected $data;
-
-    /**
-     *
-     * A idle/expire timer.
-     *
-     * @var Timer
+     * @var User
      *
      */
-    protected $timer;
+    protected $user;
 
     /**
      *
@@ -65,54 +57,34 @@ class Auth
      */
     public function __construct(
         AdapterInterface $adapter,
-        SessionInterface $manager,
-        SegmentInterface $data,
-        Timer $timer
+        User $user
     ) {
         $this->adapter = $adapter;
-        $this->manager = $manager;
-        $this->data = $data;
-        $this->timer = $timer;
-
-        $this->manager->resume();
-        $this->refresh();
+        $this->user = $user;
     }
 
-    /**
-     *
-     * Refreshes the "last active" time, logging out the user as idled or
-     * expired if needed.
-     *
-     * Multiple calls to this method may result in idled or expired
-     * authentication in the middle of script execution.
-     *
-     * @return bool Whether or not authentication is still valid.
-     *
-     * @see hasExpired()
-     *
-     * @see hasIdled()
-     *
-     * @see logout()
-     *
-     */
-    public function refresh()
+    public function getAdapter()
     {
-        if (! $this->isValid()) {
-            return false;
-        }
+        return $this->adapter;
+    }
 
-        if ($this->timer->hasExpired($this->data->initial)) {
-            $this->forceLogout(Status::EXPIRED);
-            return false;
-        }
+    public function getError()
+    {
+        return $this->error;
+    }
 
-        if ($this->timer->hasIdled($this->data->active)) {
-            $this->forceLogout(Status::IDLE);
-            return false;
-        }
+    public function getUser()
+    {
+        return $this->user;
+    }
 
-        $this->data->active = time();
-        return true;
+    public function init()
+    {
+        $this->user->resumeSession();
+        if ($this->user->isIdle() || $this->user->isExpired()) {
+            $this->adapter->logout($this->user);
+            $this->user->forceLogout($this->user->getStatus());
+        }
     }
 
     /**
@@ -130,9 +102,10 @@ class Auth
      */
     public function login($cred)
     {
-        $success = $this->adapter->login($cred);
-        if ($success) {
-            $this->forceLogin(
+        $this->error = null;
+
+        if ($this->adapter->login($cred)) {
+            $this->user->forceLogin(
                 $this->adapter->getUser(),
                 $this->adapter->getInfo()
             );
@@ -145,31 +118,6 @@ class Auth
 
     /**
      *
-     * Forces a successful login, bypassing the adapter.
-     *
-     * @param string $user The authenticated user.
-     *
-     * @param string $info Information about the user.
-     *
-     * @return null
-     *
-     */
-    public function forceLogin($user, $info = array())
-    {
-        $this->error = null;
-
-        $this->manager->start();
-        $this->manager->regenerateId();
-
-        $this->data->status = Status::VALID;
-        $this->data->initial = time();
-        $this->data->active = $this->data->initial;
-        $this->data->user = $user;
-        $this->data->info = $info;
-    }
-
-    /**
-     *
      * Logs the user out via the adapter.
      *
      * @return bool True on success, false on failure.
@@ -177,158 +125,14 @@ class Auth
      */
     public function logout()
     {
-        $success = $this->adapter->logout(
-            $this->getUser(),
-            $this->getInfo()
-        );
+        $this->error = null;
 
-        if ($success) {
-            $this->forceLogout();
+        if ($this->adapter->logout($this->user)) {
+            $this->user->forceLogout();
             return true;
         }
 
         $this->error = $this->adapter->getError();
         return false;
-    }
-
-    /**
-     *
-     * Forces a successful logout, bypassing the adapter.
-     *
-     * @return null
-     *
-     */
-    public function forceLogout($status = Status::ANON)
-    {
-        $this->error = null;
-
-        $this->manager->regenerateId();
-
-        $this->data->status = $status;
-        unset($this->data->initial);
-        unset($this->data->active);
-        unset($this->data->user);
-        unset($this->data->info);
-    }
-
-    /**
-     *
-     * Is the user authenticated?
-     *
-     * @return bool
-     *
-     */
-    public function isValid()
-    {
-        return $this->getStatus() == Status::VALID;
-    }
-
-    /**
-     *
-     * Is the user anonymous?
-     *
-     * @return bool
-     *
-     */
-    public function isAnon()
-    {
-        return $this->getStatus() == Status::ANON;
-    }
-
-    /**
-     *
-     * Has the user been idle for too long?
-     *
-     * @return bool
-     *
-     */
-    public function isIdle()
-    {
-        return $this->getStatus() == Status::IDLE;
-    }
-
-    /**
-     *
-     * Has the authentication time expired?
-     *
-     * @return bool
-     *
-     */
-    public function isExpired()
-    {
-        return $this->getStatus() == Status::EXPIRED;
-    }
-
-    /**
-     *
-     * Gets the current authentication status.
-     *
-     * @return string
-     *
-     */
-    public function getStatus()
-    {
-        $status = $this->data->status;
-        if (! $status) {
-            $status = Status::ANON;
-        }
-        return $status;
-    }
-
-    /**
-     *
-     * Gets the initial authentication time.
-     *
-     * @return int
-     *
-     */
-    public function getInitial()
-    {
-        return $this->data->initial;
-    }
-
-    /**
-     *
-     * Gets the last active time.
-     *
-     * @return int
-     *
-     */
-    public function getActive()
-    {
-        return $this->data->active;
-    }
-
-    /**
-     *
-     * Gets the current user name.
-     *
-     * @return string
-     *
-     */
-    public function getUser()
-    {
-        return $this->data->user;
-    }
-
-    /**
-     *
-     * Gets the current user information.
-     *
-     * @return array()
-     *
-     */
-    public function getInfo()
-    {
-        $info = $this->data->info;
-        if (! $info) {
-            $info = array();
-        }
-        return $info;
-    }
-
-    public function getError()
-    {
-        return $this->error;
     }
 }
