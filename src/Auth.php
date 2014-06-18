@@ -80,8 +80,9 @@ class Auth
 
     public function init()
     {
-        $this->user->resumeSession();
-        if ($this->user->isIdle() || $this->user->isExpired()) {
+        $logout = $this->user->resumeSession()
+               && ($this->user->isIdle() || $this->user->isExpired());
+        if ($logout) {
             $this->adapter->logout($this->user);
             $this->user->forceLogout($this->user->getStatus());
         }

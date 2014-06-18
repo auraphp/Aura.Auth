@@ -103,24 +103,35 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    protected function assertAnon()
+    public function testInit()
     {
         $this->assertTrue($this->user->isAnon());
-        $this->assertFalse($this->user->isValid());
-        $this->assertNull($this->auth->getUser());
-        $this->assertSame(array(), $this->auth->getInfo());
-        $this->assertNull($this->auth->getFirstActive());
-        $this->assertNull($this->auth->getLastActive());
+        $this->user->forceLogin('boshag');
+        $this->assertTrue($this->user->isValid());
+
+        $this->user->setLastActive(time() - 100);
+        $this->user->resumeSession();
+        $this->assertTrue($this->user->isValid());
+        $this->assertSame(time(), $this->user->getLastActive());
     }
 
-    protected function assertValid()
+    public function testInit_cannotResume()
     {
-        $now = time();
-        $this->assertFalse($this->user->isAnon());
-        $this->assertTrue($this->user->isValid());
-        $this->assertSame('boshag', $this->auth->getUser());
-        $this->assertSame(array('foo' => 'bar'), $this->auth->getInfo());
-        $this->assertSame($now, $this->auth->getFirstActive());
-        $this->assertSame($now, $this->auth->getLastActive());
+        $this->session->allow_resume = false;
+        $this->assertTrue($this->user->isAnon());
+        $this->auth->init();
+        $this->assertTrue($this->user->isAnon());
     }
+
+    // public function testInit_logoutAsIdle()
+    // {
+    //     $this->assertTrue($this->user->isAnon());
+    //     $this->user->forceLogin('boshag');
+    //     $this->assertTrue($this->user->isValid());
+
+    //     $this->user->setLastActive(time() - 1441);
+    //     $this->user->resumeSession();
+    //     $this->assertTrue($this->user->isIdle());
+    //     $this->assertNull($this->user->getName());
+    // }
 }
