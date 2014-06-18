@@ -40,6 +40,12 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function testGetters()
+    {
+        $this->assertSame($this->adapter, $this->auth->getAdapter());
+        $this->assertSame($this->user, $this->auth->getUser());
+    }
+
     public function testLogin()
     {
         $this->assertTrue($this->user->isAnon());
