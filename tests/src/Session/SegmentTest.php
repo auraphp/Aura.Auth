@@ -12,8 +12,8 @@ class SegmentTest extends \PHPUnit_Framework_TestCase
 
     public function testWithoutSession()
     {
-        $this->segment->foo = 'bar';
-        $this->assertNull($this->segment->foo);
+        $this->segment->set('foo', 'bar');
+        $this->assertNull($this->segment->get('foo'));
     }
 
     /**
@@ -22,13 +22,9 @@ class SegmentTest extends \PHPUnit_Framework_TestCase
     public function testWithSession()
     {
         session_start();
-        $this->assertFalse(isset($this->segment->foo));
-        $this->assertNull($this->segment->foo);
-        $this->segment->foo = 'bar';
-        $this->assertTrue(isset($this->segment->foo));
-        $this->assertSame('bar', $this->segment->foo);
+        $this->assertNull($this->segment->get('foo'));
+        $this->segment->set('foo', 'bar');
+        $this->assertSame('bar', $this->segment->get('foo'));
         $this->assertSame('bar', $_SESSION[__CLASS__]['foo']);
-        unset($this->segment->foo);
-        $this->assertFalse(isset($this->segment->foo));
     }
 }

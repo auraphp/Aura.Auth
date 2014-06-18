@@ -3,25 +3,17 @@ namespace Aura\Auth\Session;
 
 class FakeSegment implements SegmentInterface
 {
-    public function __get($key)
+    public function get($key, $alt = null)
     {
         if (isset($this->$key)) {
             return $this->$key;
         }
+
+        return $alt;
     }
 
-    public function __set($key, $val)
+    public function set($key, $val)
     {
         $this->$key = $val;
-    }
-
-    public function __isset($key)
-    {
-        return isset($this->$key);
-    }
-
-    public function __unset($key)
-    {
-        unset($this->$key);
     }
 }

@@ -3,36 +3,28 @@ namespace Aura\Auth\Session;
 
 class Segment implements SegmentInterface
 {
-    protected $segment;
+    protected $name;
 
-    public function __construct($segment = 'Aura\Auth\Auth')
+    public function __construct($name = 'Aura\Auth\Auth')
     {
-        $this->segment = $segment;
+        $this->name = $name;
     }
 
-    public function __get($key)
+    public function get($key, $alt = null)
     {
-        if (isset($_SESSION[$this->segment][$key])) {
-            return $_SESSION[$this->segment][$key];
+        if (isset($_SESSION[$this->name][$key])) {
+            return $_SESSION[$this->name][$key];
         }
+
+        return $alt;
     }
 
-    public function __set($key, $val)
+    public function set($key, $val)
     {
         if (! isset($_SESSION)) {
             return;
         }
 
-        $_SESSION[$this->segment][$key] = $val;
-    }
-
-    public function __isset($key)
-    {
-        return isset($_SESSION[$this->segment][$key]);
-    }
-
-    public function __unset($key)
-    {
-        unset($_SESSION[$this->segment][$key]);
+        $_SESSION[$this->name][$key] = $val;
     }
 }

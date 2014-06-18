@@ -217,7 +217,7 @@ class User
      */
     public function setStatus($status)
     {
-        $this->segment->status = $status;
+        $this->segment->set('status', $status);
     }
 
     /**
@@ -229,11 +229,7 @@ class User
      */
     public function getStatus()
     {
-        $status = $this->segment->status;
-        if (! $status) {
-            $status = Status::ANON;
-        }
-        return $status;
+        return $this->segment->get('status', Status::ANON);
     }
 
     /**
@@ -245,7 +241,7 @@ class User
      */
     public function setFirstActive($first_active)
     {
-        $this->segment->first_active = $first_active;
+        $this->segment->set('first_active', $first_active);
     }
 
     /**
@@ -257,7 +253,7 @@ class User
      */
     public function getFirstActive()
     {
-        return $this->segment->first_active;
+        return $this->segment->get('first_active');
     }
 
     /**
@@ -269,7 +265,7 @@ class User
      */
     public function setLastActive($last_active)
     {
-        $this->segment->last_active = $last_active;
+        $this->segment->set('last_active', $last_active);
     }
 
     /**
@@ -281,7 +277,7 @@ class User
      */
     public function getLastActive()
     {
-        return $this->segment->last_active;
+        return $this->segment->get('last_active');
     }
 
     /**
@@ -293,7 +289,7 @@ class User
      */
     public function setName($name)
     {
-        $this->segment->name = $name;
+        $this->segment->set('name', $name);
     }
 
     /**
@@ -305,7 +301,7 @@ class User
      */
     public function getName()
     {
-        return $this->segment->name;
+        return $this->segment->get('name');
     }
 
     /**
@@ -317,7 +313,7 @@ class User
      */
     public function setData(array $data)
     {
-        $this->segment->data = $data;
+        $this->segment->set('data', $data);
     }
 
     /**
@@ -329,10 +325,6 @@ class User
      */
     public function getData()
     {
-        $data = $this->segment->data;
-        if (! $data) {
-            $data = array();
-        }
-        return $data;
+        return $this->segment->get('data', array());
     }
 }
