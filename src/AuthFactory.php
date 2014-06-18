@@ -10,18 +10,18 @@ class AuthFactory
 {
     public function __construct(array $cookies)
     {
-        $this->manager = new Session($cookies);
-        $this->data = new Segment;
+        $this->session = new Session($cookies);
+        $this->segment = new Segment;
     }
 
-    public function setSession(SessionInterface $manager)
+    public function setSession(SessionInterface $session)
     {
-        $this->manager = $manager;
+        $this->session = $session;
     }
 
-    public function setSessionData(SegmentInterface $data)
+    public function setSegment(SegmentInterface $segment)
     {
-        $this->data = $data;
+        $this->segment = $segment;
     }
 
     public function setIdleTtl($idle_ttl)
@@ -36,14 +36,18 @@ class AuthFactory
 
     public function newInstance(AdapterInterface $adapter)
     {
-        return new Auth(
-            $this->adapter,
-            $this->manager,
-            $this->data,
+        $user = new User(
+            $this->session,
+            $this->segment,
             new Timer(
                 $this->idle_ttl,
                 $this->expire_ttl
             )
+        );
+
+        return new Auth(
+            $this->adapter,
+            $user,
         );
     }
 }
