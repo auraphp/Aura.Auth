@@ -25,42 +25,6 @@ class Auth
 {
     /**
      *
-     * The user is anonymous/unauthenticated.
-     *
-     * @const string
-     *
-     */
-    const ANON = 'ANON';
-
-    /**
-     *
-     * The max time for authentication has expired.
-     *
-     * @const string
-     *
-     */
-    const EXPIRED = 'EXPIRED';
-
-    /**
-     *
-     * The authenticated user has been idle for too long.
-     *
-     * @const string
-     *
-     */
-    const IDLE = 'IDLE';
-
-    /**
-     *
-     * The user is authenticated and has not idled or expired.
-     *
-     * @const string
-     *
-     */
-    const VALID = 'VALID';
-
-    /**
-     *
      * A session manager.
      *
      * @var Session
@@ -138,12 +102,12 @@ class Auth
         }
 
         if ($this->timer->hasExpired($this->data->initial)) {
-            $this->forceLogout(self::EXPIRED);
+            $this->forceLogout(Status::EXPIRED);
             return false;
         }
 
         if ($this->timer->hasIdled($this->data->active)) {
-            $this->forceLogout(self::IDLE);
+            $this->forceLogout(Status::IDLE);
             return false;
         }
 
@@ -197,7 +161,7 @@ class Auth
         $this->manager->start();
         $this->manager->regenerateId();
 
-        $this->data->status = self::VALID;
+        $this->data->status = Status::VALID;
         $this->data->initial = time();
         $this->data->active = $this->data->initial;
         $this->data->user = $user;
@@ -234,7 +198,7 @@ class Auth
      * @return null
      *
      */
-    public function forceLogout($status = self::ANON)
+    public function forceLogout($status = Status::ANON)
     {
         $this->error = null;
 
@@ -256,7 +220,7 @@ class Auth
      */
     public function isValid()
     {
-        return $this->getStatus() == self::VALID;
+        return $this->getStatus() == Status::VALID;
     }
 
     /**
@@ -268,7 +232,7 @@ class Auth
      */
     public function isAnon()
     {
-        return $this->getStatus() == self::ANON;
+        return $this->getStatus() == Status::ANON;
     }
 
     /**
@@ -280,7 +244,7 @@ class Auth
      */
     public function isIdle()
     {
-        return $this->getStatus() == self::IDLE;
+        return $this->getStatus() == Status::IDLE;
     }
 
     /**
@@ -292,7 +256,7 @@ class Auth
      */
     public function isExpired()
     {
-        return $this->getStatus() == self::EXPIRED;
+        return $this->getStatus() == Status::EXPIRED;
     }
 
     /**
@@ -306,7 +270,7 @@ class Auth
     {
         $status = $this->data->status;
         if (! $status) {
-            $status = self::ANON;
+            $status = Status::ANON;
         }
         return $status;
     }
