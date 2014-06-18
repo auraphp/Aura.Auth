@@ -84,7 +84,11 @@ class User
             return false;
         }
 
-        $timeout_status = $this->timer->getTimedStatus();
+        $timeout_status = $this->timer->getTimeoutStatus(
+            $this->getFirstActive(),
+            $this->getLastActive()
+        );
+
         if ($timeout_status) {
             $this->setStatus($timeout_status);
             return true;

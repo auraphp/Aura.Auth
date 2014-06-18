@@ -31,12 +31,12 @@ class Session implements SessionInterface
         return session_regenerate_id(true);
     }
 
+    /**
+     * @todo Need more thorough destruction?
+     * cf. <http://php.net/session_destroy>
+     */
     public function destroy()
     {
-        $destroyed = session_destroy();
-        if ($destroyed) {
-            unset($this->cookies[session_name()]);
-        }
-        return $destroyed;
+        return session_destroy();
     }
 }

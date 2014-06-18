@@ -6,63 +6,78 @@ namespace Aura\Auth\Session;
  */
 class SessionTest extends \PHPUnit_Framework_TestCase
 {
+    protected function setUp()
+    {
+        $this->setSession();
+    }
+
+    protected function setSession(array $cookies = array())
+    {
+        $this->session = new Session($cookies);
+    }
+
     public function testStart()
     {
-        $cookies = array();
-        $manager = new Session($cookies);
-
         // no session yet
         $this->assertTrue(session_id() === '');
 
         // start once
-        $manager->start();
+        $this->session->start();
         $id = session_id();
         $this->assertTrue(session_id() !== '');
     }
 
-
     public function testResume()
     {
         // fake a previous session cookie
-        $cookies = array(session_name() => true);
-        $manager = new Session($cookies);
+        $this->setSession(array(session_name() => true));
 
         // no session yet
         $this->assertTrue(session_id() === '');
 
         // resume the pre-existing session
-        $this->assertTrue($manager->resume());
+        $this->assertTrue($this->session->resume());
 
         // now we have a session
         $this->assertTrue(session_id() !== '');
+
+        // try again after the session is already started
+        $this->assertTrue($this->session->resume());
     }
 
     public function testResume_nonePrevious()
     {
         // no previous session cookie
         $cookies = array();
-        $manager = new Session($cookies);
+        $this->session = new Session($cookies);
 
         // no session yet
         $this->assertTrue(session_id() === '');
 
         // no pre-existing session to resume
-        $this->assertFalse($manager->resume());
+        $this->assertFalse($this->session->resume());
 
         // still no session
         $this->assertTrue(session_id() === '');
     }
+
     public function testRegenerateId()
     {
         $cookies = array();
-        $manager = new Session($cookies);
+        $this->session = new Session($cookies);
 
-        $manager->start();
+        $this->session->start();
         $old_id = session_id();
         $this->assertTrue(session_id() !== '');
 
-        $manager->regenerateId();
+        $this->session->regenerateId();
         $new_id = session_id();
         $this->assertTrue($old_id !== $new_id);
+    }
+
+    public function testDestroy()
+    {
+        $this->session->start();
+        $this->assertTrue($this->session->destroy());
     }
 }
