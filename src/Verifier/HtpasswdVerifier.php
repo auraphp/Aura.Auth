@@ -32,6 +32,7 @@ class HtpasswdVerifier implements VerifierInterface
      */
     public function verify($plaintext, $encrypted, array $extra = array())
     {
+        $encrypted = trim($encrypted);
         if (substr($encrypted, 0, 5) == '{SHA}') {
             return $this->sha($plaintext, $encrypted);
         }
