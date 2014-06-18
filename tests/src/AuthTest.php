@@ -110,7 +110,7 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->user->isValid());
 
         $this->user->setLastActive(time() - 100);
-        $this->user->resumeSession();
+        $this->auth->init();
         $this->assertTrue($this->user->isValid());
         $this->assertSame(time(), $this->user->getLastActive());
     }
@@ -123,15 +123,29 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->user->isAnon());
     }
 
-    // public function testInit_logoutAsIdle()
-    // {
-    //     $this->assertTrue($this->user->isAnon());
-    //     $this->user->forceLogin('boshag');
-    //     $this->assertTrue($this->user->isValid());
+    public function testInit_logoutIdle()
+    {
+        $this->assertTrue($this->user->isAnon());
+        $this->user->forceLogin('boshag');
+        $this->assertTrue($this->user->isValid());
 
-    //     $this->user->setLastActive(time() - 1441);
-    //     $this->user->resumeSession();
-    //     $this->assertTrue($this->user->isIdle());
-    //     $this->assertNull($this->user->getName());
-    // }
+        $this->user->setLastActive(time() - 1441);
+
+        $this->auth->init();
+        $this->assertTrue($this->user->isIdle());
+        $this->assertNull($this->user->getName());
+    }
+
+    public function testInit_logoutExpired()
+    {
+        $this->assertTrue($this->user->isAnon());
+        $this->user->forceLogin('boshag');
+        $this->assertTrue($this->user->isValid());
+
+        $this->user->setFirstActive(time() - 14441);
+
+        $this->auth->init();
+        $this->assertTrue($this->user->isExpired());
+        $this->assertNull($this->user->getName());
+    }
 }
