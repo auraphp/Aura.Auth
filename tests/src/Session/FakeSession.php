@@ -3,21 +3,26 @@ namespace Aura\Auth\Session;
 
 class FakeSession implements SessionInterface
 {
-    public $start = false;
-    public $resume = false;
+    public $started = false;
+    public $resumed = false;
     public $session_id = 1;
-    public $destroy = false;
+    public $destroyed = false;
+
+
+    public $allow_start = true;
+    public $allow_resume = true;
+    public $allow_destroy = true;
 
     public function start()
     {
-        $this->started = true;
-        return true;
+        $this->started = $this->allow_start;
+        return $this->started;
     }
 
     public function resume()
     {
-        $this->resume = true;
-        return true;
+        $this->resumed = $this->allow_resume;
+        return $this->resumed;
     }
 
     public function regenerateId()
@@ -27,7 +32,7 @@ class FakeSession implements SessionInterface
 
     public function destroy()
     {
-        $this->destroy = true;
-        return true;
+        $this->destroyed = $this->allow_destroy;
+        return $this->destroyed;
     }
 }

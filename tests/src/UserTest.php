@@ -39,43 +39,78 @@ class UserTest extends \PHPUnit_Framework_TestCase
         $this->assertAnon();
     }
 
-    // public function testRefresh()
-    // {
-    //     $this->assertAnon();
+    public function testForceLogin_cannotResumeOrStart()
+    {
+        $this->session->allow_resume = false;
+        $this->session->allow_start = false;
 
-    //     $this->user->forceLogin('boshag', array('foo' => 'bar'));
-    //     $this->assertTrue($this->user->isValid());
+        $this->assertAnon();
 
-    //     $this->segment->last_active -= 100;
-    //     $this->assertSame(time() - 100, $this->user->getLastActive());
+        $result = $this->user->forceLogin('boshag', array('foo' => 'bar'));
+        $this->assertFalse($result);
+        $this->assertAnon();
+    }
 
-    //     $this->user->refresh();
-    //     $this->assertSame(time(), $this->user->getLastActive());
-    // }
+    public function testForceLogout_cannotDestroy()
+    {
+        $this->session->allow_destroy = false;
 
-    // public function testRefresh_idle()
-    // {
-    //     $this->assertAnon();
+        $result = $this->user->forceLogin('boshag', array('foo' => 'bar'));
+        $this->assertSame(Status::VALID, $result);
+        $this->assertValid();
 
-    //     $this->user->forceLogin('boshag', array('foo' => 'bar'));
-    //     $this->assertTrue($this->user->isValid());
+        $result = $this->user->forceLogout();
+        $this->assertFalse($result);
+        $this->assertValid();
+    }
 
-    //     $this->segment->last_active -= 1441;
-    //     $this->user->refresh();
-    //     $this->assertTrue($this->user->isIdle());
-    // }
+    public function testResumeSession()
+    {
+        $this->assertAnon();
 
-    // public function testRefresh_expired()
-    // {
-    //     $this->assertAnon();
+        $this->user->forceLogin('boshag', array('foo' => 'bar'));
+        $this->assertTrue($this->user->isValid());
 
-    //     $this->user->forceLogin('boshag', array('foo' => 'bar'));
-    //     $this->assertValid();
+        $this->user->setLastActive($this->user->getLastActive() - 100);
+        $this->assertSame(time() - 100, $this->user->getLastActive());
 
-    //     $this->segment->first_active -= 14441;
-    //     $this->user->refresh();
-    //     $this->assertTrue($this->user->isExpired());
-    // }
+        $this->assertTrue($this->user->resumeSession());
+        $this->assertSame(time(), $this->user->getLastActive());
+    }
+
+    public function testResumeSession_noneToResume()
+    {
+        $this->session->allow_resume = false;
+
+        $this->assertAnon();
+        $this->assertFalse($this->user->resumeSession());
+        $this->assertAnon();
+    }
+
+    public function testResumeSession_expired()
+    {
+        $this->assertAnon();
+
+        $this->user->forceLogin('boshag', array('foo' => 'bar'));
+        $this->assertTrue($this->user->isValid());
+
+        $this->user->setFirstActive(time() - 14441);
+        $this->assertTrue($this->user->resumeSession());
+        $this->assertTrue($this->user->isExpired());
+
+    }
+
+    public function testRefresh_idle()
+    {
+        $this->assertAnon();
+
+        $this->user->forceLogin('boshag', array('foo' => 'bar'));
+        $this->assertTrue($this->user->isValid());
+
+        $this->user->setLastActive(time() - 1441);
+        $this->assertTrue($this->user->resumeSession());
+        $this->assertTrue($this->user->isIdle());
+    }
 
     protected function assertAnon()
     {
