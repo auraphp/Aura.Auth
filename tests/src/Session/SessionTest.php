@@ -1,15 +1,11 @@
 <?php
 namespace Aura\Auth\Session;
 
+/**
+ * @runTestsInSeparateProcesses
+ */
 class SessionTest extends \PHPUnit_Framework_TestCase
 {
-    protected $start = false;
-    protected $resume = false;
-    protected $regenerate_id = false;
-
-    /**
-     * @runInSeparateProcess
-     */
     public function testStart()
     {
         $cookies = array();
@@ -22,16 +18,9 @@ class SessionTest extends \PHPUnit_Framework_TestCase
         $manager->start();
         $id = session_id();
         $this->assertTrue(session_id() !== '');
-
-        // try to start again
-        $manager->start();
-        $this->assertTrue(session_id() === $id);
     }
 
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testResume()
     {
         // fake a previous session cookie
@@ -48,9 +37,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue(session_id() !== '');
     }
 
-    /**
-     * @runInSeparateProcess
-     */
     public function testResume_nonePrevious()
     {
         // no previous session cookie
@@ -66,10 +52,6 @@ class SessionTest extends \PHPUnit_Framework_TestCase
         // still no session
         $this->assertTrue(session_id() === '');
     }
-
-    /**
-     * @runInSeparateProcess
-     */
     public function testRegenerateId()
     {
         $cookies = array();
@@ -82,43 +64,5 @@ class SessionTest extends \PHPUnit_Framework_TestCase
         $manager->regenerateId();
         $new_id = session_id();
         $this->assertTrue($old_id !== $new_id);
-    }
-
-    public function testWithCallables()
-    {
-        $cookies = array();
-        $start = array($this, 'start');
-        $resume = array($this, 'resume');
-        $regenerate_id = array($this, 'regenerateId');
-        $manager = new Session(
-            $cookies,
-            $start,
-            $resume,
-            $regenerate_id
-        );
-
-        $manager->start();
-        $this->assertTrue($this->start);
-
-        $manager->resume();
-        $this->assertTrue($this->resume);
-
-        $manager->regenerateId();
-        $this->assertTrue($this->regenerate_id);
-    }
-
-    public function start()
-    {
-        $this->start = true;
-    }
-
-    public function resume()
-    {
-        $this->resume = true;
-    }
-
-    public function regenerateId()
-    {
-        $this->regenerate_id = true;
     }
 }

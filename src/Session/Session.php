@@ -3,41 +3,20 @@ namespace Aura\Auth\Session;
 
 class Session implements SessionInterface
 {
-    protected $start;
-
-    protected $resume;
-
-    protected $regenerate_id;
-
-    public function __construct(
-        array $cookies,
-        $start = null,
-        $resume = null,
-        $regenerate_id = null
-    ) {
+    public function __construct(array $cookies)
+    {
         $this->cookies = $cookies;
-        $this->start = $start;
-        $this->resume = $resume;
-        $this->regenerate_id = $regenerate_id;
     }
 
     public function start()
     {
-        if ($this->start) {
-            return call_user_func($this->start);
-        }
-
-        if (session_id() === '') {
-            return session_start();
-        }
-
-        return false;
+        return session_start();
     }
 
     public function resume()
     {
-        if ($this->resume) {
-            return call_user_func($this->resume);
+        if (session_id() !== '') {
+            return true;
         }
 
         if (isset($this->cookies[session_name()])) {
@@ -49,10 +28,15 @@ class Session implements SessionInterface
 
     public function regenerateId()
     {
-        if ($this->regenerate_id) {
-            return call_user_func($this->regenerate_id);
-        }
-
         return session_regenerate_id(true);
+    }
+
+    public function destroy()
+    {
+        $destroyed = session_destroy();
+        if ($destroyed) {
+            unset($this->cookies[session_name()]);
+        }
+        return $destroyed;
     }
 }
