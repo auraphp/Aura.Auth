@@ -63,13 +63,11 @@ class User
     public function __construct(
         SessionInterface $session,
         SegmentInterface $segment,
-        $expire_ttl = null,
-        $idle_ttl = null
+        Timer $timer
     ) {
         $this->session = $session;
         $this->segment = $segment;
-        $this->setExpireTtl($expire_ttl);
-        $this->setIdleTtl($idle_ttl);
+        $this->timer = $timer;
     }
 
     /**
@@ -79,10 +77,6 @@ class User
      *
      * @return bool Whether or not a session still exists.
      *
-     * @see checkIdle()
-     *
-     * @see checkExpired()
-     *
      */
     public function resumeSession()
     {
@@ -90,33 +84,14 @@ class User
             return false;
         }
 
-        if (! $this->checkIdle() && ! $this->checkExpired()) {
-            $this->setLastActive(time());
+        $timeout_status = $this->timer->getTimedStatus();
+        if ($timeout_status) {
+            $this->setStatus($timeout_status);
+            return true;
         }
 
+        $this->setLastActive(time());
         return true;
-    }
-
-    protected function checkIdle()
-    {
-        $idle = $this->idle_ttl <= 0
-             || ($this->getLastActive() + $this->idle_ttl) < time();
-        if ($idle) {
-            $this->setStatus(Status::IDLE);
-            return true;
-        }
-        return false;
-    }
-
-    protected function checkExpired()
-    {
-        $expired = $this->expire_ttl <= 0
-                || ($this->getFirstActive() + $this->expire_ttl) < time();
-        if ($expired) {
-            $this->setStatus(Status::EXPIRED);
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -183,88 +158,6 @@ class User
         $this->setName($name);
         $this->setData($data);
         return $status;
-    }
-
-    /**
-     *
-     * Sets the maximum idle time.
-     *
-     * @param int $idle_ttl The maximum idle time in seconds.
-     *
-     * @throws Exception when the session garbage collection max lifetime is
-     * less than the idle time.
-     *
-     * @return null
-     *
-     */
-    public function setIdleTtl($idle_ttl)
-    {
-        $gc_maxlifetime = ini_get('session.max_lifetime');
-
-        if ($idle_ttl === null) {
-            $idle_ttl = $gc_maxlifetime;
-        }
-
-        if ($gc_maxlifetime < $idle_ttl) {
-            throw new Exception(
-                'session.gc_maxlifetime less than idle time'
-            );
-        }
-
-        $this->idle_ttl = $idle_ttl;
-    }
-
-    /**
-     *
-     * Returns the maximum idle time.
-     *
-     * @return int
-     *
-     */
-    public function getIdleTtl()
-    {
-        return $this->idle_ttl;
-    }
-
-    /**
-     *
-     * Sets the maximum authentication lifetime.
-     *
-     * @param int $expire_ttl The maximum authentication lifetime in seconds.
-     *
-     * @throws Exception when the session cookie lifetime is less than the
-     * authentication lifetime.
-     *
-     * @return null
-     *
-     */
-    public function setExpireTtl($expire_ttl)
-    {
-        $cookie_lifetime = ini_get('session.cookie_lifetime');
-
-        if ($expire_ttl === null) {
-            $expire_ttl = $cookie_lifetime;
-        }
-
-        if ($cookie_lifetime > 0 && $cookie_lifetime < $expire_ttl) {
-            throw new Exception(
-                'session.cookie_lifetime less than expire time'
-            );
-        }
-
-        $this->expire_ttl = $expire_ttl;
-    }
-
-    /**
-     *
-     * Returns the maximum authentication lifetime.
-     *
-     * @return int
-     *
-     */
-    public function getExpireTtl()
-    {
-        return $this->expire_ttl;
     }
 
     /**

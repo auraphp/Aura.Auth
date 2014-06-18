@@ -7,11 +7,17 @@ use Aura\Auth\Session\FakeSegment;
 
 class AuthTest extends \PHPUnit_Framework_TestCase
 {
-    protected $auth;
-
     protected $adapter;
 
+    protected $session;
+
+    protected $segment;
+
+    protected $timer;
+
     protected $user;
+
+    protected $auth;
 
     protected function setUp()
     {
@@ -21,9 +27,11 @@ class AuthTest extends \PHPUnit_Framework_TestCase
 
         $this->session = new FakeSession;
         $this->segment = new FakeSegment;
+        $this->timer = new Timer(1440, 14400);
         $this->user = new User(
             $this->session,
-            $this->segment
+            $this->segment,
+            $this->timer
         );
 
         $this->auth = new Auth(

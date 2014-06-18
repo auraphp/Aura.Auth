@@ -12,13 +12,17 @@ class UserTest extends \PHPUnit_Framework_TestCase
 
     protected $segment;
 
+    protected $timer;
+
     protected function setUp()
     {
         $this->session = new FakeSession;
         $this->segment = new FakeSegment;
+        $this->timer = new Timer(1440, 14400);
         $this->user = new User(
             $this->session,
-            $this->segment
+            $this->segment,
+            $this->timer
         );
     }
 

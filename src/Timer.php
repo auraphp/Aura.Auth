@@ -139,4 +139,15 @@ class Timer
         return $this->idle_ttl <= 0
             || ($active + $this->getIdleTtl()) < time();
     }
+
+    public function getTimeoutStatus()
+    {
+        if ($this->hasIdled()) {
+            return Status::IDLE;
+        }
+
+        if ($this->hasExpired()) {
+            return Status::EXPIRED;
+        }
+    }
 }
