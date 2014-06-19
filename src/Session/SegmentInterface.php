@@ -15,7 +15,7 @@ namespace Aura\Auth\Session;
  * @package Aura.Auth
  *
  */
-interface SessionDataInterface
+interface SegmentInterface
 {
     /**
      *
@@ -24,8 +24,7 @@ interface SessionDataInterface
      * @param mixed $key
      *
      */
-    public function __get($key);
-
+    public function get($key, $alt = null);
 
     /**
      *
@@ -36,23 +35,5 @@ interface SessionDataInterface
      * @param mixed $val
      *
      */
-    public function __set($key, $val);
-
-    /**
-     * __isset
-     *
-     * @param mixed $key
-     *
-     * @return bool
-     *
-     */
-    public function __isset($key);
-
-    /**
-     * __unset
-     *
-     * @param mixed $key
-     *
-     */
-    public function __unset($key);
+    public function set($key, $val);
 }

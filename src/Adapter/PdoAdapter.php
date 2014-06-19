@@ -117,10 +117,10 @@ class PdoAdapter extends AbstractAdapter
             return false;
         }
 
-        $this->info = $row;
-        $this->user = $this->info['username'];
-        unset($this->info['username']);
-        unset($this->info['password']);
+        $this->data = $row;
+        $this->name = $this->data['username'];
+        unset($this->data['username']);
+        unset($this->data['password']);
         return true;
     }
 

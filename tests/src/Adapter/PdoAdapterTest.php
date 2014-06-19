@@ -74,8 +74,8 @@ class PdoAdapterTest extends \PHPUnit_Framework_TestCase
             'password' => '123456',
         )));
 
-        $this->assertSame('boshag', $this->adapter->getUser());
-        $this->assertSame(array('active' => 'y'), $this->adapter->getInfo());
+        $this->assertSame('boshag', $this->adapter->getName());
+        $this->assertSame(array('active' => 'y'), $this->adapter->getData());
     }
 
     public function testLogin_empty()

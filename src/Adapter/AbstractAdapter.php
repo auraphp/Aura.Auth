@@ -10,6 +10,8 @@
  */
 namespace Aura\Auth\Adapter;
 
+use Aura\Auth\User;
+
 /**
  *
  * Authentication adapter
@@ -24,14 +26,14 @@ abstract class AbstractAdapter implements AdapterInterface
      * @var string
      *
      */
-    protected $user;
+    protected $name;
 
     /**
      *
      * @var array
      *
      */
-    protected $info = array();
+    protected $data = array();
 
     /**
      *
@@ -77,7 +79,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return bool
      *
      */
-    public function logout($user, array $info = array())
+    public function logout(User $user)
     {
         $this->reset();
         return true;
@@ -85,12 +87,12 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      *
-     * @return $user
+     * @return string
      *
      */
-    public function getUser()
+    public function getName()
     {
-        return $this->user;
+        return $this->name;
     }
 
     /**
@@ -100,9 +102,9 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return array
      *
      */
-    public function getInfo()
+    public function getData()
     {
-        return $this->info;
+        return $this->data;
     }
 
     /**

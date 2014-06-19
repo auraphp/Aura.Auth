@@ -1,6 +1,8 @@
 <?php
 namespace Aura\Auth;
 
+use Aura\Auth\Status;
+
 class TimerTest extends \PHPUnit_Framework_TestCase
 {
     protected $timer;
@@ -20,6 +22,27 @@ class TimerTest extends \PHPUnit_Framework_TestCase
     {
         $this->assertFalse($this->timer->hasIdled(time()));
         $this->assertTrue($this->timer->hasIdled(time() - 1441));
+    }
+
+    public function testGetTimeoutStatus()
+    {
+        $actual = $this->timer->getTimeoutStatus(
+            time() - 14441,
+            time()
+        );
+        $this->assertSame(Status::EXPIRED, $actual);
+
+        $actual = $this->timer->getTimeoutStatus(
+            time() - 1442,
+            time() - 1441
+        );
+
+        $this->assertSame(Status::IDLE, $actual);
+
+        $this->assertNull($this->timer->getTimeoutStatus(
+            time(),
+            time()
+        ));
     }
 
     public function testSetIdleTtl_bad()
