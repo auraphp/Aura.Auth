@@ -149,10 +149,10 @@ class Timer
      * @return bool
      *
      */
-    public function hasExpired($initial)
+    public function hasExpired($first_active)
     {
         return $this->expire_ttl <= 0
-            || ($initial + $this->getExpireTtl()) < time();
+            || ($first_active + $this->getExpireTtl()) < time();
     }
 
     /**
@@ -162,9 +162,20 @@ class Timer
      * @return bool
      *
      */
-    public function hasIdled($active)
+    public function hasIdled($last_active)
     {
         return $this->idle_ttl <= 0
-            || ($active + $this->getIdleTtl()) < time();
+            || ($last_active + $this->getIdleTtl()) < time();
+    }
+
+    public function getTimeoutStatus($first_active, $last_active)
+    {
+        if ($this->hasExpired($first_active)) {
+            return Status::EXPIRED;
+        }
+
+        if ($this->hasIdled($last_active)) {
+            return Status::IDLE;
+        }
     }
 }

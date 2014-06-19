@@ -54,7 +54,7 @@ $auth = $auth_factory->newInstance();
 ?>
 ```
 
-Creating the _Auth_ object has the side effect of resuming a previous session, if one exists; this is why it needs a copy of `$_COOKIES`. It does so through the _SessionManager_. If a previous session was resumed, the _Auth_ object will refresh the authentication status as needed to mark the session as idle or expired. If no previous session exists, creating the _Auth_ object will not start a new one. (Please see the [session management](#session-management) section for more about session handling.)
+Creating the _Auth_ object has the side effect of resuming a previous session, if one exists; this is why it needs a copy of `$_COOKIES`. It does so through the _Session_. If a previous session was resumed, the _Auth_ object will refresh the authentication status as needed to mark the session as idle or expired. If no previous session exists, creating the _Auth_ object will not start a new one. (Please see the [session management](#session-management) section for more about session handling.)
 
 ### Forcing Login
 
@@ -72,9 +72,9 @@ $auth->forceLogin($user, $info);
 ?>
 ```
 
-Using `forceLogin()` has the side effect of starting a new session through the _SessionManager_ if one has not already been started, and of regenerating the session ID. (Please see the [session management](#session-management) section for more about session handling.)
+Using `forceLogin()` has the side effect of starting a new session through the _Session_ if one has not already been started, and of regenerating the session ID. (Please see the [session management](#session-management) section for more about session handling.)
 
-The user name and user information will then be stored in the session, along with an authentication status of `Auth::VALID`.
+The user name and user information will then be stored in the session, along with an authentication status of `Status::VALID`.
 
 Note that `forceLogin()` does not check any credential sources. You as the application owner are telling the _Auth_ object to treat the user as authenticated.
 
@@ -87,7 +87,7 @@ You can force the _Auth_ object to dismiss the existing authenticated user back 
 $auth->forceLogout();
 ?>
 ```
-This clears any existing user name and user information from the session, regenerates the session ID, and sets the authentication status to `Auth::ANON`. It does **not** destroy the session. (Please see the [session management](#session-management) section for more about session handling.)
+This clears any existing user name and user information from the session, regenerates the session ID, and sets the authentication status to `Status::ANON`. It does **not** destroy the session. (Please see the [session management](#session-management) section for more about session handling.)
 
 Note that `forceLogout()` does not check any credential sources. You as the application owner are telling the _Auth_ object to dismiss the user as anonymous.
 
@@ -97,19 +97,19 @@ At any time, you can retrieve authentication information using the following met
 
 - `getStatus()`: returns the current authentication status constant. These constants are:
 
-    - `Auth::ANON` -- the user is currently anonymous (unauthenticated).
+    - `Status::ANON` -- the user is currently anonymous (unauthenticated).
 
-    - `Auth::IDLE` -- the authenticated user has been idle for too long, and has become invalid. However, the _Auth_ object does not automatically log the user out, so the previous authentication information is still available.
+    - `Status::IDLE` -- the authenticated user has been idle for too long, and has become invalid. However, the _Auth_ object does not automatically log the user out, so the previous authentication information is still available.
 
-    - `Auth::EXPIRED` -- the authenticated session has lasted too long, making the user invalid. However, the _Auth_ object does not automatically log the user out, so the previous authentication information is still available.
+    - `Status::EXPIRED` -- the authenticated session has lasted too long, making the user invalid. However, the _Auth_ object does not automatically log the user out, so the previous authentication information is still available.
 
-    - `Auth::VALID` -- The user is currently authenticated and is valid.
+    - `Status::VALID` -- The user is currently authenticated and is valid.
 
 - `isValid()`, `isAnon()`, `isIdle()`, `isExpired()`: these return true or false, based on the current authentication status.
 
-- `getUser()`: returns the authenticated username string
+- `getName()`: returns the authenticated username string
 
-- `getInfo()`: returns the array of optional arbitrary user information
+- `getData()`: returns the array of optional arbitrary user data
 
 
 ### Login and Logout Handlers

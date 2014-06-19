@@ -1,6 +1,8 @@
 <?php
 namespace Aura\Auth\Adapter;
 
+use Aura\Auth\User;
+
 class FakeAdapter extends AbstractAdapter
 {
     protected $accounts = array();
@@ -17,14 +19,15 @@ class FakeAdapter extends AbstractAdapter
             && $this->checkPassword($cred);
     }
 
-    public function logout($user, array $info = array())
+    public function logout(User $user)
     {
-        if (isset($info['logout_error'])) {
+        $data = $user->getData();
+        if (isset($data['logout_error'])) {
             $this->error = 'Triggered logout error.';
             return false;
         }
 
-        return parent::logout($user, $info);
+        return parent::logout($user);
     }
 
     protected function checkUsername($cred)

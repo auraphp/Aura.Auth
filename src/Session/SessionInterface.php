@@ -17,18 +17,18 @@ namespace Aura\Auth\Session;
  * @package Aura.Auth
  *
  */
-interface SessionManagerInterface
+interface SessionInterface
 {
     /**
      *
-     * start only if not already started
+     * start session
      *
      */
     public function start();
 
     /**
      *
-     * start only if none already exists
+     * start only if one already exists
      *
      */
     public function resume();
@@ -39,4 +39,11 @@ interface SessionManagerInterface
      *
      */
     public function regenerateId();
+
+    /**
+     *
+     * destroy the session
+     *
+     */
+    public function destroy();
 }

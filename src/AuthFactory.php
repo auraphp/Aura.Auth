@@ -10,10 +10,10 @@
  */
 namespace Aura\Auth;
 
-use Aura\Auth\Session\SessionManager;
-use Aura\Auth\Session\SessionManagerInterface;
-use Aura\Auth\Session\SessionDataNative;
-use Aura\Auth\Session\SessionDataInterface;
+use Aura\Auth\Session\Session;
+use Aura\Auth\Session\SessionInterface;
+use Aura\Auth\Session\Segment;
+use Aura\Auth\Session\SegmentInterface;
 
 
 /**
@@ -70,8 +70,8 @@ class AuthFactory
      */
     public function __construct(array $cookies)
     {
-        $this->manager = new SessionManager($cookies);
-        $this->data = new SessionDataNative;
+        $this->session = new Session($cookies);
+        $this->segment = new Segment;
     }
 
     /**
@@ -83,9 +83,9 @@ class AuthFactory
      * @return void
      *
      */
-    public function setSessionManager(SessionManagerInterface $manager)
+    public function setSession(SessionInterface $session)
     {
-        $this->manager = $manager;
+        $this->session = $session;
     }
 
     /**
@@ -97,9 +97,9 @@ class AuthFactory
      * @return void
      *
      */
-    public function setSessionData(SessionDataInterface $data)
+    public function setSegment(SegmentInterface $segment)
     {
-        $this->data = $data;
+        $this->segment = $segment;
     }
 
     /**
@@ -141,14 +141,18 @@ class AuthFactory
      */
     public function newInstance(AdapterInterface $adapter)
     {
-        return new Auth(
-            $this->adapter,
-            $this->manager,
-            $this->data,
+        $user = new User(
+            $this->session,
+            $this->segment,
             new Timer(
                 $this->idle_ttl,
                 $this->expire_ttl
             )
+        );
+
+        return new Auth(
+            $this->adapter,
+            $user,
         );
     }
 }
