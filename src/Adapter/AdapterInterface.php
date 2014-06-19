@@ -28,7 +28,7 @@ interface AdapterInterface
      * @return bool
      *
      */
-    public function login($cred);
+    public function login(User $user, $cred);
 
     /**
      *
@@ -38,27 +38,4 @@ interface AdapterInterface
      *
      */
     public function logout(User $user);
-
-    /**
-     *
-     * @return $user
-     *
-     */
-    public function getName();
-
-    /**
-     *
-     * Return user details
-     *
-     * @return array
-     *
-     */
-    public function getData();
-
-    /**
-     *
-     * @return string
-     *
-     */
-    public function getError();
 }

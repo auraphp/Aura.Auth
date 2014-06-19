@@ -3,10 +3,12 @@ namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Verifier\HtpasswdVerifier;
 
-class HtpasswdAdapterTest extends \PHPUnit_Framework_TestCase
+class HtpasswdAdapterTest extends AbstractAdapterTest
 {
     protected function setUp()
     {
+        parent::setUp();
+
         $file = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'fake.htpasswd';
         $this->setAdapter($file);
     }
@@ -16,53 +18,54 @@ class HtpasswdAdapterTest extends \PHPUnit_Framework_TestCase
         $this->adapter = new HtpasswdAdapter($file, new HtpasswdVerifier);
     }
 
-    public function testfileNotFound()
+    public function testLogin_fileNotReadable()
     {
         $this->setAdapter('no-such-file');
-        $this->setExpectedException('Aura\Auth\Exception');
-        $this->assertTrue($this->adapter->login(array(
+        $this->setExpectedException('Aura\Auth\Exception\FileNotReadable');
+        $this->adapter->login($this->user, array(
             'username' => 'boshag',
             'password' => '123456',
-        )));
+        ));
     }
 
-    public function testLogin()
+    public function testLogin_success()
     {
-        $this->assertTrue($this->adapter->login(array(
+        $actual = $this->adapter->login($this->user, array(
             'username' => 'boshag',
             'password' => '123456',
-        )));
+        ));
+        $this->assertSame('boshag', $this->user->getName());
     }
 
-    public function testLogin_empty()
+    public function testLogin_usernameMissing()
     {
-        $this->assertFalse($this->adapter->login(array(
-        )));
-        $this->assertSame('Username empty.', $this->adapter->getError());
+        $this->setExpectedException('Aura\Auth\Exception\UsernameMissing');
+        $this->adapter->login($this->user, array());
+    }
 
-        $this->assertFalse($this->adapter->login(array(
+    public function testLogin_passwordMissing()
+    {
+        $this->setExpectedException('Aura\Auth\Exception\PasswordMissing');
+        $this->adapter->login($this->user, array(
             'username' => 'boshag',
-        )));
-        $this->assertSame('Password empty.', $this->adapter->getError());
+        ));
     }
 
-    public function testLogin_failed()
+    public function testLogin_usernameNotFound()
     {
-        $this->assertFalse($this->adapter->login(array(
+        $this->setExpectedException('Aura\Auth\Exception\UsernameNotFound');
+        $this->adapter->login($this->user, array(
             'username' => 'nouser',
             'password' => 'nopass',
-        )));
-
-        $this->assertSame('Credentials failed.', $this->adapter->getError());
+        ));
     }
 
-    public function testLogin_incorrect()
+    public function testLogin_passwordIncorrect()
     {
-        $this->assertFalse($this->adapter->login(array(
+        $this->setExpectedException('Aura\Auth\Exception\PasswordIncorrect');
+        $this->adapter->login($this->user, array(
             'username' => 'boshag',
             'password' => '------',
-        )));
-
-        $this->assertSame('Incorrect password.', $this->adapter->getError());
+        ));
     }
 }

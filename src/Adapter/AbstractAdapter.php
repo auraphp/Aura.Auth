@@ -10,6 +10,8 @@
  */
 namespace Aura\Auth\Adapter;
 
+use Aura\Auth\Exception;
+use Aura\Auth\Status;
 use Aura\Auth\User;
 
 /**
@@ -21,27 +23,6 @@ use Aura\Auth\User;
  */
 abstract class AbstractAdapter implements AdapterInterface
 {
-    /**
-     *
-     * @var string
-     *
-     */
-    protected $name;
-
-    /**
-     *
-     * @var array
-     *
-     */
-    protected $data = array();
-
-    /**
-     *
-     * @var string
-     *
-     */
-    protected $error;
-
     /**
      *
      * A verifier for passwords.
@@ -63,6 +44,16 @@ abstract class AbstractAdapter implements AdapterInterface
         return $this->verifier;
     }
 
+    public function resume(User $user)
+    {
+        $logout = $user->resumeSession()
+               && ($user->isIdle() || $user->isExpired());
+
+        if ($logout) {
+            $this->logout($user, $user->getStatus());
+        }
+    }
+
     /**
      *
      * @param mixed $cred
@@ -70,7 +61,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return bool
      *
      */
-    abstract public function login($cred);
+    abstract public function login(User $user, $cred);
 
     /**
      *
@@ -79,55 +70,26 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return bool
      *
      */
-    public function logout(User $user)
+    public function logout(User $user, $status = Status::ANON)
     {
-        $this->reset();
-        return true;
+        $user->forceLogout($status);
     }
 
     /**
      *
-     * @return string
+     * @param array $creds
+     *
+     * @return bool
      *
      */
-    public function getName()
+    protected function checkCredentials(&$creds)
     {
-        return $this->name;
-    }
+        if (empty($creds['username'])) {
+            throw new Exception\UsernameMissing;
+        }
 
-    /**
-     *
-     * Return user details
-     *
-     * @return array
-     *
-     */
-    public function getData()
-    {
-        return $this->data;
-    }
-
-    /**
-     *
-     * @return string
-     *
-     */
-    public function getError()
-    {
-        return $this->error;
-    }
-
-    /**
-     *
-     * Reset the user information and errors
-     *
-     * @return void
-     *
-     */
-    protected function reset()
-    {
-        $this->user = null;
-        $this->info = array();
-        $this->error = null;
+        if (empty($creds['password'])) {
+            throw new Exception\PasswordMissing;
+        }
     }
 }

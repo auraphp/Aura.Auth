@@ -12,6 +12,7 @@ namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Exception;
 use Aura\Auth\Verifier\VerifierInterface;
+use Aura\Auth\User;
 
 /**
  *
@@ -60,39 +61,34 @@ class HtpasswdAdapter extends AbstractAdapter
      *
      * @param array $creds A list of credentials to verify
      *
-     * @return mixed An array of verified user information, or boolean false
-     * if verification failed.
-     *
      */
-    public function login($creds)
+    public function login(User $user, $cred)
     {
-        if (empty($creds['username'])) {
-            $this->error = 'Username empty.';
-            return false;
-        }
+        $this->checkCredentials($cred);
+        $username = $cred['username'];
+        $password = $cred['password'];
+        $encrypted = $this->fetchEncrypted($username);
+        $this->verify($password, $encrypted);
+        $user->forceLogin($username, array());
+    }
 
-        if (empty($creds['password'])) {
-            $this->error = 'Password empty.';
-            return false;
-        }
-
-        $username = $creds['username'];
-        $password = $creds['password'];
-
+    protected function fetchEncrypted($username)
+    {
         // force the full, real path to the file
         $real = realpath($this->file);
         if (! $real) {
-            throw new Exception("File not found: '{$this->file}'");
+            throw new Exception\FileNotReadable($this->file);
         }
 
         // find the user's line in the file
         $fp = fopen($real, 'r');
         $len = strlen($username) + 1;
-        $ok = false;
+        $encrypted = false;
         while ($line = fgets($fp)) {
             if (substr($line, 0, $len) == "{$username}:") {
                 // found the line, leave the loop
-                $ok = true;
+                $tmp = explode(':', trim($line));
+                $encrypted = $tmp[1];
                 break;
             }
         }
@@ -100,25 +96,18 @@ class HtpasswdAdapter extends AbstractAdapter
         // close the file
         fclose($fp);
 
-        // did we find the username?
-        if (! $ok) {
-            $this->error = 'Credentials failed.';
-            return false;
+        // did we find the encrypted password for the username?
+        if ($encrypted) {
+            return $encrypted;
         }
 
-        // break up the pieces: 0 = username, 1 = encrypted (hashed)
-        // password. may be more than that but we don't care.
-        $tmp = explode(':', trim($line));
-        $encrypted = $tmp[1];
+        throw new Exception\UsernameNotFound;
+    }
 
-        $verified = $this->verifier->verify($password, $encrypted);
-
-        if (! $verified) {
-            $this->error = 'Incorrect password.';
-            return false;
+    protected function verify($password, $encrypted)
+    {
+        if (! $this->verifier->verify($password, $encrypted)) {
+            throw new Exception\PasswordIncorrect;
         }
-
-        $this->name = $username;
-        return true;
     }
 }

@@ -12,6 +12,8 @@ namespace Aura\Auth\Adapter;
 
 use PDO;
 use Aura\Auth\Verifier\VerifierInterface;
+use Aura\Auth\Exception;
+use Aura\Auth\User;
 
 /**
  *
@@ -86,9 +88,20 @@ class PdoAdapter extends AbstractAdapter
     ) {
         $this->pdo = $pdo;
         $this->verifier = $verifier;
-        $this->cols = $cols;
+        $this->setCols($cols);
         $this->from = $from;
         $this->where = $where;
+    }
+
+    protected function setCols($cols)
+    {
+        if (! isset($cols[0]) || trim($cols[0] == '')) {
+            throw new Exception\UsernameColumnNotSpecified;
+        }
+        if (! isset($cols[1]) || trim($cols[1] == '')) {
+            throw new Exception\PasswordColumnNotSpecified;
+        }
+        $this->cols = $cols;
     }
 
     /**
@@ -101,49 +114,15 @@ class PdoAdapter extends AbstractAdapter
      * @return bool True on success, false on failure.
      *
      */
-    public function login($creds)
+    public function login(User $user, $creds)
     {
-        if (! $this->checkCredentials($creds)) {
-            return false;
-        }
-
-        $row = $this->fetchRow($creds);
-        if (! $row) {
-            return false;
-        }
-
-        $verified = $this->verify($creds, $row);
-        if (! $verified) {
-            return false;
-        }
-
-        $this->data = $row;
-        $this->name = $this->data['username'];
-        unset($this->data['username']);
-        unset($this->data['password']);
-        return true;
-    }
-
-    /**
-     *
-     * @param array $creds
-     *
-     * @return bool
-     *
-     */
-    protected function checkCredentials(&$creds)
-    {
-        if (empty($creds['username'])) {
-            $this->error = 'Username empty.';
-            return false;
-        }
-
-        if (empty($creds['password'])) {
-            $this->error = 'Password empty.';
-            return false;
-        }
-
-        return true;
+        $this->checkCredentials($creds);
+        $data = $this->fetchRow($creds);
+        $this->verify($creds, $data);
+        $name = $data['username'];
+        unset($data['username']);
+        unset($data['password']);
+        $user->forceLogin($name, $data);
     }
 
     /**
@@ -152,7 +131,7 @@ class PdoAdapter extends AbstractAdapter
      *
      * @param array $creds
      *
-     * @return bool / row
+     * @return array
      *
      */
     protected function fetchRow($creds)
@@ -161,13 +140,11 @@ class PdoAdapter extends AbstractAdapter
         $rows = $this->fetchRows($stm, $creds);
 
         if (count($rows) < 1) {
-            $this->error = 'Credentials failed.';
-            return false;
+            throw new Exception\UsernameNotFound;
         }
 
         if (count($rows) > 1) {
-            $this->error = 'Duplicate credentials.';
-            return false;
+            throw new Exception\MultipleMatches;
         }
 
         return $rows[0];
@@ -253,20 +230,18 @@ class PdoAdapter extends AbstractAdapter
      * @return bool
      *
      */
-    protected function verify($creds, $row)
+    protected function verify($creds, $data)
     {
         $verified = $this->verifier->verify(
             $creds['password'],
-            $row['password'],
-            $row
+            $data['password'],
+            $data
         );
 
         if (! $verified) {
-            $this->error = 'Password incorrect.';
-            return false;
+            throw new Exception\PasswordIncorrect;
         }
 
         return true;
     }
-
 }
