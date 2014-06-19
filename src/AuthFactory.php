@@ -152,7 +152,7 @@ class AuthFactory
 
         return new Auth(
             $this->adapter,
-            $user,
+            $user
         );
     }
 }
