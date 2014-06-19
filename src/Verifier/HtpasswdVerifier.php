@@ -20,15 +20,15 @@ namespace Aura\Auth\Verifier;
 class HtpasswdVerifier implements VerifierInterface
 {
     /**
-     * 
+     *
      * @param string $plaintext Plaintext
-     * 
+     *
      * @param string $encrypted encrypted string
-     * 
+     *
      * @param array $extra Optional array if used by verify
-     * 
+     *
      * @return bool
-     * 
+     *
      */
     public function verify($plaintext, $encrypted, array $extra = array())
     {

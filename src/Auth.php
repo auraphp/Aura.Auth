@@ -363,6 +363,12 @@ class Auth
         return $info;
     }
 
+    /**
+     * get error
+     *
+     * @access public
+     * @return void
+     */
     public function getError()
     {
         return $this->error;

@@ -20,25 +20,25 @@ namespace Aura\Auth\Verifier;
 class HashVerifier implements VerifierInterface
 {
     /**
-     * 
+     *
      * @var string
-     * 
+     *
      */
     protected $algo;
 
     /**
-     * 
+     *
      * @var string
-     * 
+     *
      */
     protected $salt;
 
     /**
-     * 
+     *
      * @param string $algo
      *
      * @param string $salt
-     * 
+     *
      */
     public function __construct($algo, $salt = null)
     {
@@ -47,15 +47,15 @@ class HashVerifier implements VerifierInterface
     }
 
     /**
-     * 
+     *
      * @param string $plaintext Plaintext
-     * 
+     *
      * @param string $encrypted encrypted string
-     * 
+     *
      * @param array $extra Optional array if used by verify
-     * 
+     *
      * @return bool
-     * 
+     *
      */
     public function verify($plaintext, $encrypted, array $extra = array())
     {
