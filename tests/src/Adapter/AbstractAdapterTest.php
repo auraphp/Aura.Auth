@@ -4,7 +4,7 @@ namespace Aura\Auth\Adapter;
 use Aura\Auth\Verifier\HtpasswdVerifier;
 use Aura\Auth\Session\FakeSession;
 use Aura\Auth\Session\FakeSegment;
-use Aura\Auth\Timer;
+use Aura\Auth\Session\Timer;
 use Aura\Auth\User;
 
 abstract class AbstractAdapterTest extends \PHPUnit_Framework_TestCase
