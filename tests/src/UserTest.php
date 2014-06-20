@@ -3,6 +3,7 @@ namespace Aura\Auth;
 
 use Aura\Auth\Session\FakeSession;
 use Aura\Auth\Session\FakeSegment;
+use Aura\Auth\Session\Timer;
 
 class UserTest extends \PHPUnit_Framework_TestCase
 {
