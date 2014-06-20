@@ -23,42 +23,28 @@ interface AdapterInterface
 {
     /**
      *
-     * @param mixed $cred
-     *
-     * @return bool
+     * Resumes a previous session.
      *
      */
-    public function login($cred);
+    public function resume(User $user);
+
+    /**
+     *
+     * @param User $user
+     *
+     * @param mixed $cred
+     *
+     * @return null
+     *
+     */
+    public function login(User $user, $cred);
 
     /**
      *
      * Logout a user resetting all the values
      *
-     * @return bool
+     * @return null
      *
      */
     public function logout(User $user);
-
-    /**
-     *
-     * @return $user
-     *
-     */
-    public function getName();
-
-    /**
-     *
-     * Return user details
-     *
-     * @return array
-     *
-     */
-    public function getData();
-
-    /**
-     *
-     * @return string
-     *
-     */
-    public function getError();
 }

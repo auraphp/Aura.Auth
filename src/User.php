@@ -12,6 +12,7 @@ namespace Aura\Auth;
 
 use Aura\Auth\Session\SegmentInterface;
 use Aura\Auth\Session\SessionInterface;
+use Aura\Auth\Session\Timer;
 
 /**
  *
@@ -26,7 +27,7 @@ class User
      *
      * A session manager.
      *
-     * @var Session
+     * @var SessionInterface
      *
      */
     protected $session;
@@ -56,6 +57,8 @@ class User
      * @param SessionInterface $session A session session.
      *
      * @param SegmentInterface $segment A session data store.
+     *
+     * @param Timer $timer A session timer.
      *
      * @return self
      *

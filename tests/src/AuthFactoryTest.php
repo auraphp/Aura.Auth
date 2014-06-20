@@ -1,5 +1,5 @@
 <?php
-namespace Aura\Auth\Adapter;
+namespace Aura\Auth;
 
 use PDO;
 use Aura\Auth\Verifier\FakeVerifier;
@@ -10,13 +10,13 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->factory = new AdapterFactory;
+        $this->factory = new AuthFactory;
     }
 
-    public function testNewPdoInstance_hashVerifier()
+    public function testNewPdoAdapter_hashVerifier()
     {
         $pdo = new PDO('sqlite::memory:');
-        $adapter = $this->factory->newPdoInstance(
+        $adapter = $this->factory->newPdoAdapter(
             $pdo,
             'md5',
             array('username', 'password'),
@@ -28,10 +28,10 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Aura\Auth\Verifier\HashVerifier', $verifier);
     }
 
-    public function testNewPdoInstance_passwordVerifier()
+    public function testNewPdoAdapter_passwordVerifier()
     {
         $pdo = new PDO('sqlite::memory:');
-        $adapter = $this->factory->newPdoInstance(
+        $adapter = $this->factory->newPdoAdapter(
             $pdo,
             1,
             array('username', 'password'),
@@ -43,10 +43,10 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Aura\Auth\Verifier\PasswordVerifier',$verifier);
     }
 
-    public function testNewPdoInstance_customVerifier()
+    public function testNewPdoAdapter_customVerifier()
     {
         $pdo = new PDO('sqlite::memory:');
-        $adapter = $this->factory->newPdoInstance(
+        $adapter = $this->factory->newPdoAdapter(
             $pdo,
             new FakeVerifier,
             array('username', 'password'),
@@ -58,10 +58,10 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Aura\Auth\Verifier\FakeVerifier', $verifier);
     }
 
-    public function testNewHtpasswdInstance()
+    public function testNewHtpasswdAdapter()
     {
         $file = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'fake.htpasswd';
-        $adapter = $this->factory->newHtpasswdInstance($file);
+        $adapter = $this->factory->newHtpasswdAdapter($file);
         $this->assertInstanceOf('Aura\Auth\Adapter\HtpasswdAdapter', $adapter);
 
         $verifier = $adapter->getVerifier();

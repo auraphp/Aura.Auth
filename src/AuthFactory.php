@@ -10,11 +10,10 @@
  */
 namespace Aura\Auth;
 
-use Aura\Auth\Session\Session;
-use Aura\Auth\Session\SessionInterface;
-use Aura\Auth\Session\Segment;
-use Aura\Auth\Session\SegmentInterface;
-
+use Aura\Auth\Session;
+use Aura\Auth\Verifier;
+use Aura\Auth\Adapter;
+use PDO;
 
 /**
  *
@@ -27,132 +26,89 @@ use Aura\Auth\Session\SegmentInterface;
 class AuthFactory
 {
     /**
-     * manager
      *
-     * @var SessionManager
+     * Returns a new User object.
      *
-     */
-    private $manager;
-
-
-    /**
-     * data
+     * @param array $cookies A copy of $_COOKIE.
      *
-     * @var SessionDataNative
+     * @param int $idle_ttl
+     *
+     * @param int $expire_ttl
+     *
+     * @return User
      *
      */
-    private $data;
-
-    /**
-     *
-     * Maximum idle time in seconds; zero is forever.
-     *
-     * @var int
-     *
-     */
-    private $idle_ttl;
-
-    /**
-     *
-     * Maximum authentication lifetime in seconds; zero is forever.
-     *
-     * @var int
-     *
-     */
-    private $expire_ttl;
-
-    /**
-     *
-     * @param array $cookies
-     *
-     * @return void
-     *
-     */
-    public function __construct(array $cookies)
-    {
-        $this->session = new Session($cookies);
-        $this->segment = new Segment;
-    }
-
-    /**
-     *
-     * Set SessionManager
-     *
-     * @param SessionManagerInterface $manager
-     *
-     * @return void
-     *
-     */
-    public function setSession(SessionInterface $session)
-    {
-        $this->session = $session;
-    }
-
-    /**
-     *
-     * Set SessionData
-     *
-     * @param SessionDataInterface $data
-     *
-     * @return void
-     *
-     */
-    public function setSegment(SegmentInterface $segment)
-    {
-        $this->segment = $segment;
-    }
-
-    /**
-     *
-     * Sets the maximum idle time.
-     *
-     * @param int $idle_ttl The maximum idle time in seconds.
-     *
-     * @return void
-     *
-     */
-    public function setIdleTtl($idle_ttl)
-    {
-        $this->idle_ttl = $idle_ttl;
-    }
-
-    /**
-     *
-     * Sets the maximum authentication lifetime.
-     *
-     * @param int $expire_ttl The maximum authentication lifetime in seconds.
-     *
-     * @return void
-     *
-     */
-    public function setExpireTtl($expire_ttl)
-    {
-        $this->expire_ttl = $expire_ttl;
-    }
-
-    /**
-     *
-     * Create an instance of Auth object
-     *
-     * @param AdapterInterface $adapter
-     *
-     * @return void
-     *
-     */
-    public function newInstance(AdapterInterface $adapter)
-    {
+    public function newUser(
+        array $cookies,
+        $idle_ttl = 1440,
+        $expire_ttl = 14400
+    ) {
         $user = new User(
-            $this->session,
-            $this->segment,
+            new Session\Session($cookies),
+            new Session\Segment,
             new Timer(
                 $this->idle_ttl,
                 $this->expire_ttl
             )
         );
+    }
 
-        return new Auth(
-            $this->adapter,
-            $user,
+    /**
+     *
+     * Returns a new PDO adapter.
+     *
+     * @param PDO $pdo
+     *
+     * @param string|object $verifier_spec
+     *
+     * @param array $cols
+     *
+     * @param string $from
+     *
+     * @param string $where
+     *
+     * @return Adapter\PdoAdapter
+     *
+     */
+    public function newPdoAdapter(
+        PDO $pdo,
+        $verifier_spec,
+        array $cols,
+        $from,
+        $where = null
+    ) {
+        if (is_string($verifier_spec)) {
+            $verifier = new Verifier\HashVerifier($verifier_spec);
+        } elseif (is_int($verifier_spec)) {
+            $verifier = new Verifier\PasswordVerifier($verifier_spec);
+        } else {
+            $verifier = $verifier_spec;
+        }
+
+        return new Adapter\PdoAdapter(
+            $pdo,
+            $verifier,
+            $cols,
+            $from,
+            $where
+        );
+    }
+
+    /**
+     *
+     * Returns a new Htpasswd adapter.
+     *
+     * @param string $file
+     *
+     * @return Adapter\HtpasswdAdapter
+     *
+     */
+    public function newHtpasswdAdapter($file)
+    {
+        $verifier = new Verifier\HtpasswdVerifier;
+        return new Adapter\HtpasswdAdapter(
+            $file,
+            $verifier
         );
     }
 }

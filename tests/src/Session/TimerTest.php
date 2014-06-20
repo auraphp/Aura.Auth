@@ -1,5 +1,5 @@
 <?php
-namespace Aura\Auth;
+namespace Aura\Auth\Session;
 
 use Aura\Auth\Status;
 
