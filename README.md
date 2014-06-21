@@ -49,12 +49,12 @@ To track the user authentication state and related information, create an _Auth_
 
 ```php
 <?php
-$auth_factory = new \Aura\Auth\AuthFactory($_COOKIES);
+$auth_factory = new \Aura\Auth\AuthFactory($_COOKIE);
 $auth = $auth_factory->newInstance();
 ?>
 ```
 
-Creating the _Auth_ object has the side effect of resuming a previous session, if one exists; this is why it needs a copy of `$_COOKIES`. It does so through the _Session_. If a previous session was resumed, the _Auth_ object will refresh the authentication status as needed to mark the session as idle or expired. If no previous session exists, creating the _Auth_ object will not start a new one. (Please see the [session management](#session-management) section for more about session handling.)
+Creating the _Auth_ object has the side effect of resuming a previous session, if one exists; this is why it needs a copy of `$_COOKIE`. It does so through the _Session_. If a previous session was resumed, the _Auth_ object will refresh the authentication status as needed to mark the session as idle or expired. If no previous session exists, creating the _Auth_ object will not start a new one. (Please see the [session management](#session-management) section for more about session handling.)
 
 ### Forcing Login
 
