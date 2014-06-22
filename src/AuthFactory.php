@@ -29,7 +29,7 @@ class AuthFactory
      *
      * Returns a new User object.
      *
-     * @param array $cookies A copy of $_COOKIE.
+     * @param array $cookie A copy of $_COOKIE.
      *
      * @param int $idle_ttl
      *
@@ -39,12 +39,12 @@ class AuthFactory
      *
      */
     public function newUser(
-        array $cookies,
+        array $cookie,
         $idle_ttl = 1440,
         $expire_ttl = 14400
     ) {
         $user = new User(
-            new Session\Session($cookies),
+            new Session\Session($cookie),
             new Session\Segment,
             new Session\Timer(
                 $idle_ttl,

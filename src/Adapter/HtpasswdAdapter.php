@@ -59,17 +59,17 @@ class HtpasswdAdapter extends AbstractAdapter
      *
      * Verifies set of credentials.
      *
-     * @param array $creds A list of credentials to verify
+     * @param array $cred A list of credentials to verify
      *
      */
-    public function login(User $user, $cred)
+    public function login(array $cred)
     {
         $this->checkCredentials($cred);
         $username = $cred['username'];
         $password = $cred['password'];
         $encrypted = $this->fetchEncrypted($username);
         $this->verify($password, $encrypted);
-        $user->forceLogin($username, array());
+        return array($username, array());
     }
 
     protected function fetchEncrypted($username)

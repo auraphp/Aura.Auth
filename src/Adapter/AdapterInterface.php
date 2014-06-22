@@ -37,7 +37,7 @@ interface AdapterInterface
      * @return null
      *
      */
-    public function login(User $user, $cred);
+    public function login(array $cred);
 
     /**
      *

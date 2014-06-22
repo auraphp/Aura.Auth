@@ -43,67 +43,31 @@ class User
 
     /**
      *
-     * A idle/expire timer.
-     *
-     * @var Timer
-     *
-     */
-    protected $timer;
-
-    /**
-     *
      * Constructor.
      *
      * @param SessionInterface $session A session session.
      *
      * @param SegmentInterface $segment A session data store.
      *
-     * @param Timer $timer A session timer.
-     *
      * @return self
      *
      */
     public function __construct(
         SessionInterface $session,
-        SegmentInterface $segment,
-        Timer $timer
+        SegmentInterface $segment
     ) {
         $this->session = $session;
         $this->segment = $segment;
-        $this->timer = $timer;
     }
 
-    /**
-     *
-     * Resumes any previous session, logging out the user as idled or
-     * expired if needed.
-     *
-     * @return bool Whether or not a session still exists.
-     *
-     */
-    public function resumeSession()
+    public function getSession()
     {
-        if (! $this->session->resume()) {
-            return false;
-        }
-
-        $timeout_status = $this->timer->getTimeoutStatus(
-            $this->getFirstActive(),
-            $this->getLastActive()
-        );
-
-        if ($timeout_status) {
-            $this->setStatus($timeout_status);
-            return true;
-        }
-
-        $this->setLastActive(time());
-        return true;
+        return $this->session;
     }
 
     /**
      *
-     * Forces a successful login, bypassing the adapter.
+     * Forces a successful login.
      *
      * @param string $name The authenticated user name.
      *
@@ -112,8 +76,11 @@ class User
      * @return string|false
      *
      */
-    public function forceLogin($name, array $data = array())
-    {
+    public function forceLogin(
+        $name,
+        array $data = array(),
+        $status = Status::VALID
+    ) {
         $started = $this->session->resume() || $this->session->start();
         if (! $started) {
             return false;
@@ -121,7 +88,7 @@ class User
 
         $this->session->regenerateId();
         return $this->set(
-            Status::VALID,
+            $status,
             time(),
             time(),
             $name,
@@ -131,7 +98,7 @@ class User
 
     /**
      *
-     * Forces a successful logout, bypassing the adapter.
+     * Forces a successful logout.
      *
      * @return string|false
      *

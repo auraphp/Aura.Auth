@@ -44,16 +44,6 @@ abstract class AbstractAdapter implements AdapterInterface
         return $this->verifier;
     }
 
-    public function resume(User $user)
-    {
-        $logout = $user->resumeSession()
-               && ($user->isIdle() || $user->isExpired());
-
-        if ($logout) {
-            $this->logout($user, $user->getStatus());
-        }
-    }
-
     /**
      *
      * @param mixed $cred
@@ -61,7 +51,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return bool
      *
      */
-    abstract public function login(User $user, $cred);
+    abstract public function login(array $cred);
 
     /**
      *
@@ -72,23 +62,28 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     public function logout(User $user, $status = Status::ANON)
     {
-        $user->forceLogout($status);
+        // do nothing
+    }
+
+    public function resume(User $user)
+    {
+        // do nothing
     }
 
     /**
      *
-     * @param array $creds
+     * @param array $cred
      *
      * @return bool
      *
      */
-    protected function checkCredentials(&$creds)
+    protected function checkCredentials(&$cred)
     {
-        if (empty($creds['username'])) {
+        if (empty($cred['username'])) {
             throw new Exception\UsernameMissing;
         }
 
-        if (empty($creds['password'])) {
+        if (empty($cred['password'])) {
             throw new Exception\PasswordMissing;
         }
     }
