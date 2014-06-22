@@ -46,11 +46,12 @@ class AuthFactory
         $user = new User(
             new Session\Session($cookies),
             new Session\Segment,
-            new Timer(
-                $this->idle_ttl,
-                $this->expire_ttl
+            new Session\Timer(
+                $idle_ttl,
+                $expire_ttl
             )
         );
+        return $user;
     }
 
     /**
