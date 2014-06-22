@@ -76,8 +76,6 @@ class PdoAdapter extends AbstractAdapter
      *
      * @return self
      *
-     * @todo Throw exception when count($cols) < 2.
-     *
      */
     public function __construct(
         PDO $pdo,
@@ -108,36 +106,36 @@ class PdoAdapter extends AbstractAdapter
      *
      * Log in with username/password credentials.
      *
-     * @param array $creds An array of credential data, including any data to
+     * @param array $cred An array of credential data, including any data to
      * bind to the query.
      *
      * @return bool True on success, false on failure.
      *
      */
-    public function login(User $user, $creds)
+    public function login(array $cred)
     {
-        $this->checkCredentials($creds);
-        $data = $this->fetchRow($creds);
-        $this->verify($creds, $data);
+        $this->checkCredentials($cred);
+        $data = $this->fetchRow($cred);
+        $this->verify($cred, $data);
         $name = $data['username'];
         unset($data['username']);
         unset($data['password']);
-        $user->forceLogin($name, $data);
+        return array($name, $data);
     }
 
     /**
      *
      * Fetch a row from the table
      *
-     * @param array $creds
+     * @param array $cred
      *
      * @return array
      *
      */
-    protected function fetchRow($creds)
+    protected function fetchRow($cred)
     {
         $stm = $this->buildSelect();
-        $rows = $this->fetchRows($stm, $creds);
+        $rows = $this->fetchRows($stm, $cred);
 
         if (count($rows) < 1) {
             throw new Exception\UsernameNotFound;
@@ -230,10 +228,10 @@ class PdoAdapter extends AbstractAdapter
      * @return bool
      *
      */
-    protected function verify($creds, $data)
+    protected function verify($cred, $data)
     {
         $verified = $this->verifier->verify(
-            $creds['password'],
+            $cred['password'],
             $data['password'],
             $data
         );

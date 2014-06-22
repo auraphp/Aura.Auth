@@ -11,9 +11,9 @@ class SessionTest extends \PHPUnit_Framework_TestCase
         $this->setSession();
     }
 
-    protected function setSession(array $cookies = array())
+    protected function setSession(array $cookie = array())
     {
-        $this->session = new Session($cookies);
+        $this->session = new Session($cookie);
     }
 
     public function testStart()
@@ -48,8 +48,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
     public function testResume_nonePrevious()
     {
         // no previous session cookie
-        $cookies = array();
-        $this->session = new Session($cookies);
+        $cookie = array();
+        $this->session = new Session($cookie);
 
         // no session yet
         $this->assertTrue(session_id() === '');
@@ -63,8 +63,8 @@ class SessionTest extends \PHPUnit_Framework_TestCase
 
     public function testRegenerateId()
     {
-        $cookies = array();
-        $this->session = new Session($cookies);
+        $cookie = array();
+        $this->session = new Session($cookie);
 
         $this->session->start();
         $old_id = session_id();

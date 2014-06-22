@@ -3,12 +3,12 @@ namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Verifier\HtpasswdVerifier;
 
-class HtpasswdAdapterTest extends AbstractAdapterTest
+class HtpasswdAdapterTest extends \PHPUnit_Framework_TestCase
 {
+    protected $adapter;
+
     protected function setUp()
     {
-        parent::setUp();
-
         $file = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'fake.htpasswd';
         $this->setAdapter($file);
     }
@@ -22,7 +22,7 @@ class HtpasswdAdapterTest extends AbstractAdapterTest
     {
         $this->setAdapter('no-such-file');
         $this->setExpectedException('Aura\Auth\Exception\FileNotReadable');
-        $this->adapter->login($this->user, array(
+        $this->adapter->login(array(
             'username' => 'boshag',
             'password' => '123456',
         ));
@@ -30,23 +30,24 @@ class HtpasswdAdapterTest extends AbstractAdapterTest
 
     public function testLogin_success()
     {
-        $actual = $this->adapter->login($this->user, array(
+        list($name, $data) = $this->adapter->login(array(
             'username' => 'boshag',
             'password' => '123456',
         ));
-        $this->assertSame('boshag', $this->user->getName());
+        $this->assertSame('boshag', $name);
+        $this->assertSame(array(), $data);
     }
 
     public function testLogin_usernameMissing()
     {
         $this->setExpectedException('Aura\Auth\Exception\UsernameMissing');
-        $this->adapter->login($this->user, array());
+        $this->adapter->login(array());
     }
 
     public function testLogin_passwordMissing()
     {
         $this->setExpectedException('Aura\Auth\Exception\PasswordMissing');
-        $this->adapter->login($this->user, array(
+        $this->adapter->login(array(
             'username' => 'boshag',
         ));
     }
@@ -54,7 +55,7 @@ class HtpasswdAdapterTest extends AbstractAdapterTest
     public function testLogin_usernameNotFound()
     {
         $this->setExpectedException('Aura\Auth\Exception\UsernameNotFound');
-        $this->adapter->login($this->user, array(
+        $this->adapter->login(array(
             'username' => 'nouser',
             'password' => 'nopass',
         ));
@@ -63,7 +64,7 @@ class HtpasswdAdapterTest extends AbstractAdapterTest
     public function testLogin_passwordIncorrect()
     {
         $this->setExpectedException('Aura\Auth\Exception\PasswordIncorrect');
-        $this->adapter->login($this->user, array(
+        $this->adapter->login(array(
             'username' => 'boshag',
             'password' => '------',
         ));

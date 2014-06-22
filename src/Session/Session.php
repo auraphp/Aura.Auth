@@ -24,16 +24,16 @@ class Session implements SessionInterface
      * @var array
      *
      */
-    protected $cookies;
+    protected $cookie;
 
     /**
      *
-     * @param array $cookies
+     * @param array $cookie
      *
      */
-    public function __construct(array $cookies)
+    public function __construct(array $cookie)
     {
-        $this->cookies = $cookies;
+        $this->cookie = $cookie;
     }
 
     /**
@@ -61,7 +61,7 @@ class Session implements SessionInterface
             return true;
         }
 
-        if (isset($this->cookies[session_name()])) {
+        if (isset($this->cookie[session_name()])) {
             return $this->start();
         }
 

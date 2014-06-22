@@ -4,14 +4,14 @@ namespace Aura\Auth\Adapter;
 use PDO;
 use Aura\Auth\Verifier\HashVerifier;
 
-class PdoAdapterTest extends AbstractAdapterTest
+class PdoAdapterTest extends \PHPUnit_Framework_TestCase
 {
+    protected $adapter;
+
     protected $pdo;
 
     protected function setUp()
     {
-        parent::setUp();
-
         $this->pdo = new PDO('sqlite::memory:');
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $this->buildTable();
@@ -91,25 +91,25 @@ class PdoAdapterTest extends AbstractAdapterTest
 
     public function testLogin()
     {
-        $this->adapter->login($this->user, array(
+        list($name, $data) = $this->adapter->login(array(
             'username' => 'boshag',
             'password' => '123456',
         ));
 
-        $this->assertSame('boshag', $this->user->getName());
-        $this->assertSame(array('active' => 'y'), $this->user->getData());
+        $this->assertSame('boshag', $name);
+        $this->assertSame(array('active' => 'y'), $data);
     }
 
     public function testLogin_usernameMissing()
     {
         $this->setExpectedException('Aura\Auth\Exception\UsernameMissing');
-        $this->adapter->login($this->user, array());
+        $this->adapter->login(array());
     }
 
     public function testLogin_passwordMissing()
     {
         $this->setExpectedException('Aura\Auth\Exception\PasswordMissing');
-        $this->adapter->login($this->user, array(
+        $this->adapter->login(array(
             'username' => 'boshag',
         ));
     }
@@ -117,7 +117,7 @@ class PdoAdapterTest extends AbstractAdapterTest
     public function testLogin_usernameNotFound()
     {
         $this->setExpectedException('Aura\Auth\Exception\UsernameNotFound');
-        $this->adapter->login($this->user, array(
+        $this->adapter->login(array(
             'username' => 'missing',
             'password' => '------',
         ));
@@ -126,7 +126,7 @@ class PdoAdapterTest extends AbstractAdapterTest
     public function testLogin_passwordIncorrect()
     {
         $this->setExpectedException('Aura\Auth\Exception\PasswordIncorrect');
-        $this->adapter->login($this->user, array(
+        $this->adapter->login(array(
             'username' => 'boshag',
             'password' => '------',
         ));
@@ -135,7 +135,7 @@ class PdoAdapterTest extends AbstractAdapterTest
     public function testLogin_multipleMatches()
     {
         $this->setExpectedException('Aura\Auth\Exception\MultipleMatches');
-        $this->adapter->login($this->user, array(
+        $this->adapter->login(array(
             'username' => 'repeat',
             'password' => '234567',
         ));
@@ -144,12 +144,12 @@ class PdoAdapterTest extends AbstractAdapterTest
     public function testLogin_where()
     {
         $this->setAdapter("active = :active");
-        $this->adapter->login($this->user, array(
+        list($name, $data) = $this->adapter->login(array(
             'username' => 'repeat',
             'password' => '234567',
             'active' => 'y',
         ));
-        $this->assertSame('repeat', $this->user->getName());
-        $this->assertSame(array('active' => 'y'), $this->user->getData());
+        $this->assertSame('repeat', $name);
+        $this->assertSame(array('active' => 'y'), $data);
     }
 }
