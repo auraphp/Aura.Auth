@@ -60,6 +60,13 @@ class User
         $this->segment = $segment;
     }
 
+    /**
+     *
+     * Get session instance
+     *
+     * @return SessionInterface
+     *
+     */
     public function getSession()
     {
         return $this->session;
@@ -119,6 +126,21 @@ class User
         );
     }
 
+    /**
+     *
+     * @param string $status @see Status constants
+     *
+     * @param int $first_active First active at
+     *
+     * @param int $last_active Last active at
+     *
+     * @param string $name username
+     *
+     * @param array $data set the user data
+     *
+     * @return string @see Status constants
+     *
+     */
     protected function set(
         $status,
         $first_active,
