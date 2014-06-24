@@ -6,39 +6,61 @@ use Aura\Auth\Session\FakeSession;
 use Aura\Auth\Session\FakeSegment;
 use Aura\Auth\Session\Timer;
 use Aura\Auth\Auth;
+use Aura\Auth\Status;
 
 class LoginServiceTest extends \PHPUnit_Framework_TestCase
 {
-    protected $session;
-
     protected $segment;
 
-    protected $timer;
+    protected $session;
+
+    protected $adapter;
 
     protected $auth;
 
-    protected $adapter;
+    protected $login_service;
 
     protected function setUp()
     {
         $this->segment = new FakeSegment;
-        $this->auth = new Auth($this->segment);
-
         $this->session = new FakeSession;
         $this->adapter = new FakeAdapter;
-        $this->handler = new LoginService(
-            $this->auth,
-            $this->session,
-            $this->adapter
+
+        $this->auth = new Auth($this->segment);
+
+        $this->login_service = new LoginService(
+            $this->adapter,
+            $this->session
         );
     }
 
     public function testLogin()
     {
         $this->assertTrue($this->auth->isAnon());
-        $this->handler->login(array('username' => 'boshag'));
+
+        $this->login_service->login(
+            $this->auth,
+            array('username' => 'boshag')
+        );
+
         $this->assertTrue($this->auth->isValid());
         $this->assertSame('boshag', $this->auth->getUserName());
+    }
+
+    public function testForceLogin()
+    {
+        $this->assertTrue($this->auth->isAnon());
+
+        $result = $this->login_service->forceLogin(
+            $this->auth,
+            'boshag',
+            array('foo' => 'bar')
+        );
+
+        $this->assertSame(Status::VALID, $result);
+        $this->assertSame(Status::VALID, $this->auth->getStatus());
+        $this->assertSame('boshag', $this->auth->getUserName());
+        $this->assertSame(array('foo' => 'bar'), $this->auth->getUserData());
     }
 
     public function testForceLogin_cannotResumeOrStart()
@@ -48,7 +70,12 @@ class LoginServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->assertTrue($this->auth->isAnon());
 
-        $result = $this->handler->forceLogin('boshag', array('foo' => 'bar'));
+        $result = $this->login_service->forceLogin(
+            $this->auth,
+            'boshag',
+            array('foo' => 'bar')
+        );
+
         $this->assertFalse($result);
         $this->assertTrue($this->auth->isAnon());
     }

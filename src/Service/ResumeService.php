@@ -22,9 +22,15 @@ use Aura\Auth\Session\Timer;
  * @package Aura.Auth
  *
  */
-class ResumeService extends AbstractService
+class ResumeService
 {
+    protected $adapter;
+
+    protected $session;
+
     protected $timer;
+
+    protected $logout_service;
 
     /**
      *
@@ -36,13 +42,15 @@ class ResumeService extends AbstractService
      *
      */
     public function __construct(
-        Auth $auth,
-        SessionInterface $session,
         AdapterInterface $adapter,
-        Timer $timer
+        SessionInterface $session,
+        Timer $timer,
+        LogoutService $logout_service
     ) {
-        parent::__construct($auth, $session, $adapter);
+        $this->adapter = $adapter;
+        $this->session = $session;
         $this->timer = $timer;
+        $this->logout_service = $logout_service;
     }
 
     /**
@@ -53,37 +61,36 @@ class ResumeService extends AbstractService
      * @return bool Whether or not a session still exists.
      *
      */
-    public function resume()
+    public function resume(Auth $auth)
     {
         $this->session->resume();
-        if ($this->auth->isAnon() || $this->timedOut()) {
-            return;
+        if (! $this->timedOut($auth)) {
+            $auth->setLastActive(time());
+            $this->adapter->resume($auth);
         }
-
-        $this->auth->setLastActive(time());
-        $this->adapter->resume($this->auth);
     }
 
     /**
      *
-     * Set the user timeout status, and force logout if expired
-     *
-     * @see AdapterInterface::forceLogout
+     * Sets the user timeout status, and logs out if expired.
      *
      * @return bool
      *
      */
-    protected function timedOut()
+    protected function timedOut(Auth $auth)
     {
+        if ($auth->isAnon()) {
+            return false;
+        }
+
         $timeout_status = $this->timer->getTimeoutStatus(
-            $this->auth->getFirstActive(),
-            $this->auth->getLastActive()
+            $auth->getFirstActive(),
+            $auth->getLastActive()
         );
 
         if ($timeout_status) {
-            $this->auth->setStatus($timeout_status);
-            $this->adapter->logout($this->auth);
-            $this->forceLogout($timeout_status);
+            $auth->setStatus($timeout_status);
+            $this->logout_service->logout($auth, $timeout_status);
             return true;
         }
 

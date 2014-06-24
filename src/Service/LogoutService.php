@@ -22,8 +22,27 @@ use Aura\Auth\Auth;
  * @package Aura.Auth
  *
  */
-class LogoutService extends AbstractService
+class LogoutService
 {
+    protected $adapter;
+
+    protected $session;
+
+    /**
+     *
+     *  @param Auth $auth
+     *
+     *  @param AdapterInterface $adapter
+     *
+     */
+    public function __construct(
+        AdapterInterface $adapter,
+        SessionInterface $session
+    ) {
+        $this->adapter = $adapter;
+        $this->session = $session;
+    }
+
     /**
      *
      * Logout user
@@ -35,9 +54,37 @@ class LogoutService extends AbstractService
      * @param string $status see Status class
      *
      */
-    public function logout($status = Status::ANON)
+    public function logout(Auth $auth, $status = Status::ANON)
     {
-        $this->adapter->logout($this->auth, $status);
-        $this->forceLogout($status);
+        $this->adapter->logout($auth, $status);
+        $this->forceLogout($auth, $status);
+    }
+
+    /**
+     *
+     * Forces a successful logout.
+     *
+     * @param string $status The new authentication status.
+     *
+     * @return string|false The authentication status on success, or boolean
+     * false on failure.
+     *
+     */
+    public function forceLogout(Auth $auth, $status = Status::ANON)
+    {
+        $this->session->regenerateId();
+        if (! $this->session->destroy()) {
+            return false;
+        }
+
+        $auth->set(
+            $status,
+            null,
+            null,
+            null,
+            array()
+        );
+
+        return $status;
     }
 }
