@@ -11,8 +11,9 @@
 namespace Aura\Auth\Handler;
 
 use Aura\Auth\Adapter\AdapterInterface;
-use Aura\Auth\User;
+use Aura\Auth\Session\SessionInterface;
 use Aura\Auth\Status;
+use Aura\Auth\User;
 
 /**
  *
@@ -21,23 +22,8 @@ use Aura\Auth\Status;
  * @package Aura.Auth
  *
  */
-class LogoutHandler
+class LogoutHandler extends AbstractHandler
 {
-    /**
-     *
-     *  @param User $user
-     *
-     *  @param AdapterInterface $adapter
-     *
-     */
-    public function __construct(
-        User $user,
-        AdapterInterface $adapter
-    ) {
-        $this->user = $user;
-        $this->adapter = $adapter;
-    }
-
     /**
      *
      * Logout user
@@ -49,9 +35,9 @@ class LogoutHandler
      * @param string $status see Status class
      *
      */
-    public function __invoke($status = Status::ANON)
+    public function logout($status = Status::ANON)
     {
         $this->adapter->logout($this->user, $status);
-        $this->user->forceLogout($status);
+        $this->forceLogout($status);
     }
 }

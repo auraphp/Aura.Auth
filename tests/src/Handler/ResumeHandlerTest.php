@@ -21,21 +21,16 @@ class ResumeHandlerTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->session = new FakeSession;
 
         $this->segment = new FakeSegment;
+        $this->user = new User($this->segment);
 
-        $this->user = new User(
-            $this->session,
-            $this->segment
-        );
-
+        $this->session = new FakeSession;
         $this->adapter = new FakeAdapter;
-
         $this->timer = new Timer(1440, 14400);
-
         $this->handler = new ResumeHandler(
             $this->user,
+            $this->session,
             $this->adapter,
             $this->timer
         );
@@ -44,11 +39,11 @@ class ResumeHandlerTest extends \PHPUnit_Framework_TestCase
     public function testResume()
     {
         $this->assertTrue($this->user->isAnon());
-        $this->user->forceLogin('boshag');
+        $this->handler->forceLogin('boshag');
         $this->assertTrue($this->user->isValid());
 
         $this->user->setLastActive(time() - 100);
-        $this->handler->__invoke($this->user);
+        $this->handler->resume();
         $this->assertTrue($this->user->isValid());
         $this->assertSame(time(), $this->user->getLastActive());
     }
@@ -57,19 +52,19 @@ class ResumeHandlerTest extends \PHPUnit_Framework_TestCase
     {
         $this->session->allow_resume = false;
         $this->assertTrue($this->user->isAnon());
-        $this->handler->__invoke($this->user);
+        $this->handler->resume();
         $this->assertTrue($this->user->isAnon());
     }
 
     public function testResume_logoutIdle()
     {
         $this->assertTrue($this->user->isAnon());
-        $this->user->forceLogin('boshag');
+        $this->handler->forceLogin('boshag');
         $this->assertTrue($this->user->isValid());
 
         $this->user->setLastActive(time() - 1441);
 
-        $this->handler->__invoke($this->user);
+        $this->handler->resume();
         $this->assertTrue($this->user->isIdle());
         $this->assertNull($this->user->getName());
     }
@@ -77,12 +72,12 @@ class ResumeHandlerTest extends \PHPUnit_Framework_TestCase
     public function testResume_logoutExpired()
     {
         $this->assertTrue($this->user->isAnon());
-        $this->user->forceLogin('boshag');
+        $this->handler->forceLogin('boshag');
         $this->assertTrue($this->user->isValid());
 
         $this->user->setFirstActive(time() - 14441);
 
-        $this->handler->__invoke($this->user);
+        $this->handler->resume();
         $this->assertTrue($this->user->isExpired());
         $this->assertNull($this->user->getName());
     }

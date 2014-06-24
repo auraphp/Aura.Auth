@@ -11,6 +11,8 @@
 namespace Aura\Auth\Handler;
 
 use Aura\Auth\Adapter\AdapterInterface;
+use Aura\Auth\Session\SessionInterface;
+use Aura\Auth\Status;
 use Aura\Auth\User;
 
 /**
@@ -20,22 +22,13 @@ use Aura\Auth\User;
  * @package Aura.Auth
  *
  */
-class LoginHandler
+class LoginHandler extends AbstractHandler
 {
-    /**
-     *
-     *  @param User $user
-     *
-     *  @param AdapterInterface $adapter
-     *
-     */
-    public function __construct(
-        User $user,
-        AdapterInterface $adapter
-    ) {
-        $this->user = $user;
-        $this->adapter = $adapter;
-    }
+    protected $adapter;
+
+    protected $session;
+
+    protected $user;
 
     /**
      *
@@ -49,9 +42,9 @@ class LoginHandler
      *
      * @return void
      */
-    public function __invoke($cred)
+    public function login(array $cred)
     {
         list($name, $data) = $this->adapter->login($cred);
-        $this->user->forceLogin($name, $data);
+        $this->forceLogin($name, $data);
     }
 }

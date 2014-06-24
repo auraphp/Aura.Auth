@@ -21,17 +21,14 @@ class LoginHandlerTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->session = new FakeSession;
         $this->segment = new FakeSegment;
-        $this->user = new User(
-            $this->session,
-            $this->segment
-        );
+        $this->user = new User($this->segment);
 
+        $this->session = new FakeSession;
         $this->adapter = new FakeAdapter;
-
         $this->handler = new LoginHandler(
             $this->user,
+            $this->session,
             $this->adapter
         );
     }
@@ -39,8 +36,20 @@ class LoginHandlerTest extends \PHPUnit_Framework_TestCase
     public function testLogin()
     {
         $this->assertTrue($this->user->isAnon());
-        $this->handler->__invoke(array('username' => 'boshag'));
+        $this->handler->login(array('username' => 'boshag'));
         $this->assertTrue($this->user->isValid());
         $this->assertSame('boshag', $this->user->getName());
+    }
+
+    public function testForceLogin_cannotResumeOrStart()
+    {
+        $this->session->allow_resume = false;
+        $this->session->allow_start = false;
+
+        $this->assertTrue($this->user->isAnon());
+
+        $result = $this->handler->forceLogin('boshag', array('foo' => 'bar'));
+        $this->assertFalse($result);
+        $this->assertTrue($this->user->isAnon());
     }
 }

@@ -22,8 +22,10 @@ use Aura\Auth\Session\Timer;
  * @package Aura.Auth
  *
  */
-class ResumeHandler
+class ResumeHandler extends AbstractHandler
 {
+    protected $timer;
+
     /**
      *
      *  @param User $user
@@ -35,11 +37,11 @@ class ResumeHandler
      */
     public function __construct(
         User $user,
+        SessionInterface $session,
         AdapterInterface $adapter,
         Timer $timer
     ) {
-        $this->user = $user;
-        $this->adapter = $adapter;
+        parent::__construct($user, $session, $adapter);
         $this->timer = $timer;
     }
 
@@ -51,9 +53,9 @@ class ResumeHandler
      * @return bool Whether or not a session still exists.
      *
      */
-    public function __invoke()
+    public function resume()
     {
-        $this->user->getSession()->resume();
+        $this->session->resume();
         if ($this->user->isAnon() || $this->timedOut()) {
             return;
         }
@@ -65,8 +67,6 @@ class ResumeHandler
     /**
      *
      * Set the user timeout status, and force logout if expired
-     *
-     * @see User::logout
      *
      * @see AdapterInterface::forceLogout
      *
@@ -83,7 +83,7 @@ class ResumeHandler
         if ($timeout_status) {
             $this->user->setStatus($timeout_status);
             $this->adapter->logout($this->user);
-            $this->user->forceLogout($timeout_status);
+            $this->forceLogout($timeout_status);
             return true;
         }
 

@@ -38,19 +38,9 @@ class AuthFactory
      * @return User
      *
      */
-    public function newUser(
-        array $cookie,
-        $idle_ttl = 1440,
-        $expire_ttl = 14400
-    ) {
-        $user = new User(
-            new Session\Session($cookie),
-            new Session\Segment,
-            new Session\Timer(
-                $idle_ttl,
-                $expire_ttl
-            )
-        );
+    public function newUser()
+    {
+        return new User(new Session\Segment);
         return $user;
     }
 
