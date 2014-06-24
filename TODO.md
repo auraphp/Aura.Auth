@@ -2,6 +2,7 @@
 
 Add htpaswd bcrypt: http://httpd.apache.org/docs/current/programs/htpasswd.html
 
+Need more-thorough session destruction.
 
 # (?) Remember Me
 
@@ -29,7 +30,7 @@ Track number of login attempts? This would be for throttling DOS attacks.
 
 # (?) Non-Session Authentication
 
-Use a custom session save handler that does nothing.
+You should use a custom session save handler that does nothing.
 
 # (?) Formless Authentication
 
