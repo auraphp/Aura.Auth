@@ -30,7 +30,7 @@ class AuthTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(Status::VALID, $this->auth->getStatus());
         $this->assertSame($now, $this->auth->getFirstActive());
         $this->assertSame($now, $this->auth->getLastActive());
-        $this->assertSame('boshag', $this->auth->getName());
-        $this->assertSame(array('foo' => 'bar'), $this->auth->getData());
+        $this->assertSame('boshag', $this->auth->getUserName());
+        $this->assertSame(array('foo' => 'bar'), $this->auth->getUserData());
     }
 }

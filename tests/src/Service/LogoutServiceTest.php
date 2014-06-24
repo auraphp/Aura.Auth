@@ -14,44 +14,72 @@ class LogoutServiceTest extends \PHPUnit_Framework_TestCase
 
     protected $segment;
 
-    protected $timer;
+    protected $adapter;
 
     protected $auth;
 
-    protected $adapter;
+    protected $login_service;
+
+    protected $logout_service;
 
     protected function setUp()
     {
         $this->segment = new FakeSegment;
-        $this->auth = new Auth($this->segment);
-
         $this->session = new FakeSession;
         $this->adapter = new FakeAdapter;
-        $this->handler = new LogoutService(
-            $this->auth,
-            $this->session,
-            $this->adapter
+
+        $this->auth = new Auth($this->segment);
+
+        $this->login_service = new LoginService(
+            $this->adapter,
+            $this->session
+        );
+
+        $this->logout_service = new LogoutService(
+            $this->adapter,
+            $this->session
         );
     }
 
     public function testLogout()
     {
-        $this->handler->forceLogin('boshag');
+        $this->login_service->forceLogin($this->auth, 'boshag');
         $this->assertTrue($this->auth->isValid());
 
-        $this->handler->logout();
+        $this->logout_service->logout($this->auth);
         $this->assertTrue($this->auth->isAnon());
+    }
+
+    public function testForceLogout()
+    {
+        $result = $this->login_service->forceLogin(
+            $this->auth,
+            'boshag',
+            array('foo' => 'bar')
+        );
+        $this->assertSame(Status::VALID, $result);
+        $this->assertTrue($this->auth->isValid());
+
+        $result = $this->logout_service->forceLogout($this->auth);
+
+        $this->assertSame(Status::ANON, $result);
+        $this->assertSame(Status::ANON, $this->auth->getStatus());
+        $this->assertNull($this->auth->getUserName());
     }
 
     public function testForceLogout_cannotDestroy()
     {
         $this->session->allow_destroy = false;
 
-        $result = $this->handler->forceLogin('boshag', array('foo' => 'bar'));
+        $result = $this->login_service->forceLogin(
+            $this->auth,
+            'boshag',
+            array('foo' => 'bar')
+        );
         $this->assertSame(Status::VALID, $result);
         $this->assertTrue($this->auth->isValid());
 
-        $result = $this->handler->forceLogout();
+        $result = $this->logout_service->forceLogout($this->auth);
         $this->assertFalse($result);
         $this->assertTrue($this->auth->isValid());
     }

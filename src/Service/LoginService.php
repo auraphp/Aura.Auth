@@ -22,8 +22,27 @@ use Aura\Auth\Auth;
  * @package Aura.Auth
  *
  */
-class LoginService extends AbstractService
+class LoginService
 {
+    protected $adapter;
+
+    protected $session;
+
+    /**
+     *
+     *  @param Auth $auth
+     *
+     *  @param AdapterInterface $adapter
+     *
+     */
+    public function __construct(
+        AdapterInterface $adapter,
+        SessionInterface $session
+    ) {
+        $this->adapter = $adapter;
+        $this->session = $session;
+    }
+
     /**
      *
      * Login user
@@ -36,9 +55,46 @@ class LoginService extends AbstractService
      *
      * @return void
      */
-    public function login(array $cred)
+    public function login(Auth $auth, array $cred)
     {
         list($name, $data) = $this->adapter->login($cred);
-        $this->forceLogin($name, $data);
+        $this->forceLogin($auth, $name, $data);
+    }
+
+    /**
+     *
+     * Forces a successful login.
+     *
+     * @param string $name The authenticated user name.
+     *
+     * @param string $data Additional arbitrary user data.
+     *
+     * @param string $status The new authentication status.
+     *
+     * @return string|false The authentication status on success, or boolean
+     * false on failure.
+     *
+     */
+    public function forceLogin(
+        Auth $auth,
+        $name,
+        array $data = array(),
+        $status = Status::VALID
+    ) {
+        $started = $this->session->resume() || $this->session->start();
+        if (! $started) {
+            return false;
+        }
+
+        $this->session->regenerateId();
+        $auth->set(
+            $status,
+            time(),
+            time(),
+            $name,
+            $data
+        );
+
+        return $status;
     }
 }

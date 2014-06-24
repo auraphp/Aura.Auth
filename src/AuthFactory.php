@@ -10,9 +10,10 @@
  */
 namespace Aura\Auth;
 
+use Aura\Auth\Adapter;
+use Aura\Auth\Service;
 use Aura\Auth\Session;
 use Aura\Auth\Verifier;
-use Aura\Auth\Adapter;
 use PDO;
 
 /**
@@ -25,23 +26,78 @@ use PDO;
 
 class AuthFactory
 {
+    public function __construct(array $cookie)
+    {
+        $this->cookie = $cookie;
+    }
+
     /**
      *
      * Returns a new Auth object.
      *
-     * @param array $cookie A copy of $_COOKIE.
-     *
-     * @param int $idle_ttl
-     *
-     * @param int $expire_ttl
-     *
      * @return Auth
      *
      */
-    public function newAuth()
+    public function newInstance()
     {
         return new Auth(new Session\Segment);
-        return $user;
+    }
+
+    public function newLoginService($adapter = null)
+    {
+        return new Service\LoginService(
+            $this->fixAdapter($adapter),
+            $this->newSession()
+        );
+    }
+
+    public function newLogoutService(
+        $adapter = null
+    ) {
+        return new Service\LogoutService(
+            $this->fixAdapter($adapter),
+            $this->newSession()
+        );
+    }
+
+    public function newResumeService(
+        $adapter = null,
+        $idle_ttl = 1440,
+        $expire_ttl = 14400
+    ) {
+        $adapter = $this->fixAdapter($adapter);
+        $session = $this->newSession();
+        $timer = new Session\Timer(
+            ini_get('session.gc_maxlifetime'),
+            ini_get('session.cookie_lifetime'),
+            $idle_ttl,
+            $expire_ttl
+        );
+
+        $logout_service = new Service\LogoutService(
+            $adapter,
+            $session
+        );
+
+        return new Service\ResumeService(
+            $adapter,
+            $session,
+            $timer,
+            $logout_service
+        );
+    }
+
+    protected function newSession()
+    {
+        return new Session\Session($this->cookie);
+    }
+
+    protected function fixAdapter($adapter)
+    {
+        if ($adapter === null) {
+            $adapter = new Adapter\NullAdapter;
+        }
+        return $adapter;
     }
 
     /**

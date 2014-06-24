@@ -54,9 +54,9 @@ class Auth
      *
      * @param int $last_active Last active at
      *
-     * @param string $name username
+     * @param string $username username
      *
-     * @param array $data set the user data
+     * @param array $userdata set the user data
      *
      * @return string @see Status constants
      *
@@ -65,14 +65,14 @@ class Auth
         $status,
         $first_active,
         $last_active,
-        $name,
-        array $data
+        $username,
+        array $userdata
     ) {
         $this->setStatus($status);
         $this->setFirstActive($first_active);
         $this->setLastActive($last_active);
-        $this->setName($name);
-        $this->setData($data);
+        $this->setUserName($username);
+        $this->setUserData($userdata);
     }
 
     /**
@@ -202,9 +202,9 @@ class Auth
      * @param string $name
      *
      */
-    public function setName($name)
+    public function setUserName($username)
     {
-        $this->segment->set('name', $name);
+        $this->segment->set('username', $username);
     }
 
     /**
@@ -214,9 +214,9 @@ class Auth
      * @return string
      *
      */
-    public function getName()
+    public function getUserName()
     {
-        return $this->segment->get('name');
+        return $this->segment->get('username');
     }
 
     /**
@@ -226,9 +226,9 @@ class Auth
      * @param array $data
      *
      */
-    public function setData(array $data)
+    public function setUserData(array $userdata)
     {
-        $this->segment->set('data', $data);
+        $this->segment->set('userdata', $userdata);
     }
 
     /**
@@ -238,8 +238,8 @@ class Auth
      * @return array
      *
      */
-    public function getData()
+    public function getUserData()
     {
-        return $this->segment->get('data', array());
+        return $this->segment->get('userdata', array());
     }
 }
