@@ -15,7 +15,7 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testNewAuth()
     {
-        $auth = $this->factory->newAuth(array());
+        $auth = $this->factory->newInstance(array());
         $this->assertInstanceOf('Aura\Auth\Auth', $auth);
     }
 

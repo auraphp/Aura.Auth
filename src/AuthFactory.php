@@ -38,10 +38,52 @@ class AuthFactory
      * @return Auth
      *
      */
-    public function newAuth()
+    public function newInstance()
     {
         return new Auth(new Session\Segment);
-        return $user;
+    }
+
+    public function newLoginService(
+        $auth,
+        $adapter = null
+    ) {
+        if (! $adapter) {
+            $adapter = new Adapter\NullAdapter;
+        }
+        return new LoginService($auth, $adapter, new Session);
+    }
+
+    public function newLogoutService(
+        $auth,
+        $adapter
+    ) {
+        if (! $adapter) {
+            $adapter = new Adapter\NullAdapter;
+        }
+        return new LogoutService($auth, $adapter, new Session);
+    }
+
+    public function newResumeService(
+        $auth,
+        $adapter = null,
+        $idle_ttl = 1440,
+        $expire_ttl = 14400
+    ) {
+        if (! $adapter) {
+            $adapter = new Adapter\NullAdapter;
+        }
+
+        return new Service/ResumeService(
+            $auth,
+            $adapter,
+            new Session\Session,
+            new Session\Timer(
+                ini_get('session.gc_maxlifetime'),
+                ini_get('session.cookie_lifetime'),
+                $idle_ttl,
+                $expire_ttl
+            )
+        );
     }
 
     /**
