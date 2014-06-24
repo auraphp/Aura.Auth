@@ -1,5 +1,5 @@
 <?php
-namespace Aura\Auth\Handler;
+namespace Aura\Auth\Service;
 
 use Aura\Auth\Adapter\FakeAdapter;
 use Aura\Auth\Session\FakeSession;
@@ -7,7 +7,7 @@ use Aura\Auth\Session\FakeSegment;
 use Aura\Auth\Session\Timer;
 use Aura\Auth\User;
 
-class ResumeHandlerTest extends \PHPUnit_Framework_TestCase
+class ResumeServiceTest extends \PHPUnit_Framework_TestCase
 {
     protected $session;
 
@@ -28,7 +28,7 @@ class ResumeHandlerTest extends \PHPUnit_Framework_TestCase
         $this->session = new FakeSession;
         $this->adapter = new FakeAdapter;
         $this->timer = new Timer(1440, 14400);
-        $this->handler = new ResumeHandler(
+        $this->handler = new ResumeService(
             $this->user,
             $this->session,
             $this->adapter,

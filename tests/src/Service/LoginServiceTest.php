@@ -1,14 +1,13 @@
 <?php
-namespace Aura\Auth\Handler;
+namespace Aura\Auth\Service;
 
 use Aura\Auth\Adapter\FakeAdapter;
 use Aura\Auth\Session\FakeSession;
 use Aura\Auth\Session\FakeSegment;
 use Aura\Auth\Session\Timer;
 use Aura\Auth\User;
-use Aura\Auth\Status;
 
-class LogoutHandlerTest extends \PHPUnit_Framework_TestCase
+class LoginServiceTest extends \PHPUnit_Framework_TestCase
 {
     protected $session;
 
@@ -27,32 +26,30 @@ class LogoutHandlerTest extends \PHPUnit_Framework_TestCase
 
         $this->session = new FakeSession;
         $this->adapter = new FakeAdapter;
-        $this->handler = new LogoutHandler(
+        $this->handler = new LoginService(
             $this->user,
             $this->session,
             $this->adapter
         );
     }
 
-    public function testLogout()
+    public function testLogin()
     {
-        $this->handler->forceLogin('boshag');
-        $this->assertTrue($this->user->isValid());
-
-        $this->handler->logout();
         $this->assertTrue($this->user->isAnon());
+        $this->handler->login(array('username' => 'boshag'));
+        $this->assertTrue($this->user->isValid());
+        $this->assertSame('boshag', $this->user->getName());
     }
 
-    public function testForceLogout_cannotDestroy()
+    public function testForceLogin_cannotResumeOrStart()
     {
-        $this->session->allow_destroy = false;
+        $this->session->allow_resume = false;
+        $this->session->allow_start = false;
+
+        $this->assertTrue($this->user->isAnon());
 
         $result = $this->handler->forceLogin('boshag', array('foo' => 'bar'));
-        $this->assertSame(Status::VALID, $result);
-        $this->assertTrue($this->user->isValid());
-
-        $result = $this->handler->forceLogout();
         $this->assertFalse($result);
-        $this->assertTrue($this->user->isValid());
+        $this->assertTrue($this->user->isAnon());
     }
 }
