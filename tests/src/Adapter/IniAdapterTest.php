@@ -3,12 +3,10 @@ namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Verifier\HashVerifier;
 
-class IniAdapterTest extends AbstractAdapterTest
+class IniAdapterTest extends \PHPUnit_Framework_TestCase
 {
     protected function setUp()
     {
-        parent::setUp();
-
         $file = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'fake.inipasswd';
         $this->setAdapter($file);
     }
@@ -22,7 +20,7 @@ class IniAdapterTest extends AbstractAdapterTest
     {
         $this->setAdapter('no-such-file');
         $this->setExpectedException('Aura\Auth\Exception\FileNotReadable');
-        $this->adapter->login($this->user, array(
+        $this->adapter->login(array(
             'username' => 'pmjones',
             'password' => '123456',
         ));
@@ -30,23 +28,23 @@ class IniAdapterTest extends AbstractAdapterTest
 
     public function testLogin_success()
     {
-        $actual = $this->adapter->login($this->user, array(
+        list($name, $data) = $this->adapter->login(array(
             'username' => 'pmjones',
             'password' => '123456',
         ));
-        $this->assertSame('pmjones', $this->user->getName());
+        $this->assertSame('pmjones', $name);
     }
 
     public function testLogin_usernameMissing()
     {
         $this->setExpectedException('Aura\Auth\Exception\UsernameMissing');
-        $this->adapter->login($this->user, array());
+        $this->adapter->login(array());
     }
 
     public function testLogin_passwordMissing()
     {
         $this->setExpectedException('Aura\Auth\Exception\PasswordMissing');
-        $this->adapter->login($this->user, array(
+        $this->adapter->login(array(
             'username' => 'boshag',
         ));
     }
@@ -54,7 +52,7 @@ class IniAdapterTest extends AbstractAdapterTest
     public function testLogin_usernameNotFound()
     {
         $this->setExpectedException('Aura\Auth\Exception\UsernameNotFound');
-        $this->adapter->login($this->user, array(
+        $this->adapter->login(array(
             'username' => 'nouser',
             'password' => 'nopass',
         ));
@@ -63,7 +61,7 @@ class IniAdapterTest extends AbstractAdapterTest
     public function testLogin_passwordIncorrect()
     {
         $this->setExpectedException('Aura\Auth\Exception\PasswordIncorrect');
-        $this->adapter->login($this->user, array(
+        $this->adapter->login(array(
             'username' => 'harikt',
             'password' => '------',
         ));

@@ -61,7 +61,7 @@ class IniAdapter extends AbstractAdapter
      * @param array $cred A list of credentials to verify
      *
      */
-    public function login(User $user, $cred)
+    public function login(array $cred)
     {
         $this->checkCredentials($cred);
         $username = $cred['username'];
@@ -70,7 +70,7 @@ class IniAdapter extends AbstractAdapter
         $encrypted = $user_data['password'];
         unset($user_data['password']);
         $this->verify($password, $encrypted);
-        $user->forceLogin($username, $user_data);
+        return array($username, $user_data);
     }
 
     /**
