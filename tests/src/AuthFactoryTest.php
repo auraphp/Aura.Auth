@@ -10,7 +10,7 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->factory = new AuthFactory;
+        $this->factory = new AuthFactory($_COOKIE);
     }
 
     public function testNewAuth()
@@ -72,5 +72,23 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
 
         $verifier = $adapter->getVerifier();
         $this->assertInstanceOf('Aura\Auth\Verifier\HtpasswdVerifier', $verifier);
+    }
+
+    public function testNewLoginService()
+    {
+        $service = $this->factory->newLoginService();
+        $this->assertInstanceOf('Aura\Auth\Service\LoginService', $service);
+    }
+
+    public function testNewLogoutService()
+    {
+        $service = $this->factory->newLogoutService();
+        $this->assertInstanceOf('Aura\Auth\Service\LogoutService', $service);
+    }
+
+    public function testNewResumeService()
+    {
+        $service = $this->factory->newResumeService();
+        $this->assertInstanceOf('Aura\Auth\Service\ResumeService', $service);
     }
 }
