@@ -13,6 +13,12 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
         $this->factory = new AuthFactory;
     }
 
+    public function testNewAuth()
+    {
+        $auth = $this->factory->newAuth(array());
+        $this->assertInstanceOf('Aura\Auth\Auth', $auth);
+    }
+
     public function testNewPdoAdapter_hashVerifier()
     {
         $pdo = new PDO('sqlite::memory:');

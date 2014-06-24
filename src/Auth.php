@@ -21,17 +21,8 @@ use Aura\Auth\Session\Timer;
  * @package Aura.Auth
  *
  */
-class User
+class Auth
 {
-    /**
-     *
-     * A session manager.
-     *
-     * @var SessionInterface
-     *
-     */
-    protected $session;
-
     /**
      *
      * Session data.
@@ -45,85 +36,14 @@ class User
      *
      * Constructor.
      *
-     * @param SessionInterface $session A session session.
-     *
      * @param SegmentInterface $segment A session data store.
      *
      * @return self
      *
      */
-    public function __construct(
-        SessionInterface $session,
-        SegmentInterface $segment
-    ) {
-        $this->session = $session;
+    public function __construct(SegmentInterface $segment)
+    {
         $this->segment = $segment;
-    }
-
-    /**
-     *
-     * Get session instance
-     *
-     * @return SessionInterface
-     *
-     */
-    public function getSession()
-    {
-        return $this->session;
-    }
-
-    /**
-     *
-     * Forces a successful login.
-     *
-     * @param string $name The authenticated user name.
-     *
-     * @param string $data Additional arbitrary user data.
-     *
-     * @return string|false
-     *
-     */
-    public function forceLogin(
-        $name,
-        array $data = array(),
-        $status = Status::VALID
-    ) {
-        $started = $this->session->resume() || $this->session->start();
-        if (! $started) {
-            return false;
-        }
-
-        $this->session->regenerateId();
-        return $this->set(
-            $status,
-            time(),
-            time(),
-            $name,
-            $data
-        );
-    }
-
-    /**
-     *
-     * Forces a successful logout.
-     *
-     * @return string|false
-     *
-     */
-    public function forceLogout($status = Status::ANON)
-    {
-        $this->session->regenerateId();
-        if (! $this->session->destroy()) {
-            return false;
-        }
-
-        return $this->set(
-            $status,
-            null,
-            null,
-            null,
-            array()
-        );
     }
 
     /**
@@ -141,7 +61,7 @@ class User
      * @return string @see Status constants
      *
      */
-    protected function set(
+    public function set(
         $status,
         $first_active,
         $last_active,
@@ -153,7 +73,6 @@ class User
         $this->setLastActive($last_active);
         $this->setName($name);
         $this->setData($data);
-        return $status;
     }
 
     /**

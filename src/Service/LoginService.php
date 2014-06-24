@@ -8,10 +8,12 @@
  * @license http://opensource.org/licenses/bsd-license.php BSD
  *
  */
-namespace Aura\Auth\Handler;
+namespace Aura\Auth\Service;
 
 use Aura\Auth\Adapter\AdapterInterface;
-use Aura\Auth\User;
+use Aura\Auth\Session\SessionInterface;
+use Aura\Auth\Status;
+use Aura\Auth\Auth;
 
 /**
  *
@@ -20,38 +22,23 @@ use Aura\Auth\User;
  * @package Aura.Auth
  *
  */
-class LoginHandler
+class LoginService extends AbstractService
 {
-    /**
-     *
-     *  @param User $user
-     *
-     *  @param AdapterInterface $adapter
-     *
-     */
-    public function __construct(
-        User $user,
-        AdapterInterface $adapter
-    ) {
-        $this->user = $user;
-        $this->adapter = $adapter;
-    }
-
     /**
      *
      * Login user
      *
      * @see AdapterInterface::login
      *
-     * @see User::forceLogin
+     * @see Auth::forceLogin
      *
      * @param array $cred
      *
      * @return void
      */
-    public function __invoke($cred)
+    public function login(array $cred)
     {
         list($name, $data) = $this->adapter->login($cred);
-        $this->user->forceLogin($name, $data);
+        $this->forceLogin($name, $data);
     }
 }

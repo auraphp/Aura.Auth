@@ -8,25 +8,27 @@
  * @license http://opensource.org/licenses/bsd-license.php BSD
  *
  */
-namespace Aura\Auth\Handler;
+namespace Aura\Auth\Service;
 
-use Aura\Auth\User;
+use Aura\Auth\Auth;
 use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Auth\Session\SessionInterface;
 use Aura\Auth\Session\Timer;
 
 /**
  *
- * Resume Handler
+ * Resume Service
  *
  * @package Aura.Auth
  *
  */
-class ResumeHandler
+class ResumeService extends AbstractService
 {
+    protected $timer;
+
     /**
      *
-     *  @param User $user
+     *  @param Auth $auth
      *
      *  @param AdapterInterface $adapter
      *
@@ -34,12 +36,12 @@ class ResumeHandler
      *
      */
     public function __construct(
-        User $user,
+        Auth $auth,
+        SessionInterface $session,
         AdapterInterface $adapter,
         Timer $timer
     ) {
-        $this->user = $user;
-        $this->adapter = $adapter;
+        parent::__construct($auth, $session, $adapter);
         $this->timer = $timer;
     }
 
@@ -51,22 +53,20 @@ class ResumeHandler
      * @return bool Whether or not a session still exists.
      *
      */
-    public function __invoke()
+    public function resume()
     {
-        $this->user->getSession()->resume();
-        if ($this->user->isAnon() || $this->timedOut()) {
+        $this->session->resume();
+        if ($this->auth->isAnon() || $this->timedOut()) {
             return;
         }
 
-        $this->user->setLastActive(time());
-        $this->adapter->resume($this->user);
+        $this->auth->setLastActive(time());
+        $this->adapter->resume($this->auth);
     }
 
     /**
      *
      * Set the user timeout status, and force logout if expired
-     *
-     * @see User::logout
      *
      * @see AdapterInterface::forceLogout
      *
@@ -76,14 +76,14 @@ class ResumeHandler
     protected function timedOut()
     {
         $timeout_status = $this->timer->getTimeoutStatus(
-            $this->user->getFirstActive(),
-            $this->user->getLastActive()
+            $this->auth->getFirstActive(),
+            $this->auth->getLastActive()
         );
 
         if ($timeout_status) {
-            $this->user->setStatus($timeout_status);
-            $this->adapter->logout($this->user);
-            $this->user->forceLogout($timeout_status);
+            $this->auth->setStatus($timeout_status);
+            $this->adapter->logout($this->auth);
+            $this->forceLogout($timeout_status);
             return true;
         }
 

@@ -12,7 +12,7 @@ namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Exception;
 use Aura\Auth\Status;
-use Aura\Auth\User;
+use Aura\Auth\Auth;
 
 /**
  *
@@ -60,12 +60,12 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return bool
      *
      */
-    public function logout(User $user, $status = Status::ANON)
+    public function logout(Auth $auth, $status = Status::ANON)
     {
         // do nothing
     }
 
-    public function resume(User $user)
+    public function resume(Auth $auth)
     {
         // do nothing
     }

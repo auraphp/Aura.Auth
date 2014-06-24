@@ -1,10 +1,10 @@
 <?php
 namespace Aura\Auth;
 
-use SessionHandlerInterface;
+use SessionServiceInterface;
 
 // a session handler that does nothing, for testing purposes only
-class MockSessionHandler implements SessionHandlerInterface
+class MockSessionService implements SessionServiceInterface
 {
     public $data;
 

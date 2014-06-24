@@ -12,7 +12,7 @@ namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Exception;
 use Aura\Auth\Verifier\VerifierInterface;
-use Aura\Auth\User;
+use Aura\Auth\Auth;
 
 /**
  *

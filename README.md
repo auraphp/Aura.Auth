@@ -112,7 +112,7 @@ At any time, you can retrieve authentication information using the following met
 - `getData()`: returns the array of optional arbitrary user data
 
 
-### Login and Logout Handlers
+### Login and Logout Services
 
 TBD
 
