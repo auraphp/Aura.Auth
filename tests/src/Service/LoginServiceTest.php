@@ -38,7 +38,7 @@ class LoginServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->auth->isAnon());
         $this->handler->login(array('username' => 'boshag'));
         $this->assertTrue($this->auth->isValid());
-        $this->assertSame('boshag', $this->auth->getName());
+        $this->assertSame('boshag', $this->auth->getUserName());
     }
 
     public function testForceLogin_cannotResumeOrStart()

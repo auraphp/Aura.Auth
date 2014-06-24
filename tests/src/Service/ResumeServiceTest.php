@@ -66,7 +66,7 @@ class ResumeServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->handler->resume();
         $this->assertTrue($this->auth->isIdle());
-        $this->assertNull($this->auth->getName());
+        $this->assertNull($this->auth->getUserName());
     }
 
     public function testResume_logoutExpired()
@@ -79,6 +79,6 @@ class ResumeServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->handler->resume();
         $this->assertTrue($this->auth->isExpired());
-        $this->assertNull($this->auth->getName());
+        $this->assertNull($this->auth->getUserName());
     }
 }
