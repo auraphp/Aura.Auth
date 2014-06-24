@@ -5,7 +5,7 @@ use Aura\Auth\Adapter\FakeAdapter;
 use Aura\Auth\Session\FakeSession;
 use Aura\Auth\Session\FakeSegment;
 use Aura\Auth\Session\Timer;
-use Aura\Auth\User;
+use Aura\Auth\Auth;
 
 class ResumeServiceTest extends \PHPUnit_Framework_TestCase
 {
@@ -15,7 +15,7 @@ class ResumeServiceTest extends \PHPUnit_Framework_TestCase
 
     protected $timer;
 
-    protected $user;
+    protected $auth;
 
     protected $adapter;
 
@@ -23,13 +23,13 @@ class ResumeServiceTest extends \PHPUnit_Framework_TestCase
     {
 
         $this->segment = new FakeSegment;
-        $this->user = new User($this->segment);
+        $this->auth = new Auth($this->segment);
 
         $this->session = new FakeSession;
         $this->adapter = new FakeAdapter;
         $this->timer = new Timer(1440, 14400);
         $this->handler = new ResumeService(
-            $this->user,
+            $this->auth,
             $this->session,
             $this->adapter,
             $this->timer
@@ -38,47 +38,47 @@ class ResumeServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testResume()
     {
-        $this->assertTrue($this->user->isAnon());
+        $this->assertTrue($this->auth->isAnon());
         $this->handler->forceLogin('boshag');
-        $this->assertTrue($this->user->isValid());
+        $this->assertTrue($this->auth->isValid());
 
-        $this->user->setLastActive(time() - 100);
+        $this->auth->setLastActive(time() - 100);
         $this->handler->resume();
-        $this->assertTrue($this->user->isValid());
-        $this->assertSame(time(), $this->user->getLastActive());
+        $this->assertTrue($this->auth->isValid());
+        $this->assertSame(time(), $this->auth->getLastActive());
     }
 
     public function testResume_cannotResume()
     {
         $this->session->allow_resume = false;
-        $this->assertTrue($this->user->isAnon());
+        $this->assertTrue($this->auth->isAnon());
         $this->handler->resume();
-        $this->assertTrue($this->user->isAnon());
+        $this->assertTrue($this->auth->isAnon());
     }
 
     public function testResume_logoutIdle()
     {
-        $this->assertTrue($this->user->isAnon());
+        $this->assertTrue($this->auth->isAnon());
         $this->handler->forceLogin('boshag');
-        $this->assertTrue($this->user->isValid());
+        $this->assertTrue($this->auth->isValid());
 
-        $this->user->setLastActive(time() - 1441);
+        $this->auth->setLastActive(time() - 1441);
 
         $this->handler->resume();
-        $this->assertTrue($this->user->isIdle());
-        $this->assertNull($this->user->getName());
+        $this->assertTrue($this->auth->isIdle());
+        $this->assertNull($this->auth->getName());
     }
 
     public function testResume_logoutExpired()
     {
-        $this->assertTrue($this->user->isAnon());
+        $this->assertTrue($this->auth->isAnon());
         $this->handler->forceLogin('boshag');
-        $this->assertTrue($this->user->isValid());
+        $this->assertTrue($this->auth->isValid());
 
-        $this->user->setFirstActive(time() - 14441);
+        $this->auth->setFirstActive(time() - 14441);
 
         $this->handler->resume();
-        $this->assertTrue($this->user->isExpired());
-        $this->assertNull($this->user->getName());
+        $this->assertTrue($this->auth->isExpired());
+        $this->assertNull($this->auth->getName());
     }
 }

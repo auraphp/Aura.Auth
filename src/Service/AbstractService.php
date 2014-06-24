@@ -13,7 +13,7 @@ namespace Aura\Auth\Service;
 use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Auth\Session\SessionInterface;
 use Aura\Auth\Status;
-use Aura\Auth\User;
+use Aura\Auth\Auth;
 
 /**
  *
@@ -28,21 +28,21 @@ abstract class AbstractService
 
     protected $session;
 
-    protected $user;
+    protected $auth;
 
     /**
      *
-     *  @param User $user
+     *  @param Auth $auth
      *
      *  @param AdapterInterface $adapter
      *
      */
     public function __construct(
-        User $user,
+        Auth $auth,
         SessionInterface $session,
         AdapterInterface $adapter
     ) {
-        $this->user = $user;
+        $this->auth = $auth;
         $this->session = $session;
         $this->adapter = $adapter;
     }
@@ -72,7 +72,7 @@ abstract class AbstractService
         }
 
         $this->session->regenerateId();
-        $this->user->set(
+        $this->auth->set(
             $status,
             time(),
             time(),
@@ -100,7 +100,7 @@ abstract class AbstractService
             return false;
         }
 
-        $this->user->set(
+        $this->auth->set(
             $status,
             null,
             null,

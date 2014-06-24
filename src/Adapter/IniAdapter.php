@@ -12,7 +12,7 @@ namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Exception;
 use Aura\Auth\Verifier\VerifierInterface;
-use Aura\Auth\User;
+use Aura\Auth\Auth;
 /**
  *
  * Authenticate against .ini style files.
@@ -56,8 +56,6 @@ class IniAdapter extends AbstractAdapter
      *
      * Verifies set of credentials.
      *
-     * @param User $user
-     *
      * @param array $cred A list of credentials to verify
      *
      */
@@ -66,11 +64,11 @@ class IniAdapter extends AbstractAdapter
         $this->checkCredentials($cred);
         $username = $cred['username'];
         $password = $cred['password'];
-        $user_data = $this->fetchUser($username);
-        $encrypted = $user_data['password'];
-        unset($user_data['password']);
+        $userdata = $this->fetchAuth($username);
+        $encrypted = $userdata['password'];
+        unset($userdata['password']);
         $this->verify($password, $encrypted);
-        return array($username, $user_data);
+        return array($username, $userdata);
     }
 
     /**
@@ -82,7 +80,7 @@ class IniAdapter extends AbstractAdapter
      * @return mixed An array of verified user information
      *
      */
-    public function fetchUser($username)
+    public function fetchAuth($username)
     {
         // force the full, real path to the .ini file
         $real = realpath($this->file);

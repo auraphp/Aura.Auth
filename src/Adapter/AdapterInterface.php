@@ -10,7 +10,7 @@
  */
 namespace Aura\Auth\Adapter;
 
-use Aura\Auth\User;
+use Aura\Auth\Auth;
 
 /**
  *
@@ -26,13 +26,11 @@ interface AdapterInterface
      * Resumes a previous session.
      *
      */
-    public function resume(User $user);
+    public function resume(Auth $auth);
 
     /**
      *
-     * @param User $user
-     *
-     * @param mixed $cred
+     * @param array $cred
      *
      * @return null
      *
@@ -43,8 +41,10 @@ interface AdapterInterface
      *
      * Logout a user resetting all the values
      *
+     * @param Auth $auth
+     *
      * @return null
      *
      */
-    public function logout(User $user);
+    public function logout(Auth $auth);
 }

@@ -27,7 +27,7 @@ class AuthFactory
 {
     /**
      *
-     * Returns a new User object.
+     * Returns a new Auth object.
      *
      * @param array $cookie A copy of $_COOKIE.
      *
@@ -35,12 +35,12 @@ class AuthFactory
      *
      * @param int $expire_ttl
      *
-     * @return User
+     * @return Auth
      *
      */
-    public function newUser()
+    public function newAuth()
     {
-        return new User(new Session\Segment);
+        return new Auth(new Session\Segment);
         return $user;
     }
 

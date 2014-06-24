@@ -13,7 +13,7 @@ namespace Aura\Auth\Service;
 use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Auth\Session\SessionInterface;
 use Aura\Auth\Status;
-use Aura\Auth\User;
+use Aura\Auth\Auth;
 
 /**
  *
@@ -24,19 +24,13 @@ use Aura\Auth\User;
  */
 class LoginService extends AbstractService
 {
-    protected $adapter;
-
-    protected $session;
-
-    protected $user;
-
     /**
      *
      * Login user
      *
      * @see AdapterInterface::login
      *
-     * @see User::forceLogin
+     * @see Auth::forceLogin
      *
      * @param array $cred
      *

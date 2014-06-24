@@ -21,7 +21,7 @@ use Aura\Auth\Session\Timer;
  * @package Aura.Auth
  *
  */
-class User
+class Auth
 {
     /**
      *

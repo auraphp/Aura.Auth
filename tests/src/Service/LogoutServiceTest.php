@@ -5,7 +5,7 @@ use Aura\Auth\Adapter\FakeAdapter;
 use Aura\Auth\Session\FakeSession;
 use Aura\Auth\Session\FakeSegment;
 use Aura\Auth\Session\Timer;
-use Aura\Auth\User;
+use Aura\Auth\Auth;
 use Aura\Auth\Status;
 
 class LogoutServiceTest extends \PHPUnit_Framework_TestCase
@@ -16,19 +16,19 @@ class LogoutServiceTest extends \PHPUnit_Framework_TestCase
 
     protected $timer;
 
-    protected $user;
+    protected $auth;
 
     protected $adapter;
 
     protected function setUp()
     {
         $this->segment = new FakeSegment;
-        $this->user = new User($this->segment);
+        $this->auth = new Auth($this->segment);
 
         $this->session = new FakeSession;
         $this->adapter = new FakeAdapter;
         $this->handler = new LogoutService(
-            $this->user,
+            $this->auth,
             $this->session,
             $this->adapter
         );
@@ -37,10 +37,10 @@ class LogoutServiceTest extends \PHPUnit_Framework_TestCase
     public function testLogout()
     {
         $this->handler->forceLogin('boshag');
-        $this->assertTrue($this->user->isValid());
+        $this->assertTrue($this->auth->isValid());
 
         $this->handler->logout();
-        $this->assertTrue($this->user->isAnon());
+        $this->assertTrue($this->auth->isAnon());
     }
 
     public function testForceLogout_cannotDestroy()
@@ -49,10 +49,10 @@ class LogoutServiceTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->handler->forceLogin('boshag', array('foo' => 'bar'));
         $this->assertSame(Status::VALID, $result);
-        $this->assertTrue($this->user->isValid());
+        $this->assertTrue($this->auth->isValid());
 
         $result = $this->handler->forceLogout();
         $this->assertFalse($result);
-        $this->assertTrue($this->user->isValid());
+        $this->assertTrue($this->auth->isValid());
     }
 }

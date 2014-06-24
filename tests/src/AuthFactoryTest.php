@@ -13,10 +13,10 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
         $this->factory = new AuthFactory;
     }
 
-    public function testNewUser()
+    public function testNewAuth()
     {
-        $user = $this->factory->newUser(array());
-        $this->assertInstanceOf('Aura\Auth\User', $user);
+        $auth = $this->factory->newAuth(array());
+        $this->assertInstanceOf('Aura\Auth\Auth', $auth);
     }
 
     public function testNewPdoAdapter_hashVerifier()

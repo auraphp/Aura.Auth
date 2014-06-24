@@ -10,7 +10,7 @@
  */
 namespace Aura\Auth\Service;
 
-use Aura\Auth\User;
+use Aura\Auth\Auth;
 use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Auth\Session\SessionInterface;
 use Aura\Auth\Session\Timer;
@@ -28,7 +28,7 @@ class ResumeService extends AbstractService
 
     /**
      *
-     *  @param User $user
+     *  @param Auth $auth
      *
      *  @param AdapterInterface $adapter
      *
@@ -36,12 +36,12 @@ class ResumeService extends AbstractService
      *
      */
     public function __construct(
-        User $user,
+        Auth $auth,
         SessionInterface $session,
         AdapterInterface $adapter,
         Timer $timer
     ) {
-        parent::__construct($user, $session, $adapter);
+        parent::__construct($auth, $session, $adapter);
         $this->timer = $timer;
     }
 
@@ -56,12 +56,12 @@ class ResumeService extends AbstractService
     public function resume()
     {
         $this->session->resume();
-        if ($this->user->isAnon() || $this->timedOut()) {
+        if ($this->auth->isAnon() || $this->timedOut()) {
             return;
         }
 
-        $this->user->setLastActive(time());
-        $this->adapter->resume($this->user);
+        $this->auth->setLastActive(time());
+        $this->adapter->resume($this->auth);
     }
 
     /**
@@ -76,13 +76,13 @@ class ResumeService extends AbstractService
     protected function timedOut()
     {
         $timeout_status = $this->timer->getTimeoutStatus(
-            $this->user->getFirstActive(),
-            $this->user->getLastActive()
+            $this->auth->getFirstActive(),
+            $this->auth->getLastActive()
         );
 
         if ($timeout_status) {
-            $this->user->setStatus($timeout_status);
-            $this->adapter->logout($this->user);
+            $this->auth->setStatus($timeout_status);
+            $this->adapter->logout($this->auth);
             $this->forceLogout($timeout_status);
             return true;
         }

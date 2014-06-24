@@ -13,7 +13,7 @@ namespace Aura\Auth\Service;
 use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Auth\Session\SessionInterface;
 use Aura\Auth\Status;
-use Aura\Auth\User;
+use Aura\Auth\Auth;
 
 /**
  *
@@ -28,7 +28,7 @@ class LogoutService extends AbstractService
      *
      * Logout user
      *
-     * @see User::forceLogout
+     * @see Auth::forceLogout
      *
      * @see AdapterInterface::logout
      *
@@ -37,7 +37,7 @@ class LogoutService extends AbstractService
      */
     public function logout($status = Status::ANON)
     {
-        $this->adapter->logout($this->user, $status);
+        $this->adapter->logout($this->auth, $status);
         $this->forceLogout($status);
     }
 }

@@ -5,7 +5,7 @@ use Aura\Auth\Adapter\FakeAdapter;
 use Aura\Auth\Session\FakeSession;
 use Aura\Auth\Session\FakeSegment;
 use Aura\Auth\Session\Timer;
-use Aura\Auth\User;
+use Aura\Auth\Auth;
 
 class LoginServiceTest extends \PHPUnit_Framework_TestCase
 {
@@ -15,19 +15,19 @@ class LoginServiceTest extends \PHPUnit_Framework_TestCase
 
     protected $timer;
 
-    protected $user;
+    protected $auth;
 
     protected $adapter;
 
     protected function setUp()
     {
         $this->segment = new FakeSegment;
-        $this->user = new User($this->segment);
+        $this->auth = new Auth($this->segment);
 
         $this->session = new FakeSession;
         $this->adapter = new FakeAdapter;
         $this->handler = new LoginService(
-            $this->user,
+            $this->auth,
             $this->session,
             $this->adapter
         );
@@ -35,10 +35,10 @@ class LoginServiceTest extends \PHPUnit_Framework_TestCase
 
     public function testLogin()
     {
-        $this->assertTrue($this->user->isAnon());
+        $this->assertTrue($this->auth->isAnon());
         $this->handler->login(array('username' => 'boshag'));
-        $this->assertTrue($this->user->isValid());
-        $this->assertSame('boshag', $this->user->getName());
+        $this->assertTrue($this->auth->isValid());
+        $this->assertSame('boshag', $this->auth->getName());
     }
 
     public function testForceLogin_cannotResumeOrStart()
@@ -46,10 +46,10 @@ class LoginServiceTest extends \PHPUnit_Framework_TestCase
         $this->session->allow_resume = false;
         $this->session->allow_start = false;
 
-        $this->assertTrue($this->user->isAnon());
+        $this->assertTrue($this->auth->isAnon());
 
         $result = $this->handler->forceLogin('boshag', array('foo' => 'bar'));
         $this->assertFalse($result);
-        $this->assertTrue($this->user->isAnon());
+        $this->assertTrue($this->auth->isAnon());
     }
 }
