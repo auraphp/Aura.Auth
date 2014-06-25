@@ -9,7 +9,7 @@ Note that the purpose of this package is only to authenticate user credentials; 
 
 ## Foreword
 
-This package is still in development and not yet complete. Please review the [TODO](blob/develop-2/TODO.md) document for more information.
+This package is still in development and not yet complete. Please review the [TODO](TODO.md) document for more information.
 
 ### Installation
 
