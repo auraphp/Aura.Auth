@@ -2,12 +2,7 @@
 // autoloader
 require dirname(__DIR__) . '/autoload.php';
 
-// default globals
-if (is_readable(__DIR__ . '/globals.dist.php')) {
-    require __DIR__ . '/globals.dist.php';
-}
-
-// override globals
-if (is_readable(__DIR__ . '/globals.php')) {
-    require __DIR__ . '/globals.php';
+// load composer autoload. Good to test password_hash really by ircmaxell/password-compat
+if (is_readable(dirname(__DIR__) . '/vendor/autoload.php')) {
+    require dirname(__DIR__) . '/vendor/autoload.php';
 }
