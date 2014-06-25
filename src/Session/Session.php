@@ -84,11 +84,21 @@ class Session implements SessionInterface
      *
      * Destroy session.
      *
-     * @todo Need more thorough destruction?
-     * cf. <http://php.net/session_destroy>
+     * @see http://php.net/session-destroy
+     *
      */
     public function destroy()
     {
+        $cookie = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $cookie['path'],
+            $cookie['domain'],
+            $cookie['secure'],
+            $cookie['httponly']
+        );
         return session_destroy();
     }
 }

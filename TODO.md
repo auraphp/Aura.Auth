@@ -1,19 +1,28 @@
-# Security
+# TODO
+
+## Security
 
 Add bcrypt to _HtpasswdVerifier_ per <http://httpd.apache.org/docs/current/programs/htpasswd.html>
 
-Add more-thorough session destruction to _Session_ per <http://php.net/session_destroy>.
-
-# Adapters
-
 Add hashing to the IniAdapter.
+
+Track IP numbers through _ResumeService_? This may break with proxies.
+
+## Adapters/Verifiers
 
 Import the LdapAdapter from hold/.
 
 Import the MailAdapter from hold/.
 
+Add OAuth2 adapters?
 
-# Remember Me
+## Verifiers
+
+Build an HttpDigestVerifier based on <http://php.net/manual/en/features.http-auth.php> and/or <http://evertpot.com/223/>.
+
+## Remember Me
+
+Add "remember me" functionality.
 
 On "remember me" during login, store the a cryptographically secure token as a cookie. (Store username too?) Also keep in database.
 
@@ -31,18 +40,9 @@ Also on resume, we may wish to add a DB check to reload session details; this is
 
 Cf. <https://github.com/craigrodway/LoginPersist/blob/master/LoginPersist.module> and perhaps other implementations for ideas and insight.
 
-# Security/Throttling
-
-Track IP numbers?
+## Throttling
 
 Track activity/page loads?  I.e., number of times we had to "resume" the session. This would be for throttling the page loads.
 
-Track number of login attempts? This would be for throttling DOS attacks.
+Track number of login attempts? This would be for throttling brute-force of logins.
 
-# Formless Authentication
-
-HTTP basic is easy. Pass $cred = array('username' => $_SERVER['PHP_AUTH_USER'], 'password' => $_SERVER['PHP_AUTH_PW']) to the handler. Or something like <http://evertpot.com/223/>.
-
-HTTP digest is a little more tricky. Build a Verifier based on <http://php.net/manual/en/features.http-auth.php>, or on <http://evertpot.com/223/>.
-
-OAuth is a different thing entirely.

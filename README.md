@@ -369,7 +369,10 @@ $auth = $auth_factory->newInstance();
 $login_service = $auth_factory->newLoginService(...);
 
 try {
-    $login_service->login($auth, $_POST);
+    $login_service->login($auth, array(
+        'username' => $_POST['username'],
+        'password' => $_POST['password'],
+    );
     echo "You are now logged into a new session.";
 } catch (\Aura\Auth\Exception\UsernameMissing $e) {
     echo "The 'username' field is missing or empty.";
@@ -387,6 +390,52 @@ try {
 
 > N.b.: Instead of creating the  _Auth_ and _LoginService_ objects by hand, you may wish to use a dependency injection container such as [Aura.Di](https://github.com/auraphp/Aura.Di) to retain them for shared use throughout your application.
 
+Alternatively, you may wish to use credentials from the HTTP `Authorization: Basic` headers instead of using `$_POST` or other form-related inputs.  On Apache `mod_php` you might use the auto-populated `$_SERVER['PHP_AUTH_*']` values:
+
+```php
+<?php
+$authorization_basic = function () {
+    return array(
+        isset($_SERVER['PHP_AUTH_USER']) ? $_SERVER['PHP_AUTH_USER'] : null,
+        isset($_SERVER['PHP_AUTH_PW'])   ? $_SERVER['PHP_AUTH_PW']   : null,
+    );
+}
+
+list($username, $password) = $authorization_basic();
+$login_service->login($auth, array(
+    'username' => $username,
+    'password' => $password,
+));
+?>
+```
+
+On other servers you may need to extract the credentials from the `Authorization: Basic` header itself:
+
+```php
+<?php
+$authorization_basic = function () {
+
+    $header = isset($_SERVER['HTTP_AUTHORIZATION'])
+            ? $_SERVER['HTTP_AUTHORIZATION']
+            : '';
+
+    if (strtolower(substr($header, 0, 6)) !== 'basic ') {
+        return array(null, null);
+    }
+
+    $encoded = substr($header, 6);
+    $decoded = base64_decode($encoded);
+    return explode(':', $decoded);
+
+}
+
+list($username, $password) = $authorization_basic();
+$login_service->login($auth, array(
+    'username' => $username,
+    'password' => $password,
+));
+?>
+```
 
 #### Logging Out
 
@@ -409,6 +458,7 @@ if ($auth->isAnon()) {
 ```
 
 > N.b.: Instead of creating the  _Auth_ and _LogoutService_ objects by hand, you may wish to use a dependency injection container such as [Aura.Di](https://github.com/auraphp/Aura.Di) to retain them for shared use throughout your application.
+
 
 ### Custom Adapters
 
