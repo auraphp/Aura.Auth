@@ -266,7 +266,7 @@ To create an adapter for PDO connections to SQL tables, call the _AuthFactory_ `
 
 Here is a legacy example where passwords are MD5 hashed in an accounts table:
 
-```
+```php
 <?php
 $pdo = new \PDO(...);
 $hash = 'md5';
@@ -278,7 +278,7 @@ $pdo_adapter = $auth_factory->newPdoAdapter($pdo, $hash, $cols, $from);
 
 Here is a modern, more complex example that uses bcrypt instead of md5, retrieves extra user information columns from joined tables, and filters for active accounts:
 
-```
+```php
 <?php
 $pdo = new \PDO(...);
 $hash = PASSWORD_BCRYPT;
