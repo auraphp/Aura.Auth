@@ -19,6 +19,12 @@
     "require": {
         "php": ">=5.3.0"
     },
+    "require-dev": {
+        "ircmaxell/password-compat": "~1.0.0"
+    },
+    "suggest": {
+        "ircmaxell/password-compat": "A compatibility library for the proposed simplified password hashing algorithm: https://wiki.php.net/rfc/password_hash"
+    },
     "autoload": {
         "psr-4": {
             "Aura\\Auth\\": "src/"
