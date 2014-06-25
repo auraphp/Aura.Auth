@@ -24,15 +24,29 @@ use Aura\Auth\Auth;
  */
 class LoginService
 {
+    /**
+     *
+     * Adapter of Adapterinterface
+     *
+     * @var mixed
+     *
+     */
     protected $adapter;
 
+    /**
+     *
+     * session
+     *
+     * @var SessionInterface
+     *
+     */
     protected $session;
 
     /**
      *
-     *  @param Auth $auth
-     *
      *  @param AdapterInterface $adapter
+     *
+     *  @param SessionInterface $session
      *
      */
     public function __construct(
@@ -47,13 +61,12 @@ class LoginService
      *
      * Login user
      *
-     * @see AdapterInterface::login
-     *
-     * @see Auth::forceLogin
+     * @param Auth $auth
      *
      * @param array $cred
      *
      * @return void
+     *
      */
     public function login(Auth $auth, array $cred)
     {
@@ -64,6 +77,8 @@ class LoginService
     /**
      *
      * Forces a successful login.
+     *
+     * @param Auth $auth
      *
      * @param string $name The authenticated user name.
      *

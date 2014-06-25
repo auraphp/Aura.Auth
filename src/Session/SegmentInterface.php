@@ -23,6 +23,8 @@ interface SegmentInterface
      *
      * @param mixed $key
      *
+     * @param mixed $alt Useful when you want to return if the key is null
+     *
      */
     public function get($key, $alt = null);
 

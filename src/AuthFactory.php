@@ -14,6 +14,7 @@ use Aura\Auth\Adapter;
 use Aura\Auth\Service;
 use Aura\Auth\Session;
 use Aura\Auth\Verifier;
+use Aura\Auth\Adapter\AdapterInterface;
 use PDO;
 
 /**
@@ -26,6 +27,14 @@ use PDO;
 
 class AuthFactory
 {
+    /**
+     * cookie
+     *
+     * @var mixed
+     *
+     */
+    protected $cookie;
+
     public function __construct(array $cookie)
     {
         $this->cookie = $cookie;
@@ -43,7 +52,16 @@ class AuthFactory
         return new Auth(new Session\Segment);
     }
 
-    public function newLoginService($adapter = null)
+    /**
+     *
+     * Login Service
+     *
+     * @param AdapterInterface $adapter
+     *
+     * @return Service\LoginService
+     *
+     */
+    public function newLoginService(AdapterInterface $adapter = null)
     {
         return new Service\LoginService(
             $this->fixAdapter($adapter),
@@ -51,8 +69,17 @@ class AuthFactory
         );
     }
 
+    /**
+     *
+     * Logout Service
+     *
+     * @param AdapterInterface $adapter
+     *
+     * @return Service\LogoutService
+     *
+     */
     public function newLogoutService(
-        $adapter = null
+        AdapterInterface $adapter = null
     ) {
         return new Service\LogoutService(
             $this->fixAdapter($adapter),
@@ -60,8 +87,21 @@ class AuthFactory
         );
     }
 
+    /**
+     *
+     * Resume if started else start a new session
+     *
+     * @param AdapterInterface $adapter
+     *
+     * @param int $idle_ttl
+     *
+     * @param int $expire_ttl
+     *
+     * @return Service\ResumeService
+     *
+     */
     public function newResumeService(
-        $adapter = null,
+        AdapterInterface $adapter = null,
         $idle_ttl = 1440,
         $expire_ttl = 14400
     ) {
@@ -87,12 +127,29 @@ class AuthFactory
         );
     }
 
+    /**
+     *
+     * Start a session
+     *
+     * @return Session\Session
+     *
+     */
     protected function newSession()
     {
         return new Session\Session($this->cookie);
     }
 
-    protected function fixAdapter($adapter)
+    /**
+     *
+     * If no adapter provided create Adapter\NullAdapter else
+     * the same adapter passed
+     *
+     * @param Adapterinterface $adapter
+     *
+     * @return Adapterinterface
+     *
+     */
+    protected function fixAdapter(AdapterInterface $adapter = null)
     {
         if ($adapter === null) {
             $adapter = new Adapter\NullAdapter;

@@ -57,6 +57,10 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * Logout a user resetting all the values
      *
+     * @param Auth $auth
+     *
+     * @param string $status @see Status
+     *
      * @return bool
      *
      */
@@ -65,6 +69,13 @@ abstract class AbstractAdapter implements AdapterInterface
         // do nothing
     }
 
+    /**
+     *
+     * Resume logged in session
+     *
+     * @param Auth $auth
+     *
+     */
     public function resume(Auth $auth)
     {
         // do nothing
