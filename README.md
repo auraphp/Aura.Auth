@@ -9,6 +9,8 @@ Note that the purpose of this package is only to authenticate user credentials; 
 
 ## Foreword
 
+This package is still in development and not yet complete. Please review the [TODO](blob/develop-2/TODO.md) document for more information.
+
 ### Installation
 
 This library requires PHP 5.3 or later, and has no userland dependencies. (For the newer, more-secure [`password_hash()`](http://php.net/password_hash) functionality, this library requires PHP 5.5 or later, or an alternative userland implementation such as [ircmaxell/password-compat](https://github.com/ircmaxell/password_compat).)
