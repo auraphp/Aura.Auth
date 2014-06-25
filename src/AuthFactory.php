@@ -28,16 +28,33 @@ use PDO;
 class AuthFactory
 {
     /**
-     * cookie
      *
-     * @var mixed
+     * @var SessionInterface
      *
      */
-    protected $cookie;
+    protected $session;
 
-    public function __construct(array $cookie)
-    {
-        $this->cookie = $cookie;
+    /**
+     *
+     * @var SegmentInterface
+     *
+     */
+    protected $segment;
+
+    public function __construct(
+        array $cookie,
+        SessionInterface $session = null,
+        SegmentInterface $segment = null
+    ) {
+        $this->session = $session;
+        if (! $this->session) {
+            $this->session = new Session\Session($cookie);
+        }
+
+        $this->segment = $segment;
+        if (! $this->segment) {
+            $this->segment = new Session\Segment;
+        }
     }
 
     /**
@@ -49,7 +66,7 @@ class AuthFactory
      */
     public function newInstance()
     {
-        return new Auth(new Session\Segment);
+        return new Auth($this->segment);
     }
 
     /**
@@ -65,7 +82,7 @@ class AuthFactory
     {
         return new Service\LoginService(
             $this->fixAdapter($adapter),
-            $this->newSession()
+            $this->session
         );
     }
 
@@ -78,12 +95,11 @@ class AuthFactory
      * @return Service\LogoutService
      *
      */
-    public function newLogoutService(
-        AdapterInterface $adapter = null
-    ) {
+    public function newLogoutService(AdapterInterface $adapter = null)
+    {
         return new Service\LogoutService(
             $this->fixAdapter($adapter),
-            $this->newSession()
+            $this->session
         );
     }
 
@@ -105,8 +121,9 @@ class AuthFactory
         $idle_ttl = 1440,
         $expire_ttl = 14400
     ) {
+
         $adapter = $this->fixAdapter($adapter);
-        $session = $this->newSession();
+
         $timer = new Session\Timer(
             ini_get('session.gc_maxlifetime'),
             ini_get('session.cookie_lifetime'),
@@ -116,27 +133,15 @@ class AuthFactory
 
         $logout_service = new Service\LogoutService(
             $adapter,
-            $session
+            $this->session
         );
 
         return new Service\ResumeService(
             $adapter,
-            $session,
+            $this->session,
             $timer,
             $logout_service
         );
-    }
-
-    /**
-     *
-     * Start a session
-     *
-     * @return Session\Session
-     *
-     */
-    protected function newSession()
-    {
-        return new Session\Session($this->cookie);
     }
 
     /**

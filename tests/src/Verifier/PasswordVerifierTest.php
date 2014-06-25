@@ -3,16 +3,16 @@ namespace Aura\Auth\Verifier;
 
 class PasswordVerifierTest extends \PHPUnit_Framework_TestCase
 {
+    protected function setUp()
+    {
+        if (! defined('PASSWORD_BCRYPT')) {
+            $this->markTestSkipped("password_hash functionality not available. Install ircmaxell/password-compat for 5.3+");
+        }
+    }
+
     public function test()
     {
-        if (defined('PASSWORD_BCRYPT')) {
-            // use the real password_hash()
-            $algo = PASSWORD_BCRYPT;
-        } else {
-            // use the fake password_hash()
-            $this->markTestIncomplete("password_hash functionality not available. Install ircmaxell/password-compat for 5.3+");
-        }
-
+        $algo = PASSWORD_BCRYPT;
         $verifier = new PasswordVerifier($algo);
         $plaintext = 'password';
         $encrypted = password_hash($plaintext, $algo);
