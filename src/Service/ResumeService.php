@@ -24,12 +24,36 @@ use Aura\Auth\Session\Timer;
  */
 class ResumeService
 {
+    /**
+     *
+     * @var AdapterInterface
+     *
+     */
     protected $adapter;
 
+    /**
+     *
+     * session
+     *
+     * @var SessionInterface
+     *
+     */
     protected $session;
 
+    /**
+     * Timer
+     *
+     * @var Timer
+     *
+     */
     protected $timer;
 
+    /**
+     * logout_service
+     *
+     * @var LogoutService
+     *
+     */
     protected $logout_service;
 
     /**
@@ -38,7 +62,11 @@ class ResumeService
      *
      *  @param AdapterInterface $adapter
      *
+     *  @param SessionInterface $adapter
+     *
      *  @param Timer $timer
+     *
+     *  @param LogoutService $logout_service
      *
      */
     public function __construct(

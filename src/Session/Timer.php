@@ -60,6 +60,10 @@ class Timer
      *
      * Constructor.
      *
+     * @param int $ini_gc_maxlifetime
+     *
+     * @param int $ini_cookie_lifetime
+     *
      * @param int $idle_ttl The maximum idle time in seconds.
      *
      * @param int $expire_ttl The maximum authentication time in seconds.
@@ -149,6 +153,8 @@ class Timer
      *
      * Has the authentication time expired?
      *
+     * @param int $first_active
+     *
      * @return bool
      *
      */
@@ -162,6 +168,8 @@ class Timer
      *
      * Has the idle time been exceeded?
      *
+     * @param int $last_active
+     *
      * @return bool
      *
      */
@@ -171,6 +179,17 @@ class Timer
             || ($last_active + $this->getIdleTtl()) < time();
     }
 
+    /**
+     *
+     * Get Timeout Status
+     *
+     * @param int $first_active
+     *
+     * @param int $last_active
+     *
+     * @return string
+     *
+     */
     public function getTimeoutStatus($first_active, $last_active)
     {
         if ($this->hasExpired($first_active)) {

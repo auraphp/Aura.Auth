@@ -24,8 +24,20 @@ use Aura\Auth\Auth;
  */
 class LogoutService
 {
+    /**
+     *
+     * @var AdapterInterface
+     *
+     */
     protected $adapter;
 
+    /**
+     *
+     * session
+     *
+     * @var SessionInterface
+     *
+     */
     protected $session;
 
     /**
@@ -33,6 +45,8 @@ class LogoutService
      *  @param Auth $auth
      *
      *  @param AdapterInterface $adapter
+     *
+     *  @param SessionInterface $adapter
      *
      */
     public function __construct(
@@ -47,9 +61,7 @@ class LogoutService
      *
      * Logout user
      *
-     * @see Auth::forceLogout
-     *
-     * @see AdapterInterface::logout
+     * @param Auth $auth
      *
      * @param string $status see Status class
      *
@@ -63,6 +75,8 @@ class LogoutService
     /**
      *
      * Forces a successful logout.
+     *
+     * @param Auth $auth
      *
      * @param string $status The new authentication status.
      *
