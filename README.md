@@ -11,9 +11,9 @@ Note that the purpose of this package is only to authenticate user credentials; 
 
 ### Installation
 
-This library requires PHP 5.3 or later, and has no userland dependencies.
+This library requires PHP 5.3 or later, and has no userland dependencies. (For the newer, more-secure [`password_hash()`](http://php.net/password_hash) functionality, this library requires PHP 5.5 or later, or an alternative userland implementation such as [ircmaxell/password-compat](https://github.com/ircmaxell/password_compat).)
 
-> NOT YET: It is installable and autoloadable via Composer as [aura/auth](https://packagist.org/packages/aura/auth).
+It is installable and autoloadable via Composer as [aura/auth](https://packagist.org/packages/aura/auth).
 
 Alternatively, [download a release](https://github.com/auraphp/Aura.Auth/releases) or clone this repository, then require or include its _autoload.php_ file.
 
@@ -33,7 +33,6 @@ you notice compliance oversights, please send a patch via pull request.
 [PSR-2]: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md
 [PSR-4]: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader.md
 
-
 ### Community
 
 To ask questions, provide feedback, or otherwise communicate with the Aura community, please join our [Google Group](http://groups.google.com/group/auraphp), follow [@auraphp on Twitter](http://twitter.com/auraphp), or chat with us on #auraphp on Freenode.
@@ -41,7 +40,7 @@ To ask questions, provide feedback, or otherwise communicate with the Aura commu
 
 ## Getting Started
 
-Because this package is still in very early development, THE FOLLOWING DOCUMENTATION IS INCOMPLETE AND SOMETIMES WRONG.
+Warning: this package is still in its early development stages, so the behaviors described below may change rapidly.
 
 ### Instantiation
 
@@ -49,7 +48,7 @@ To track authentication state and related information, create an _Auth_ object u
 
 ```php
 <?php
-$auth_factory = new \Aura\Auth\AuthFactory;
+$auth_factory = new \Aura\Auth\AuthFactory($_COOKIE);
 $auth = $auth_factory->newInstance();
 ?>
 ```
@@ -124,9 +123,7 @@ Using `forceLogin()` has these side effects:
 
 - it starts a new session if one has not already been started, or resumes a previous session if one exists
 
-- it regenerates the session ID.
-
-> N.b.: Please see the [session management](#session-management) section for more about session management.
+- it regenerates the session ID
 
 The specified user name and user data will be stored in a `$_SESSION` segment, along with an authentication status of `Status::VALID`.
 
@@ -160,8 +157,6 @@ Using `forceLogout()` has these side effects:
 - it regenerates the session ID
 
 - it destroys the session
-
-> N.b.: Please see the [session management](#session-management) section for more about session management.
 
 Note that `forceLogout()` does not check any credential sources. You as the application owner are forcing the _Auth_ object to a logged-out state.
 
@@ -243,9 +238,7 @@ $login_service->login($auth, array(
 ?>
 ```
 
-For more on _LoginService_ idioms, please see the [Login Service Idioms](#login-service-idioms) section.
-
-The _LogoutService_ and _ResumeService_ do not need credential information.
+For more on _LoginService_ idioms, please see the [Service Idioms](#service-idioms) section. (The _LogoutService_ and _ResumeService_ do not need credential information.)
 
 #### PDO Adapter
 
@@ -309,9 +302,9 @@ You can then pass the _Adapter_ to each _Service_ factory method like so:
 
 ```php
 <?php
-$login_service = $auth_factory->newLoginService($htpasswd_adapter);
-$logout_service = $auth_factory->newLogoutService($htpasswd_adapter);
-$resume_service = $auth_factory->newResumeService($htpasswd_adapter);
+$login_service = $auth_factory->newLoginService($pdo_adapter);
+$logout_service = $auth_factory->newLogoutService($pdo_adapter);
+$resume_service = $auth_factory->newResumeService($pdo_adapter);
 ?>
 ```
 
@@ -326,15 +319,246 @@ $login_service->login($auth, array(
 ?>
 ```
 
-For more on _LoginService_ idioms, please see the [Login Service Idioms](#login-service-idioms) section.
+For more on _LoginService_ idioms, please see the [Service Idioms](#service-idioms) section. (The _LogoutService_ and _ResumeService_ do not need credential information.)
 
-The _LogoutService_ and _ResumeService_ do not need credential information.
+### Service Idioms
 
-### Login Service Idioms
+#### Resuming A Session
 
-TBD (this is how to build a login service)
+This is an example of the code needed to resume a pre-existing session. Note that the `echo` statements are intended to explain the different resulting states of the `resume()` call, and may be replaced by whatever logic you feel is appropriate. For example, you may wish to redirect to a login page when a session has idled or expired.
+
+```php
+<?php
+$auth = $auth_factory->newInstance();
+
+$resume_service = $auth_factory->newResumeService(...);
+$resume_service->resume($auth);
+
+switch (true) {
+    case $auth->isAnon():
+        echo "You are not logged in.";
+        break;
+    case $auth->isIdle():
+        echo "Your session was idle for too long. Please log in again.";
+        break;
+    case $auth->isExpired():
+        echo "Your session has expired. Please log in again.";
+        break;
+    case $auth->isValid():
+        echo "You are still logged in.";
+        break;
+    default:
+        echo "You have an unknown status.";
+        break;
+}
+?>
+```
+
+> N.b.: Instead of creating the  _Auth_ and _ResumeService_ objects by hand, you may wish to use a dependency injection container such as [Aura.Di](https://github.com/auraphp/Aura.Di) to retain them for shared use throughout your application.
+
+#### Logging In
+
+This is an example of the code needed to effect a login. Note that the `echo` statements are intended to explain the different resulting states of the `login()` call, and may be replaced by whatever logic you feel is appropriate.
+
+```php
+<?php
+$auth = $auth_factory->newInstance();
+
+$login_service = $auth_factory->newLoginService(...);
+
+try {
+    $login_service->login($auth, $_POST);
+    echo "You are now logged into a new session.";
+} catch (\Aura\Auth\Exception\UsernameMissing $e) {
+    echo "The 'username' field is missing or empty.";
+} catch (\Aura\Auth\Exception\PasswordMissing $e) {
+    echo "The 'password' field is missing or empty.";
+} catch (\Aura\Auth\Exception\UsernameNotFound $e) {
+    echo "The username you entered was not found.";
+} catch (\Aura\Auth\Exception\MultipleMatches $e) {
+    echo "There is more than one account with that username.";
+} catch (\Aura\Auth\Exception\PasswordIncorrect $e) {
+    echo "The password you entered was incorrect.";
+}
+?>
+```
+
+> N.b.: Instead of creating the  _Auth_ and _LoginService_ objects by hand, you may wish to use a dependency injection container such as [Aura.Di](https://github.com/auraphp/Aura.Di) to retain them for shared use throughout your application.
+
+
+#### Logging Out
+
+This is an example of the code needed to effect a login. Note that the `echo` statements are intended to explain the different resulting states of the `logout()` call, and may be replaced by whatever logic you feel is appropriate.
+
+```php
+<?php
+$auth = $auth_factory->newInstance();
+
+$logout_service = $auth_factory->newLogoutService(...);
+
+$logout_service->logout($auth);
+
+if ($auth->isAnon()) {
+    echo "You are now logged out.";
+} else {
+    echo "Something went wrong; you are still logged in.";
+}
+?>
+```
+
+> N.b.: Instead of creating the  _Auth_ and _LogoutService_ objects by hand, you may wish to use a dependency injection container such as [Aura.Di](https://github.com/auraphp/Aura.Di) to retain them for shared use throughout your application.
+
+### Custom Adapters
+
+Although this package comes with multiple _Adapter_ classes, it may be that none of them fit your needs.
+
+You may wish to extend one of the existing adapters to add login/logout/resume behaviors. Alternatively, you can create an _Adapter_ of your own by implementing the _AdapterInterface_ on a class of your choosing:
+
+```php
+<?php
+use Aura\Auth\Adapter\AdapterInterface;
+use Aura\Auth\Auth;
+
+class CustomAdapter implements AdapterInterface
+{
+    // AdapterInterface::login()
+    public function login(array $cred)
+    {
+        if ($this->isLegit($cred)) {
+            $username = ...;
+            $userdata = array(...);
+            $this->updateLoginTime(time());
+            return array($username, $userdata);
+        } else {
+            throw CustomException('Something went wrong.');
+        }
+    }
+
+    // AdapterInterface::logout()
+    public function logout(Auth $auth)
+    {
+        $this->updateLogoutTime($auth->getUsername(), time());
+    }
+
+    // AdapterInterface::resume()
+    public function resume(Auth $auth)
+    {
+        $this->updateActiveTime($auth->getUsername(), time());
+    }
+
+    // custom support methods not in the interface
+    protected function isLegit($credentials) { ... }
+
+    protected function updateLoginTime($time) { ... }
+
+    protected function updateActiveTime($time) { ... }
+
+    protected function updateLogoutTime($time) { ... }
+}
+?>
+```
+
+You can then pass an instance of the custom adapter when creating services through the _AuthFactory_ methods:
+
+```php
+<?php
+$custom_adapter = new CustomAdapter;
+$login_service = $auth_factory->newLoginService($custom_adapter);
+$logout_service = $auth_factory->newLogoutService($custom_adapter);
+$resume_service = $auth_factory->newResumeService($custom_adapter);
+?>
+```
 
 ### Session Management
 
-TBD
+The _Service_ objects use a _Session_ object to start sessions, destroy them, and regenerate session IDs. The _Session_ object uses the native PHP `session_*()` functions to manage sessions.
 
+#### Custom Sessions
+
+If you wish to use an alternative means of managing sessions, implement the _SessionInterface_ on an object of your choice. One way to do this is by by wrapping a framework-specific session object and proxying the _SessionInterface_ methods to the wrapped object:
+
+```php
+<?php
+use Aura\Auth\Session\SessionInterface;
+
+class CustomSession implements SessionInterface
+{
+    protected $fwsession;
+
+    public function __construct(FrameworkSession $fwsession)
+    {
+        $this->fwsession = $fwsession;
+    }
+
+    public function start()
+    {
+        return $this->fwsession->startSession();
+    }
+
+    public function resume()
+    {
+        if ($this->fwsession->isAlreadyStarted()) {
+            return true;
+        }
+
+        if ($this->fwsession->canBeRestarted()) {
+            return $this->fwsession->restartSession();
+        }
+
+        return false;
+    }
+
+    public function regenerateId()
+    {
+        return $this->fwsession->regenerateSessionId();
+    }
+
+    public function destroy()
+    {
+        return $this->fwsession->destroySession();
+    }
+}
+?>
+```
+
+Then pass that custom session object to the _AuthFactory_ instantiation:
+
+```php
+<?php
+use Aura\Auth\AuthFactory;
+
+$custom_session = new CustomSession(new FrameworkSession);
+$auth_factory = new AuthFactory($_COOKIE, $custom_session);
+?>
+```
+
+The factory will pass your custom session object wherever it is needed.
+
+#### Working Without Sessions
+
+In some situations, such as with APIs where credentials are provided with every request, it may be beneficial to avoid sessions altogether. In this case, pass a _NullSession_ and _NullSegment_ to the _AuthFactory_:
+
+```php
+<?php
+use Aura\Auth\AuthFactory;
+use Aura\Auth\Session\NullSession;
+use Aura\Auth\Session\NullSegment;
+
+$null_session = new NullSession;
+$null_segment = new NullSegment;
+$auth_factory = new AuthFactory($_COOKIE, $null_session, $null_segment);
+?>
+```
+
+With the _NullSession_, a session will never actually be started or destroyed, and no session ID will be created or regenerated. Likewise, no session will ever be resumed, because it will never have been saved at the end of the previous request. Finally, PHP will never create a session cookie to send in the response.
+
+Likewise, the _NullSegment_ retains authentication information in an object property instead of in a `$_SESSION` segment. Unlike the normal _Segment_, which only retains data when `$_SESSION` is present, the _NullSegment_ will always retain data that is set into it. When the request is over, all authentication information retained in the _NullSegment_ will disappear.
+
+When using the _NullSession_ and _NullSegment_, you will have to check  credentials via the _LoginService_ `login()` or `forceLogin()` method on each request, which in turn will retain the authentication information in the _Segment_. In an API situation this is often preferable to managing an ongoing session.
+
+> N.b. In an API situation, the credentials may be an API token, or passed as HTTP basic or digest authentication headers.  Pass these to the adapter of your choice.
+
+
+### Custom Services
+
+You are not restricted to the login, logout, and resume services provided by this package. However, if you build a service of your own, or if you extend one of the provided services, you will have to instantiate that customized service object manually, instead of using the _AuthFactory_. This can be tedious but is not difficult, especially when using a dependency injection container system such as [Aura.Di](https://github.com/auraphp/Aura.Auth).
