@@ -24,13 +24,15 @@
     },
     "autoload": {
         "psr-4": {
-            "Aura\\Auth\\": "src/"
+            "Aura\\Auth\\": "src/",
+            "Aura\\Auth\\_Config\\": "config/"
         }
     },
     "extra": {
         "aura": {
             "type": "library",
             "config": {
+                "common": "Aura\\Auth\\_Config\\Common"
             }
         },
         "branch-alias": {
