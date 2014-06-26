@@ -59,6 +59,7 @@ class HashVerifier implements VerifierInterface
      */
     public function verify($plaintext, $encrypted, array $extra = array())
     {
-        return hash($this->algo, $this->salt . $plaintext) === $encrypted;
+        $salt = isset($extra['salt']) ? $extra['salt'] : $this->salt;
+        return hash($this->algo, $salt . $plaintext) === $encrypted;
     }
 }
