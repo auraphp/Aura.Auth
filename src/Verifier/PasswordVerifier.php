@@ -49,15 +49,15 @@ class PasswordVerifier implements VerifierInterface
      *
      * @param string $plaintext Plaintext
      *
-     * @param string $encrypted encrypted string
+     * @param string $hashvalue encrypted string
      *
      * @param array $extra Optional array if used by verify
      *
      * @return bool
      *
      */
-    public function verify($plaintext, $encrypted, array $extra = array())
+    public function verify($plaintext, $hashvalue, array $extra = array())
     {
-        return password_verify($plaintext, $encrypted);
+        return password_verify($plaintext, $hashvalue);
     }
 }

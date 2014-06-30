@@ -67,8 +67,8 @@ class HtpasswdAdapter extends AbstractAdapter
         $this->checkCredentials($cred);
         $username = $cred['username'];
         $password = $cred['password'];
-        $encrypted = $this->fetchEncrypted($username);
-        $this->verify($password, $encrypted);
+        $hashvalue = $this->fetchEncrypted($username);
+        $this->verify($password, $hashvalue);
         return array($username, array());
     }
 
@@ -83,12 +83,12 @@ class HtpasswdAdapter extends AbstractAdapter
         // find the user's line in the file
         $fp = fopen($real, 'r');
         $len = strlen($username) + 1;
-        $encrypted = false;
+        $hashvalue = false;
         while ($line = fgets($fp)) {
             if (substr($line, 0, $len) == "{$username}:") {
                 // found the line, leave the loop
                 $tmp = explode(':', trim($line));
-                $encrypted = $tmp[1];
+                $hashvalue = $tmp[1];
                 break;
             }
         }
@@ -97,16 +97,16 @@ class HtpasswdAdapter extends AbstractAdapter
         fclose($fp);
 
         // did we find the encrypted password for the username?
-        if ($encrypted) {
-            return $encrypted;
+        if ($hashvalue) {
+            return $hashvalue;
         }
 
         throw new Exception\UsernameNotFound;
     }
 
-    protected function verify($password, $encrypted)
+    protected function verify($password, $hashvalue)
     {
-        if (! $this->verifier->verify($password, $encrypted)) {
+        if (! $this->verifier->verify($password, $hashvalue)) {
             throw new Exception\PasswordIncorrect;
         }
     }
