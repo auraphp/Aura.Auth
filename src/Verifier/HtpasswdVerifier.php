@@ -33,6 +33,11 @@ class HtpasswdVerifier implements VerifierInterface
     public function verify($plaintext, $encrypted, array $extra = array())
     {
         $encrypted = trim($encrypted);
+
+        if (substr($encrypted, 0, 4) == '$2y$') {
+            return $this->bcrypt($plaintext, $encrypted);
+        }
+
         if (substr($encrypted, 0, 5) == '{SHA}') {
             return $this->sha($plaintext, $encrypted);
         }
@@ -72,20 +77,34 @@ class HtpasswdVerifier implements VerifierInterface
     protected function apr1($plaintext, $encrypted)
     {
         $salt = preg_replace('/^\$apr1\$([^$]+)\$.*/', '\\1', $encrypted);
-        $length  = strlen($plaintext);
+        $context = $this->computeContext($plaintext, $salt);
+        $binary = $this->computeBinary($plaintext, $salt, $context);
+        $p = $this->computeP($binary);
+        $computed_hash = '$apr1$' . $salt . '$' . $p
+                       . $this->convert64(ord($binary[11]), 3);
+        return $computed_hash === $encrypted;
+    }
+
+    protected function computeContext($plaintext, $salt)
+    {
+        $length = strlen($plaintext);
+        $hash = hash('md5', $plaintext . $salt . $plaintext, true);
         $context = $plaintext . '$apr1$' . $salt;
-        $binary = hash('md5', $plaintext . $salt . $plaintext, true);
 
         for ($i = $length; $i > 0; $i -= 16) {
-            $context .= substr($binary, 0, min(16 , $i));
+            $context .= substr($hash, 0, min(16 , $i));
         }
 
         for ( $i = $length; $i > 0; $i >>= 1) {
             $context .= ($i & 1) ? chr(0) : $plaintext[0];
         }
 
-        $binary = hash('md5', $context, true);
+        return $context;
+    }
 
+    protected function computeBinary($plaintext, $salt, $context)
+    {
+        $binary = hash('md5', $context, true);
         for($i = 0; $i < 1000; $i++) {
             $new = ($i & 1) ? $plaintext : $binary;
             if ($i % 3) {
@@ -97,7 +116,11 @@ class HtpasswdVerifier implements VerifierInterface
             $new .= ($i & 1) ? $binary : $plaintext;
             $binary = hash('md5', $new, true);
         }
+        return $binary;
+    }
 
+    protected function computeP($binary)
+    {
         $p = array();
         for ($i = 0; $i < 5; $i++) {
             $k = $i + 6;
@@ -112,11 +135,7 @@ class HtpasswdVerifier implements VerifierInterface
                 5
             );
         }
-
-        $computed_hash = '$apr1$' . $salt . '$' . implode($p)
-                       . $this->convert64(ord($binary[11]), 3);
-
-        return $computed_hash === $encrypted;
+        return implode($p);
     }
 
     /**
@@ -160,5 +179,10 @@ class HtpasswdVerifier implements VerifierInterface
 
         $computed_hash = crypt($plaintext, $encrypted);
         return $computed_hash === $encrypted;
+    }
+
+    protected function bcrypt($plaintext, $encrypted)
+    {
+        return password_verify($plaintext, $encrypted);
     }
 }
