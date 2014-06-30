@@ -28,22 +28,12 @@ class HashVerifier implements VerifierInterface
 
     /**
      *
-     * @var string
-     *
-     */
-    protected $salt;
-
-    /**
-     *
      * @param string $algo
      *
-     * @param string $salt
-     *
      */
-    public function __construct($algo, $salt = null)
+    public function __construct($algo)
     {
         $this->algo = $algo;
-        $this->salt = $salt;
     }
 
     /**
@@ -59,6 +49,6 @@ class HashVerifier implements VerifierInterface
      */
     public function verify($plaintext, $encrypted, array $extra = array())
     {
-        return hash($this->algo, $this->salt . $plaintext) === $encrypted;
+        return hash($this->algo, $plaintext) === $encrypted;
     }
 }
