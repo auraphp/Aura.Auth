@@ -10,6 +10,8 @@
  */
 namespace Aura\Auth\Adapter;
 
+use Aura\Auth\Exception;
+
 /**
  *
  * Authenticate against an LDAP server.
@@ -35,27 +37,21 @@ class LdapAdapter extends AbstractAdapter
      * @var array
      *
      */
-    protected $_Solar_Auth_Storage_Adapter_Ldap = array(
-        'uri'    => null,
-        'format' => null,
-        'filter' => '\w',
-    );
+    protected $uri = null;
+    protected $format = null;
+    protected $filter = '\w';
+    protected $options = array();
 
-    /**
-     *
-     * Checks to make sure the LDAP extension is available.
-     *
-     * @return null
-     *
-     */
-    protected function _preConfig()
-    {
-        parent::_preConfig();
-        if (! extension_loaded('ldap')) {
-            throw $this->_exception('ERR_EXTENSION_NOT_LOADED', array(
-                'extension' => 'ldap',
-            ));
-        }
+    public function __construct(
+        $uri,
+        $format,
+        $filter = '\w',
+        array $options = array()
+    ) {
+        $this->uri = $uri;
+        $this->format = $format;
+        $this->filter = $filter;
+        $this->options = $options;
     }
 
     /**
@@ -68,45 +64,39 @@ class LdapAdapter extends AbstractAdapter
      * if verification failed.
      *
      */
-    public function validateCredentials($credentials)
+    public function login(array $cred)
     {
+        $this->checkCredentials($cred);
+        $username = $cred['username'];
+        $password = $cred['password'];
 
-        if (empty($credentials['username'])) {
-            return false;
-        }
-        if (empty($credentials['password'])) {
-            return false;
-        }
-        $username = $credentials['username'];
-        $password = $credentials['password'];
-
-        // connect
-        $conn = @ldap_connect($this->_config['uri']);
-
-        // did the connection work?
+        $conn = ldap_connect($this->uri);
         if (! $conn) {
-            throw $this->_exception('ERR_CONNECTION_FAILED', $this->_config);
+            throw new Exception\ConnectionFailed($this->uri);
         }
 
-        // upgrade to LDAP3 when possible
-        @ldap_set_option($conn, LDAP_OPT_PROTOCOL_VERSION, 3);
+        foreach ($this->options as $opt => $val) {
+            ldap_set_option($conn, $opt, $val);
+        }
 
         // filter the username to prevent LDAP injection
-        $regex = '/[^' . $this->_config['filter'] . ']/';
+        $regex = '/[^' . $this->filter . ']/';
         $username = preg_replace($regex, '', $username);
 
         // bind to the server
-        $rdn = sprintf($this->_config['format'], $username);
-        $bind = @ldap_bind($conn, $rdn, $password);
+        $rdn = sprintf($this->format, $username);
+        $bind = ldap_bind($conn, $rdn, $password);
 
         // did the bind succeed?
         if ($bind) {
             ldap_close($conn);
             return array('username' => $username);
-        } else {
-            $this->_err = @ldap_errno($conn) . " " . @ldap_error($conn);
-            ldap_close($conn);
-            return false;
         }
+
+        $e = new Exception\ConnectionFailed(
+            ldap_errno($conn) . ': ' . ldap_error($conn)
+        );
+        ldap_close($conn);
+        throw $e;
     }
 }
