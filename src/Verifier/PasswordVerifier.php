@@ -39,13 +39,10 @@ class PasswordVerifier implements VerifierInterface
      *
      * @param string $algo
      *
-     * @param array $opts
-     *
      */
-    public function __construct($algo, array $opts = array())
+    public function __construct($algo)
     {
         $this->algo = $algo;
-        $this->opts = $opts;
     }
 
     /**
@@ -59,7 +56,7 @@ class PasswordVerifier implements VerifierInterface
      * @return bool
      *
      */
-    public function verify($plaintext, $encrypted, array $extra = array())
+    public function verify($plaintext, $encrypted)
     {
         return password_verify($plaintext, $encrypted);
     }
