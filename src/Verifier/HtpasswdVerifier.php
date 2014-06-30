@@ -54,7 +54,7 @@ class HtpasswdVerifier implements VerifierInterface
     // Tomas V. V. Cox.
     protected function sha($plaintext, $hashvalue)
     {
-        $hex = pack('H40', sha1($plaintext));
+        $hex = sha1($plaintext, true);
         $computed_hash = '{SHA}' . base64_encode($hex);
         return $computed_hash === $hashvalue;
     }
