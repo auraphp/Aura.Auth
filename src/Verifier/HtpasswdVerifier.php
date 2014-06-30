@@ -23,40 +23,40 @@ class HtpasswdVerifier implements VerifierInterface
      *
      * @param string $plaintext Plaintext
      *
-     * @param string $encrypted encrypted string
+     * @param string $hashvalue encrypted string
      *
      * @param array $extra Optional array if used by verify
      *
      * @return bool
      *
      */
-    public function verify($plaintext, $encrypted, array $extra = array())
+    public function verify($plaintext, $hashvalue, array $extra = array())
     {
-        $encrypted = trim($encrypted);
+        $hashvalue = trim($hashvalue);
 
-        if (substr($encrypted, 0, 4) == '$2y$') {
-            return $this->bcrypt($plaintext, $encrypted);
+        if (substr($hashvalue, 0, 4) == '$2y$') {
+            return password_verify($plaintext, $hashvalue);
         }
 
-        if (substr($encrypted, 0, 5) == '{SHA}') {
-            return $this->sha($plaintext, $encrypted);
+        if (substr($hashvalue, 0, 5) == '{SHA}') {
+            return $this->sha($plaintext, $hashvalue);
         }
 
-        if (substr($encrypted, 0, 6) == '$apr1$') {
-            return $this->apr1($plaintext, $encrypted);
+        if (substr($hashvalue, 0, 6) == '$apr1$') {
+            return $this->apr1($plaintext, $hashvalue);
         }
 
-        return $this->des($plaintext, $encrypted);
+        return $this->des($plaintext, $hashvalue);
     }
 
     // use SHA1 encryption.  pack SHA binary into hexadecimal,
     // then encode into characters using base64. this is per
     // Tomas V. V. Cox.
-    protected function sha($plaintext, $encrypted)
+    protected function sha($plaintext, $hashvalue)
     {
-        $hex = pack('H40', sha1($plaintext));
+        $hex = sha1($plaintext, true);
         $computed_hash = '{SHA}' . base64_encode($hex);
-        return $computed_hash === $encrypted;
+        return $computed_hash === $hashvalue;
     }
 
     /**
@@ -74,15 +74,15 @@ class HtpasswdVerifier implements VerifierInterface
      * @return string The APR MD5 encrypted string.
      *
      */
-    protected function apr1($plaintext, $encrypted)
+    protected function apr1($plaintext, $hashvalue)
     {
-        $salt = preg_replace('/^\$apr1\$([^$]+)\$.*/', '\\1', $encrypted);
+        $salt = preg_replace('/^\$apr1\$([^$]+)\$.*/', '\\1', $hashvalue);
         $context = $this->computeContext($plaintext, $salt);
         $binary = $this->computeBinary($plaintext, $salt, $context);
         $p = $this->computeP($binary);
         $computed_hash = '$apr1$' . $salt . '$' . $p
                        . $this->convert64(ord($binary[11]), 3);
-        return $computed_hash === $encrypted;
+        return $computed_hash === $hashvalue;
     }
 
     protected function computeContext($plaintext, $salt)
@@ -171,18 +171,13 @@ class HtpasswdVerifier implements VerifierInterface
     // workaround, if the password provided by the user is
     // longer than 8 characters, this method will *not* validate
     // it.
-    protected function des($plaintext, $encrypted)
+    protected function des($plaintext, $hashvalue)
     {
         if (strlen($plaintext) > 8) {
             return false;
         }
 
-        $computed_hash = crypt($plaintext, $encrypted);
-        return $computed_hash === $encrypted;
-    }
-
-    protected function bcrypt($plaintext, $encrypted)
-    {
-        return password_verify($plaintext, $encrypted);
+        $computed_hash = crypt($plaintext, $hashvalue);
+        return $computed_hash === $hashvalue;
     }
 }
