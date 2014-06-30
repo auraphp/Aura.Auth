@@ -183,10 +183,6 @@ class HtpasswdVerifier implements VerifierInterface
 
     protected function bcrypt($plaintext, $encrypted)
     {
-        if (! function_exists('password_verify')) {
-            throw new Exception\AlgorithmNotAvailable('bcrypt');
-        }
-
         return password_verify($plaintext, $encrypted);
     }
 }

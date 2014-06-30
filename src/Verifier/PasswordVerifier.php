@@ -56,7 +56,7 @@ class PasswordVerifier implements VerifierInterface
      * @return bool
      *
      */
-    public function verify($plaintext, $encrypted)
+    public function verify($plaintext, $encrypted, array $extra = array())
     {
         return password_verify($plaintext, $encrypted);
     }

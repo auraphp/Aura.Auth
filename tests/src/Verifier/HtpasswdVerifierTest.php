@@ -32,6 +32,9 @@ class HtpasswdVerifierTest extends \PHPUnit_Framework_TestCase
 
     public function testBcrypt()
     {
+        if (! function_exists('password_verify')) {
+            $this->markTestSkipped("password_hash functionality not available. Install ircmaxell/password-compat for 5.3+");
+        }
         $encrypted = '$2y$05$VBdzN9btLNhVZi1tyl8nOeNiQcafX.A8pR/HJT57XHKK2lGmPpaDW';
         $this->assertTrue($this->verifier->verify('1234567890', $encrypted));
         $this->assertFalse($this->verifier->verify('wrong', $encrypted));
