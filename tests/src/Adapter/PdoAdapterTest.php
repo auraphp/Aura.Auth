@@ -2,7 +2,7 @@
 namespace Aura\Auth\Adapter;
 
 use PDO;
-use Aura\Auth\Verifier\HashVerifier;
+use Aura\Auth\Verifier\PasswordVerifier;
 
 class PdoAdapterTest extends \PHPUnit_Framework_TestCase
 {
@@ -22,7 +22,7 @@ class PdoAdapterTest extends \PHPUnit_Framework_TestCase
     {
         $this->adapter = new PdoAdapter(
             $this->pdo,
-            new HashVerifier('md5'),
+            new PasswordVerifier('md5'),
             array('username', 'password', 'active'),
             'accounts',
             $where
@@ -72,7 +72,7 @@ class PdoAdapterTest extends \PHPUnit_Framework_TestCase
         $this->setExpectedException('Aura\Auth\Exception\UsernameColumnNotSpecified');
         $this->adapter = new PdoAdapter(
             $this->pdo,
-            new HashVerifier('md5'),
+            new PasswordVerifier('md5'),
             array(),
             'accounts'
         );
@@ -83,7 +83,7 @@ class PdoAdapterTest extends \PHPUnit_Framework_TestCase
         $this->setExpectedException('Aura\Auth\Exception\PasswordColumnNotSpecified');
         $this->adapter = new PdoAdapter(
             $this->pdo,
-            new HashVerifier('md5'),
+            new PasswordVerifier('md5'),
             array('username'),
             'accounts'
         );

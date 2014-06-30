@@ -37,7 +37,7 @@ class PasswordVerifier implements VerifierInterface
      *
      * Constructor
      *
-     * @param string $algo
+     * @param mixed $algo
      *
      */
     public function __construct($algo)
@@ -47,9 +47,9 @@ class PasswordVerifier implements VerifierInterface
 
     /**
      *
-     * @param string $plaintext Plaintext
+     * @param string $plaintext Plaintext password.
      *
-     * @param string $hashvalue encrypted string
+     * @param string $hashvalue The comparison hash.
      *
      * @param array $extra Optional array if used by verify
      *
@@ -58,6 +58,10 @@ class PasswordVerifier implements VerifierInterface
      */
     public function verify($plaintext, $hashvalue, array $extra = array())
     {
-        return password_verify($plaintext, $hashvalue);
+        if (is_string($this->algo)) {
+            return hash($this->algo, $plaintext) === $hashvalue;
+        } else {
+            return password_verify($plaintext, $hashvalue);
+        }
     }
 }

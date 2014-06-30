@@ -19,21 +19,6 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Aura\Auth\Auth', $auth);
     }
 
-    public function testNewPdoAdapter_hashVerifier()
-    {
-        $pdo = new PDO('sqlite::memory:');
-        $adapter = $this->factory->newPdoAdapter(
-            $pdo,
-            'md5',
-            array('username', 'password'),
-            'accounts'
-        );
-        $this->assertInstanceOf('Aura\Auth\Adapter\PdoAdapter', $adapter);
-
-        $verifier = $adapter->getVerifier();
-        $this->assertInstanceOf('Aura\Auth\Verifier\HashVerifier', $verifier);
-    }
-
     public function testNewPdoAdapter_passwordVerifier()
     {
         $pdo = new PDO('sqlite::memory:');

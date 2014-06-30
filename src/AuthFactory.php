@@ -186,12 +186,10 @@ class AuthFactory
         $from,
         $where = null
     ) {
-        if (is_string($verifier_spec)) {
-            $verifier = new Verifier\HashVerifier($verifier_spec);
-        } elseif (is_int($verifier_spec)) {
-            $verifier = new Verifier\PasswordVerifier($verifier_spec);
-        } else {
+        if (is_object($verifier_spec)) {
             $verifier = $verifier_spec;
+        } else {
+            $verifier = new Verifier\PasswordVerifier($verifier_spec);
         }
 
         return new Adapter\PdoAdapter(

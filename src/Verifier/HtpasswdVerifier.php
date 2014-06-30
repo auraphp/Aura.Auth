@@ -35,7 +35,7 @@ class HtpasswdVerifier implements VerifierInterface
         $hashvalue = trim($hashvalue);
 
         if (substr($hashvalue, 0, 4) == '$2y$') {
-            return $this->bcrypt($plaintext, $hashvalue);
+            return password_verify($plaintext, $hashvalue);
         }
 
         if (substr($hashvalue, 0, 5) == '{SHA}') {
@@ -179,10 +179,5 @@ class HtpasswdVerifier implements VerifierInterface
 
         $computed_hash = crypt($plaintext, $hashvalue);
         return $computed_hash === $hashvalue;
-    }
-
-    protected function bcrypt($plaintext, $hashvalue)
-    {
-        return password_verify($plaintext, $hashvalue);
     }
 }
