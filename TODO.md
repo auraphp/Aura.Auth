@@ -2,8 +2,6 @@
 
 ## Security
 
-Add bcrypt to _HtpasswdVerifier_ per <http://httpd.apache.org/docs/current/programs/htpasswd.html>
-
 Add hashing to the IniAdapter.
 
 Track IP numbers through _ResumeService_? This may break with proxies.
