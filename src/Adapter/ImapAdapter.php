@@ -79,11 +79,11 @@ class ImapAdapter extends AbstractAdapter
             $this->params
         );
 
-        if (is_resource($conn)) {
-            $this->proxy->imap_close($conn);
-            return array($username, array());
+        if (! $conn) {
+            throw new Exception\ConnectionFailed($this->mailbox);
         }
 
-        throw new Exception\ConnectionFailed($this->mailbox);
+        $this->proxy->imap_close($conn);
+        return array($username, array());
     }
 }

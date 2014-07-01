@@ -98,9 +98,11 @@ class LdapAdapter extends AbstractAdapter
             return array('username' => $username);
         }
 
-        $e = new Exception\ConnectionFailed(
-            $this->proxy->ldap_errno($conn) . ': ' . $this->proxy->ldap_error($conn)
-        );
+        // bind failed
+        $message = $this->proxy->ldap_errno($conn)
+                 . ': '
+                 . $this->proxy->ldap_error($conn);
+        $e = new Exception\ConnectionFailed($message);
         $this->proxy->ldap_close($conn);
         throw $e;
     }
