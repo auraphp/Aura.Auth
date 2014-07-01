@@ -21,8 +21,7 @@ class LdapAdapterTest extends \PHPUnit_Framework_TestCase
                 'ldap_close',
                 'ldap_errno',
                 'ldap_error'
-            ),
-            array()
+            )
         );
 
         $this->adapter = new LdapAdapter(
@@ -41,22 +40,7 @@ class LdapAdapterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testLoginConnectionFailed()
-    {
-        $input = array(
-            'username' => 'someusername',
-            'password' => 'secretpassword'
-        );
-        $this->phpfunc->expects($this->once())
-            ->method('ldap_connect')
-            ->with('ldaps://ldap.example.com:636')
-            ->will($this->returnValue(false));
-
-        $this->setExpectedException('Aura\Auth\Exception\ConnectionFailed');
-        $this->adapter->login($input);
-    }
-
-    public function testLoginSuccess()
+    public function testLogin()
     {
         $this->phpfunc->expects($this->once())
             ->method('ldap_connect')
@@ -95,7 +79,22 @@ class LdapAdapterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testBindFailed()
+    public function testLogin_connectionFailed()
+    {
+        $input = array(
+            'username' => 'someusername',
+            'password' => 'secretpassword'
+        );
+        $this->phpfunc->expects($this->once())
+            ->method('ldap_connect')
+            ->with('ldaps://ldap.example.com:636')
+            ->will($this->returnValue(false));
+
+        $this->setExpectedException('Aura\Auth\Exception\ConnectionFailed');
+        $this->adapter->login($input);
+    }
+
+    public function testLogin_bindFailed()
     {
         $this->phpfunc->expects($this->once())
             ->method('ldap_connect')
