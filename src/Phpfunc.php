@@ -18,15 +18,15 @@ namespace Aura\Auth;
  *
  */
 
-class FunctionProxy
+class Phpfunc
 {
     /**
      *
-     * __call
+     * Magic call for PHP functions.
      *
-     * @param string $method
+     * @param string $method The PHP function to call.
      *
-     * @param array $params
+     * @param array $params Params to pass to the function.
      *
      * @return mixed
      *

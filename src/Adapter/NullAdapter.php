@@ -23,12 +23,12 @@ class NullAdapter extends AbstractAdapter
      *
      * login
      *
-     * @param array $cred
+     * @param array $input
      *
      * @return array
      *
      */
-    public function login(array $cred)
+    public function login(array $input)
     {
         return array(null, null);
     }

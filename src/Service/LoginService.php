@@ -63,14 +63,14 @@ class LoginService
      *
      * @param Auth $auth
      *
-     * @param array $cred
+     * @param array $input
      *
      * @return void
      *
      */
-    public function login(Auth $auth, array $cred)
+    public function login(Auth $auth, array $input)
     {
-        list($name, $data) = $this->adapter->login($cred);
+        list($name, $data) = $this->adapter->login($input);
         $this->forceLogin($auth, $name, $data);
     }
 
