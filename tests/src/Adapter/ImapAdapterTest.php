@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Adapter;
 
-use Aura\Auth\FunctionProxy;
+use Aura\Auth\Phpfunc;
 
 class ImapAdapterTest extends \PHPUnit_Framework_TestCase
 {
@@ -10,7 +10,7 @@ class ImapAdapterTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->adapter = new ImapAdapter(
-            new FunctionProxy,
+            new Phpfunc,
             '{mailbox.example.com:143/imap/secure}'
         );
     }

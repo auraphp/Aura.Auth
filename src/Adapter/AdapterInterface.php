@@ -30,12 +30,12 @@ interface AdapterInterface
 
     /**
      *
-     * @param array $cred
+     * @param array $input
      *
      * @return null
      *
      */
-    public function login(array $cred);
+    public function login(array $input);
 
     /**
      *

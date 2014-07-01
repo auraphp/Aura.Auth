@@ -46,12 +46,12 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      *
-     * @param mixed $cred
+     * @param mixed $input
      *
      * @return bool
      *
      */
-    abstract public function login(array $cred);
+    abstract public function login(array $input);
 
     /**
      *
@@ -83,18 +83,18 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      *
-     * @param array $cred
+     * @param array $input
      *
      * @return bool
      *
      */
-    protected function checkCredentials(&$cred)
+    protected function checkInput(&$input)
     {
-        if (empty($cred['username'])) {
+        if (empty($input['username'])) {
             throw new Exception\UsernameMissing;
         }
 
-        if (empty($cred['password'])) {
+        if (empty($input['password'])) {
             throw new Exception\PasswordMissing;
         }
     }

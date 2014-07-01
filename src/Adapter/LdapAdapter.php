@@ -11,7 +11,7 @@
 namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Exception;
-use Aura\Auth\FunctionProxy;
+use Aura\Auth\Phpfunc;
 
 /**
  *
@@ -38,24 +38,20 @@ class LdapAdapter extends AbstractAdapter
      * @var array
      *
      */
-    protected $uri = null;
-    protected $format = null;
-    protected $filter = '\w';
+    protected $server;
+    protected $dnformat = null;
     protected $options = array();
-
-    protected $proxy;
+    protected $phpfunc;
 
     public function __construct(
-        FunctionProxy $proxy,
-        $uri,
-        $format,
-        $filter = '\w',
+        Phpfunc $phpfunc,
+        $server,
+        $dnformat,
         array $options = array()
     ) {
-        $this->proxy = $proxy;
-        $this->uri = $uri;
-        $this->format = $format;
-        $this->filter = $filter;
+        $this->phpfunc = $phpfunc;
+        $this->server = $server;
+        $this->dnformat = $dnformat;
         $this->options = $options;
     }
 
@@ -63,47 +59,73 @@ class LdapAdapter extends AbstractAdapter
      *
      * Verifies set of credentials.
      *
-     * @param array $credentials A list of credentials to verify
+     * @param array $input A list of credentials to verify
      *
      * @return mixed An array of verified user information, or boolean false
      * if verification failed.
      *
      */
-    public function login(array $cred)
+    public function login(array $input)
     {
-        $this->checkCredentials($cred);
-        $username = $cred['username'];
-        $password = $cred['password'];
+        $this->checkInput($input);
+        $username = $input['username'];
+        $password = $input['password'];
 
-        $conn = $this->proxy->ldap_connect($this->uri);
+        $conn = $this->connect();
+        $this->bind($conn, $username, $password);
+        return array($username, array());
+    }
+
+    protected function connect()
+    {
+        $conn = $this->phpfunc->ldap_connect($this->server);
         if (! $conn) {
-            throw new Exception\ConnectionFailed($this->uri);
+            throw new Exception\ConnectionFailed($this->server);
         }
 
         foreach ($this->options as $opt => $val) {
-            $this->proxy->ldap_set_option($conn, $opt, $val);
+            $this->phpfunc->ldap_set_option($conn, $opt, $val);
         }
 
-        // filter the username to prevent LDAP injection
-        $regex = '/[^' . $this->filter . ']/';
-        $username = preg_replace($regex, '', $username);
+        return $conn;
+    }
 
-        // bind to the server
-        $rdn = sprintf($this->format, $username);
-        $bind = $this->proxy->ldap_bind($conn, $rdn, $password);
+    protected function bind($conn, $username, $password)
+    {
+        $username = $this->escape($username);
+        $bind_rdn = sprintf($this->dnformat, $username);
 
-        // did the bind succeed?
-        if ($bind) {
-            $this->proxy->ldap_close($conn);
-            return array('username' => $username);
+        $bound = $this->phpfunc->ldap_bind($conn, $bind_rdn, $password);
+        if (! $bound) {
+            $error = $this->phpfunc->ldap_errno($conn)
+                   . ': '
+                   . $this->phpfunc->ldap_error($conn);
+            $this->phpfunc->ldap_close($conn);
+            throw new Exception\BindFailed($error);
         }
 
-        // bind failed
-        $message = $this->proxy->ldap_errno($conn)
-                 . ': '
-                 . $this->proxy->ldap_error($conn);
-        $e = new Exception\ConnectionFailed($message);
-        $this->proxy->ldap_close($conn);
-        throw $e;
+        $this->phpfunc->ldap_unbind($conn);
+        $this->phpfunc->ldap_close($conn);
+    }
+
+    // per http://projects.webappsec.org/w/page/13246947/LDAP%20Injection
+    // and https://www.owasp.org/index.php/Preventing_LDAP_Injection_in_Java
+    protected function escape($str)
+    {
+        return strtr($str, array(
+            '\\' => '\\\\',
+            '&'  => '\\&',
+            '!'  => '\\!',
+            '|'  => '\\|',
+            '='  => '\\=',
+            '<'  => '\\<',
+            '>'  => '\\>',
+            ','  => '\\,',
+            '+'  => '\\+',
+            '-'  => '\\-',
+            '"'  => '\\"',
+            "'"  => "\\'",
+            ';'  => '\\;',
+        ));
     }
 }

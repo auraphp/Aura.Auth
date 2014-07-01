@@ -18,7 +18,7 @@ namespace Aura\Auth;
  *
  */
 
-class FunctionProxy
+class Phpfunc
 {
     /**
      *

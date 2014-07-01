@@ -13,8 +13,8 @@ class FakeAdapter extends AbstractAdapter
         $this->accounts = $accounts;
     }
 
-    public function login(array $cred)
+    public function login(array $input)
     {
-        return array($cred['username'], array());
+        return array($input['username'], array());
     }
 }

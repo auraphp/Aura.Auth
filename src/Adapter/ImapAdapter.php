@@ -11,7 +11,7 @@
 namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Exception;
-use Aura\Auth\FunctionProxy;
+use Aura\Auth\Phpfunc;
 
 /**
  *
@@ -38,19 +38,19 @@ class ImapAdapter extends AbstractAdapter
 
     protected $params;
 
-    protected $proxy;
+    protected $phpfunc;
 
     public function __construct(
-        FunctionProxy $proxy,
+        Phpfunc $phpfunc,
         $mailbox,
         $options = 0,
-        $attempt = 1,
+        $retries = 1,
         array $params = null
     ) {
-        $this->proxy = $proxy;
+        $this->phpfunc = $phpfunc;
         $this->mailbox = $mailbox;
         $this->options = $options;
-        $this->attempt = $attempt;
+        $this->retries = $retries;
         $this->params = $params;
     }
 
@@ -58,24 +58,24 @@ class ImapAdapter extends AbstractAdapter
      *
      * Log in with username/password credentials.
      *
-     * @param array $cred An array of credential data, including any data to
+     * @param array $input An array of credential data, including any data to
      * bind to the query.
      *
      * @return bool True on success, false on failure.
      *
      */
-    public function login(array $cred)
+    public function login(array $input)
     {
-        $this->checkCredentials($cred);
-        $username = $cred['username'];
-        $password = $cred['password'];
+        $this->checkInput($input);
+        $username = $input['username'];
+        $password = $input['password'];
 
-        $conn = $this->proxy->imap_open(
+        $conn = $this->phpfunc->imap_open(
             $this->mailbox,
             $username,
             $password,
             $this->options,
-            $this->attempt,
+            $this->retries,
             $this->params
         );
 
@@ -83,7 +83,7 @@ class ImapAdapter extends AbstractAdapter
             throw new Exception\ConnectionFailed($this->mailbox);
         }
 
-        $this->proxy->imap_close($conn);
+        $this->phpfunc->imap_close($conn);
         return array($username, array());
     }
 }

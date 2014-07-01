@@ -106,17 +106,17 @@ class PdoAdapter extends AbstractAdapter
      *
      * Log in with username/password credentials.
      *
-     * @param array $cred An array of credential data, including any data to
+     * @param array $input An array of credential data, including any data to
      * bind to the query.
      *
      * @return bool True on success, false on failure.
      *
      */
-    public function login(array $cred)
+    public function login(array $input)
     {
-        $this->checkCredentials($cred);
-        $data = $this->fetchRow($cred);
-        $this->verify($cred, $data);
+        $this->checkInput($input);
+        $data = $this->fetchRow($input);
+        $this->verify($input, $data);
         $name = $data['username'];
         unset($data['username']);
         unset($data['password']);
@@ -127,15 +127,15 @@ class PdoAdapter extends AbstractAdapter
      *
      * Fetch a row from the table
      *
-     * @param array $cred
+     * @param array $input
      *
      * @return array
      *
      */
-    protected function fetchRow($cred)
+    protected function fetchRow($input)
     {
         $stm = $this->buildSelect();
-        $rows = $this->fetchRows($stm, $cred);
+        $rows = $this->fetchRows($stm, $input);
 
         if (count($rows) < 1) {
             throw new Exception\UsernameNotFound;
@@ -228,10 +228,10 @@ class PdoAdapter extends AbstractAdapter
      * @return bool
      *
      */
-    protected function verify($cred, $data)
+    protected function verify($input, $data)
     {
         $verified = $this->verifier->verify(
-            $cred['password'],
+            $input['password'],
             $data['password'],
             $data
         );

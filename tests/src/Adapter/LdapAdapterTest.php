@@ -1,21 +1,22 @@
 <?php
 namespace Aura\Auth\Adapter;
 
-use Aura\Auth\FunctionProxy;
+use Aura\Auth\Phpfunc;
 
 class LdapAdapterTest extends \PHPUnit_Framework_TestCase
 {
     protected $adapter;
 
-    protected $proxy;
+    protected $phpfunc;
 
     protected function setUp()
     {
-        $this->proxy = $this->getMock(
-            'Aura\Auth\FunctionProxy',
+        $this->phpfunc = $this->getMock(
+            'Aura\Auth\Phpfunc',
             array(
                 'ldap_connect',
                 'ldap_bind',
+                'ldap_unbind',
                 'ldap_set_option',
                 'ldap_close',
                 'ldap_errno',
@@ -23,7 +24,13 @@ class LdapAdapterTest extends \PHPUnit_Framework_TestCase
             ),
             array()
         );
-        $this->adapter = new LdapAdapter($this->proxy, 'ldap.example.com', '');
+
+        $this->adapter = new LdapAdapter(
+            $this->phpfunc,
+            'ldaps://ldap.example.com:636',
+            'ou=Foo,dc=Bar,cn=users,uid=%s',
+            array('LDAP_OPTION_KEY', 'LDAP_OPTION_VALUE')
+        );
     }
 
     public function testInstance()
@@ -34,82 +41,91 @@ class LdapAdapterTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    /**
-     *
-     * @expectedException Aura\Auth\Exception\ConnectionFailed
-     *
-     */
     public function testLoginConnectionFailed()
     {
-        $cred = array(
+        $input = array(
             'username' => 'someusername',
             'password' => 'secretpassword'
         );
-        $this->proxy->expects($this->once())
+        $this->phpfunc->expects($this->once())
             ->method('ldap_connect')
-            ->with('ldap.example.com')
+            ->with('ldaps://ldap.example.com:636')
             ->will($this->returnValue(false));
-        $this->adapter->login($cred);
+
+        $this->setExpectedException('Aura\Auth\Exception\ConnectionFailed');
+        $this->adapter->login($input);
     }
 
     public function testLoginSuccess()
     {
-        $this->proxy->expects($this->once())
+        $this->phpfunc->expects($this->once())
             ->method('ldap_connect')
-            ->with('ldap.example.com')
+            ->with('ldaps://ldap.example.com:636')
             ->will($this->returnValue(true));
 
-        $this->proxy->expects($this->any())
+        $this->phpfunc->expects($this->any())
             ->method('ldap_set_option')
             ->will($this->returnValue(true));
 
-        $this->proxy->expects($this->once())
+        $this->phpfunc->expects($this->once())
             ->method('ldap_bind')
+            ->with(
+                true,
+                'ou=Foo,dc=Bar,cn=users,uid=someusername',
+                'secretpassword'
+            )
             ->will($this->returnValue(true));
 
-        $cred = array(
-            'username' => 'someusername',
-            'password' => 'secretpassword'
-        );
-        $this->assertEquals(array('username' => $cred['username']), $this->adapter->login($cred));
-    }
-
-    /**
-     *
-     * @expectedException Aura\Auth\Exception\ConnectionFailed
-     *
-     */
-    public function testUsernamePasswordFailure()
-    {
-        $this->proxy->expects($this->once())
-            ->method('ldap_connect')
-            ->with('ldap.example.com')
+        $this->phpfunc->expects($this->once())
+            ->method('ldap_unbind')
             ->will($this->returnValue(true));
 
-        $this->proxy->expects($this->any())
-            ->method('ldap_set_option')
-            ->will($this->returnValue(true));
-
-        $this->proxy->expects($this->once())
-            ->method('ldap_bind')
-            ->will($this->returnValue(false));
-
-        $this->proxy->expects($this->once())
-            ->method('ldap_error')
-            ->will($this->returnValue(400));
-
-        $this->proxy->expects($this->once())
-            ->method('ldap_errno')
-            ->will($this->returnValue(500));
-
-        $this->proxy->expects($this->once())
+        $this->phpfunc->expects($this->once())
             ->method('ldap_close')
             ->will($this->returnValue(true));
 
-        $cred = array(
+        $actual = $this->adapter->login(array(
             'username' => 'someusername',
             'password' => 'secretpassword'
+        ));
+
+        $this->assertEquals(
+            array('someusername', array()),
+            $actual
         );
-        $this->adapter->login($cred);
+    }
+
+    public function testBindFailed()
+    {
+        $this->phpfunc->expects($this->once())
+            ->method('ldap_connect')
+            ->with('ldaps://ldap.example.com:636')
+            ->will($this->returnValue(true));
+
+        $this->phpfunc->expects($this->any())
+            ->method('ldap_set_option')
+            ->will($this->returnValue(true));
+
+        $this->phpfunc->expects($this->once())
+            ->method('ldap_bind')
+            ->will($this->returnValue(false));
+
+        $this->phpfunc->expects($this->once())
+            ->method('ldap_errno')
+            ->will($this->returnValue(1));
+
+        $this->phpfunc->expects($this->once())
+            ->method('ldap_error')
+            ->will($this->returnValue('Operations Error'));
+
+        $this->phpfunc->expects($this->once())
+            ->method('ldap_close')
+            ->will($this->returnValue(true));
+
+        $this->setExpectedException('Aura\Auth\Exception\BindFailed');
+        $this->adapter->login(array(
+            'username' => 'someusername',
+            'password' => 'secretpassword'
+        ));
     }
 }
