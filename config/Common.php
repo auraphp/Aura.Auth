@@ -79,6 +79,10 @@ class Common extends Config
             'expire_ttl' => 14400,
         );
 
+        $di->params['Aura\Auth\Session\Session'] = array(
+            'cookie' => $_COOKIE
+        );
+
         /**
          * Aura\Auth\Verifier\HashVerifier
          */
