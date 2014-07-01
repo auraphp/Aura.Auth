@@ -11,6 +11,7 @@
 namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Exception;
+use Aura\Auth\FunctionProxy;
 
 /**
  *
@@ -37,12 +38,16 @@ class ImapAdapter extends AbstractAdapter
 
     protected $params;
 
+    protected $proxy;
+
     public function __construct(
+        FunctionProxy $proxy,
         $mailbox,
         $options = 0,
         $attempt = 1,
         array $params = null
     ) {
+        $this->proxy = $proxy;
         $this->mailbox = $mailbox;
         $this->options = $options;
         $this->attempt = $attempt;
@@ -65,7 +70,7 @@ class ImapAdapter extends AbstractAdapter
         $username = $cred['username'];
         $password = $cred['password'];
 
-        $conn = imap_open(
+        $conn = $this->proxy->imap_open(
             $this->mailbox,
             $username,
             $password,
@@ -75,7 +80,7 @@ class ImapAdapter extends AbstractAdapter
         );
 
         if (is_resource($conn)) {
-            imap_close($conn);
+            $this->proxy->imap_close($conn);
             return array($username, array());
         }
 
