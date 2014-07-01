@@ -11,7 +11,7 @@
 namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Exception;
-use Aura\Auth\ExtensionProxy;
+use Aura\Auth\FunctionProxy;
 
 /**
  *
@@ -46,17 +46,17 @@ class LdapAdapter extends AbstractAdapter
     protected $proxy;
 
     public function __construct(
-        ExtensionProxy $proxy,
+        FunctionProxy $proxy,
         $uri,
         $format,
         $filter = '\w',
         array $options = array()
     ) {
+        $this->proxy = $proxy;
         $this->uri = $uri;
         $this->format = $format;
         $this->filter = $filter;
         $this->options = $options;
-        $this->proxy = $proxy;
     }
 
     /**
@@ -75,13 +75,13 @@ class LdapAdapter extends AbstractAdapter
         $username = $cred['username'];
         $password = $cred['password'];
 
-        $conn = $this->proxy->connect($this->uri);
+        $conn = $this->proxy->ldap_connect($this->uri);
         if (! $conn) {
             throw new Exception\ConnectionFailed($this->uri);
         }
 
         foreach ($this->options as $opt => $val) {
-            $this->proxy->set_option($conn, $opt, $val);
+            $this->proxy->ldap_set_option($conn, $opt, $val);
         }
 
         // filter the username to prevent LDAP injection
@@ -90,18 +90,18 @@ class LdapAdapter extends AbstractAdapter
 
         // bind to the server
         $rdn = sprintf($this->format, $username);
-        $bind = $this->proxy->bind($conn, $rdn, $password);
+        $bind = $this->proxy->ldap_bind($conn, $rdn, $password);
 
         // did the bind succeed?
         if ($bind) {
-            $this->proxy->close($conn);
+            $this->proxy->ldap_close($conn);
             return array('username' => $username);
         }
 
         $e = new Exception\ConnectionFailed(
-            $this->proxy->errno($conn) . ': ' . $this->proxy->error($conn)
+            $this->proxy->ldap_errno($conn) . ': ' . $this->proxy->ldap_error($conn)
         );
-        $this->proxy->close($conn);
+        $this->proxy->ldap_close($conn);
         throw $e;
     }
 }

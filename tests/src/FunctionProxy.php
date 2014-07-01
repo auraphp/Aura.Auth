@@ -1,20 +1,20 @@
 <?php
 namespace Aura\Auth;
 
-class ExtensionProxyTest extends \PHPUnit_Framework_TestCase
+class FunctionProxyTest extends \PHPUnit_Framework_TestCase
 {
     protected $proxy;
 
     protected function setUp()
     {
-        $this->proxy = new ExtensionProxy('str');
+        $this->proxy = new FunctionProxy;
     }
 
     public function testInstance()
     {
         $this->assertEquals(
             str_replace('Hello', 'Hi', 'Hello Aura'),
-            $this->proxy->replace('Hello', 'Hi', 'Hello Aura')
+            $this->proxy->str_replace('Hello', 'Hi', 'Hello Aura')
         );
     }
 }
