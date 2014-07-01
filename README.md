@@ -292,7 +292,7 @@ $cols = array(
 );
 $from = 'accounts JOIN profiles ON accounts.uid = profiles.uid';
 $where = 'accounts.active = 1';
-$pdo_adapter = $auth_factory->newPdoAdapter($pdo, $hash, $cols, $from);
+$pdo_adapter = $auth_factory->newPdoAdapter($pdo, $hash, $cols, $from, $where);
 ?>
 ```
 
