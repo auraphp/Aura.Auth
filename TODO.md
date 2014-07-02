@@ -2,15 +2,9 @@
 
 ## Security
 
-Add hashing to the IniAdapter.
-
 Track IP numbers through _ResumeService_? This may break with proxies.
 
 ## Adapters/Verifiers
-
-Import the LdapAdapter from hold/.
-
-Import the MailAdapter from hold/.
 
 Add OAuth2 adapters?
 
