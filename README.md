@@ -3,17 +3,17 @@
 Provides authentication functionality and session tracking using various adapters; currently supported adapters are:
 
 - Apache htpasswd files
-- SQL tables via [PDO](http://php.net/pdo)
+- SQL tables via the [PDO](http://php.net/pdo) extension
+- IMAP/POP/NNTP via the [imap](http://php.net/imap) extension
+- LDAP and Active Directory via the [ldap](http://php.net.ldap) extension
 
-Note that the purpose of this package is only to authenticate user credentials; it does not currently, and probably will not in the future, handle user account creation and management. That is more properly the domain of application-level functionality, or at least a separate Aura bundle.
+Note that the purpose of this package is only to authenticate user credentials. It does not currently, and probably will not in the future, handle user account creation and management. That is more properly the domain of application-level functionality, or at least a separate Aura bundle.
 
 ## Foreword
 
-This package is still in development and not yet complete. Please review the [TODO](TODO.md) document for more information.
-
 ### Installation
 
-This library requires PHP 5.3 or later, and has no userland dependencies. (For the newer, more-secure [`password_hash()`](http://php.net/password_hash) functionality, this library requires PHP 5.5 or later, or an alternative userland implementation such as [ircmaxell/password-compat](https://github.com/ircmaxell/password_compat).)
+This library requires PHP 5.5 or later, and has no userland dependencies.  (As a special consideration, this library is compatible with PHP 5.3 and 5.4 when the ircmaxell/password-compat](https://github.com/ircmaxell/password_compat) package is installed.)
 
 It is installable and autoloadable via Composer as [aura/auth](https://packagist.org/packages/aura/auth).
 
@@ -41,8 +41,6 @@ To ask questions, provide feedback, or otherwise communicate with the Aura commu
 
 
 ## Getting Started
-
-Warning: this package is still in its early development stages, so the behaviors described below may change rapidly.
 
 ### Instantiation
 
@@ -242,6 +240,90 @@ $login_service->login($auth, array(
 
 For more on _LoginService_ idioms, please see the [Service Idioms](#service-idioms) section. (The _LogoutService_ and _ResumeService_ do not need credential information.)
 
+#### IMAP/POP/NNTP Adapter
+
+##### Instantiation
+
+To create an adapter for IMAP/POP/NNTP servers, call the _AuthFactory_ `newImapAdapter()` method and pass the mailbox specification string, along with any appropriate option constants:
+
+```php
+<?php
+$imap_adapter = $auth_factory->newImapAdapter(
+    '{mail.example.com:143/imap/secure}',
+    OP_HALFOPEN
+);
+?>
+```
+
+> N.b.: See the [imap_open()](http://php.net/imap_open) documentation for more variations on mailbox specification strings.
+
+##### Service Integration
+
+You can then pass the _Adapter_ to each _Service_ factory method like so:
+
+```php
+<?php
+$login_service = $auth_factory->newLoginService($imap_adapter);
+$logout_service = $auth_factory->newLogoutService($imap_adapter);
+$resume_service = $auth_factory->newResumeService($imap_adapter);
+?>
+```
+
+To attempt a user login, pass an array with `username` and `password` elements to the _LoginService_ `login()` method along with the _Auth_ object:
+
+```php
+<?php
+$login_service->login($auth, array(
+    'username' => 'boshag',
+    'password' => '12345'
+));
+?>
+```
+
+For more on _LoginService_ idioms, please see the [Service Idioms](#service-idioms) section. (The _LogoutService_ and _ResumeService_ do not need credential information.)
+
+#### LDAP Adapter
+
+##### Instantiation
+
+To create an adapter for LDAP and Active Directory servers, call the _AuthFactory_ `newLdapAdapter()` method and pass the server name with a distinguished name (DN) format string:
+
+```php
+<?php
+$ldap_adapter = $auth_factory->newImapAdapter(
+    'ldaps://ldap.example.com:636',
+    'ou=Company Name,dc=Department Name,cn=users,uid=%s'
+);
+?>
+```
+
+> N.b.: The username will be escaped and then passed to the DN format string via [sprintf()](http://php.net/sprintf). The completed DN will be used for binding to the server after connection.
+
+##### Service Integration
+
+You can then pass the _Adapter_ to each _Service_ factory method like so:
+
+```php
+<?php
+$login_service = $auth_factory->newLoginService($ldap_adapter);
+$logout_service = $auth_factory->newLogoutService($ldap_adapter);
+$resume_service = $auth_factory->newResumeService($ldap_adapter);
+?>
+```
+
+To attempt a user login, pass an array with `username` and `password` elements to the _LoginService_ `login()` method along with the _Auth_ object:
+
+```php
+<?php
+$login_service->login($auth, array(
+    'username' => 'boshag',
+    'password' => '12345'
+));
+?>
+```
+
+For more on _LoginService_ idioms, please see the [Service Idioms](#service-idioms) section. (The _LogoutService_ and _ResumeService_ do not need credential information.)
+
 #### PDO Adapter
 
 ##### Instantiation
@@ -384,11 +466,19 @@ try {
     echo "There is more than one account with that username.";
 } catch (\Aura\Auth\Exception\PasswordIncorrect $e) {
     echo "The password you entered was incorrect.";
+} catch (\Aura\Auth\Exception\ConnectionFailed $e) {
+    echo "Cound not connect to IMAP or LDAP server.";
+    echo "This could be because the username or password was wrong,";
+    echo "or because the the connect operation itself failed in some way. ";
+    echo $e->getMessage();
+} catch (\Aura\Auth\Exception\BindFailed $e) {
+    echo "Cound not bind to LDAP server.";
+    echo "This could be because the username or password was wrong,";
+    echo "or because the the bind operations itself failed in some way. ";
+    echo $e->getMessage();
 }
 ?>
 ```
-
-**TBD: _ConnectionFailed_ for IMAP/LDAP, and _BindFailed_ for LDAP**
 
 > N.b.: Instead of creating the  _Auth_ and _LoginService_ objects by hand, you may wish to use a dependency injection container such as [Aura.Di](https://github.com/auraphp/Aura.Di) to retain them for shared use throughout your application.
 

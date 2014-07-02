@@ -218,4 +218,32 @@ class AuthFactory
             $verifier
         );
     }
+
+    public function newImapAdapter(
+        $mailbox,
+        $options = 0,
+        $retries = 1,
+        array $params = null
+    ) {
+        return new Adapter\ImapAdapter(
+            new Phpfunc,
+            $mailbox,
+            $options,
+            $retries,
+            $params
+        );
+    }
+
+    public function newLdapAdapter(
+        $server,
+        $dnformat,
+        array $options = array()
+    ) {
+        return new Adapter\LdapAdapter(
+            new Phpfunc,
+            $server,
+            $dnformat,
+            $options
+        );
+    }
 }

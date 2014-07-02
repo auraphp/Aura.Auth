@@ -59,6 +59,19 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Aura\Auth\Verifier\HtpasswdVerifier', $verifier);
     }
 
+    public function testNewImapAdapter()
+    {
+        $adapter = $this->factory->newImapAdapter('imap.example.com', '{mbox}');
+        $this->assertInstanceOf('Aura\Auth\Adapter\ImapAdapter', $adapter);
+    }
+
+    public function testNewLdapAdapter()
+    {
+        $adapter = $this->factory->newLdapAdapter('ldap.example.com', 'ou=Org');
+        $this->assertInstanceOf('Aura\Auth\Adapter\LdapAdapter', $adapter);
+    }
+
+
     public function testNewLoginService()
     {
         $service = $this->factory->newLoginService();
