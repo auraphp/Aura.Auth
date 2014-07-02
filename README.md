@@ -290,7 +290,7 @@ To create an adapter for LDAP and Active Directory servers, call the _AuthFactor
 
 ```php
 <?php
-$ldap_adapter = $auth_factory->newImapAdapter(
+$ldap_adapter = $auth_factory->newLdapAdapter(
     'ldaps://ldap.example.com:636',
     'ou=Company Name,dc=Department Name,cn=users,uid=%s'
 );
