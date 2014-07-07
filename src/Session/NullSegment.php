@@ -51,10 +51,6 @@ class NullSegment implements SegmentInterface
      */
     public function set($key, $val)
     {
-        if (! isset($this->data)) {
-            return;
-        }
-
         $this->data[$key] = $val;
     }
 }
