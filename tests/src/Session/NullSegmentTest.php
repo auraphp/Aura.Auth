@@ -10,7 +10,7 @@ class NullSegmentTest extends \PHPUnit_Framework_TestCase
         $this->segment = new NullSegment;
     }
 
-    public function testWithSession()
+    public function test()
     {
         $this->assertNull($this->segment->get('foo'));
         $this->segment->set('foo', 'bar');

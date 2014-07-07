@@ -80,16 +80,12 @@ class LogoutService
      *
      * @param string $status The new authentication status.
      *
-     * @return string|false The authentication status on success, or boolean
-     * false on failure.
+     * @return string The new authentication status.
      *
      */
     public function forceLogout(Auth $auth, $status = Status::ANON)
     {
         $this->session->regenerateId();
-        if (! $this->session->destroy()) {
-            return false;
-        }
 
         $auth->set(
             $status,

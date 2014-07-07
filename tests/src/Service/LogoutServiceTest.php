@@ -66,21 +66,4 @@ class LogoutServiceTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(Status::ANON, $this->auth->getStatus());
         $this->assertNull($this->auth->getUserName());
     }
-
-    public function testForceLogout_cannotDestroy()
-    {
-        $this->session->allow_destroy = false;
-
-        $result = $this->login_service->forceLogin(
-            $this->auth,
-            'boshag',
-            array('foo' => 'bar')
-        );
-        $this->assertSame(Status::VALID, $result);
-        $this->assertTrue($this->auth->isValid());
-
-        $result = $this->logout_service->forceLogout($this->auth);
-        $this->assertFalse($result);
-        $this->assertTrue($this->auth->isValid());
-    }
 }

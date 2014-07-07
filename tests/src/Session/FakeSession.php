@@ -6,12 +6,10 @@ class FakeSession implements SessionInterface
     public $started = false;
     public $resumed = false;
     public $session_id = 1;
-    public $destroyed = false;
 
 
     public $allow_start = true;
     public $allow_resume = true;
-    public $allow_destroy = true;
 
     public function start()
     {
@@ -28,11 +26,5 @@ class FakeSession implements SessionInterface
     public function regenerateId()
     {
         $this->session_id ++;
-    }
-
-    public function destroy()
-    {
-        $this->destroyed = $this->allow_destroy;
-        return $this->destroyed;
     }
 }

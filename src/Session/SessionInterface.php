@@ -39,11 +39,4 @@ interface SessionInterface
      *
      */
     public function regenerateId();
-
-    /**
-     *
-     * destroy the session
-     *
-     */
-    public function destroy();
 }

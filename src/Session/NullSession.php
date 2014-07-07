@@ -54,14 +54,4 @@ class NullSession implements SessionInterface
     {
         return true;
     }
-
-    /**
-     *
-     * Destroy session.
-     *
-     */
-    public function destroy()
-    {
-        return true;
-    }
 }

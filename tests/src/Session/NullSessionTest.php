@@ -30,11 +30,4 @@ class NullSessionTest extends \PHPUnit_Framework_TestCase
         $this->assertTrue($this->session->regenerateId());
         $this->assertTrue(session_id() === '');
     }
-
-    public function testDestroy()
-    {
-        $this->assertTrue(session_id() === '');
-        $this->assertTrue($this->session->destroy());
-        $this->assertTrue(session_id() === '');
-    }
 }

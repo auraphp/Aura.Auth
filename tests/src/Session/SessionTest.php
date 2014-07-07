@@ -74,10 +74,4 @@ class SessionTest extends \PHPUnit_Framework_TestCase
         $new_id = session_id();
         $this->assertTrue($old_id !== $new_id);
     }
-
-    public function testDestroy()
-    {
-        $this->session->start();
-        $this->assertTrue($this->session->destroy());
-    }
 }
