@@ -84,9 +84,9 @@ To retain values in a session, you can start a session by force with `session_st
 
 This package comes with three services for dealing with authentication phases:
 
-- _LoginService_ to log in and start a new session,
+- _LoginService_ to log in and start (or resume) a session,
 
-- _LogoutService_ to log out and destroy an existing session,
+- _LogoutService_ to log out and remove the username and user data in the session (note that this **does not** destroy the session), and
 
 - _ResumeService_ to resume a previously-started session.
 
@@ -152,13 +152,13 @@ echo $auth->getStatus(); // ANON
 
 Using `forceLogout()` has these side effects:
 
-- it clears any existing user name and user data from the `$_SESSION` segment
+- it clears any existing username and user data from the `$_SESSION` segment
 
 - it regenerates the session ID
 
-- it destroys the session
-
 Note that `forceLogout()` does not check any credential sources. You as the application owner are forcing the _Auth_ object to a logged-out state.
+
+Note also that this **does not** destroy the session. This is because you may have other things you need in the session memory, such as flash messages.
 
 #### Resuming A Session
 
@@ -615,7 +615,7 @@ $resume_service = $auth_factory->newResumeService($custom_adapter);
 
 ### Session Management
 
-The _Service_ objects use a _Session_ object to start sessions, destroy them, and regenerate session IDs. The _Session_ object uses the native PHP `session_*()` functions to manage sessions.
+The _Service_ objects use a _Session_ object to start sessions and regenerate session IDs. (Note that they **do not** destroy sessions.) The _Session_ object uses the native PHP `session_*()` functions to manage sessions.
 
 #### Custom Sessions
 
@@ -656,11 +656,6 @@ class CustomSession implements SessionInterface
     {
         return $this->fwsession->regenerateSessionId();
     }
-
-    public function destroy()
-    {
-        return $this->fwsession->destroySession();
-    }
 }
 ?>
 ```
@@ -694,9 +689,9 @@ $auth_factory = new AuthFactory($_COOKIE, $null_session, $null_segment);
 ?>
 ```
 
-With the _NullSession_, a session will never actually be started or destroyed, and no session ID will be created or regenerated. Likewise, no session will ever be resumed, because it will never have been saved at the end of the previous request. Finally, PHP will never create a session cookie to send in the response.
+With the _NullSession_, no session will ever be started, and no session ID will be created or regenerated. Likewise, no session will ever be resumed, because it will never have been saved at the end of the previous request. Finally, PHP will never create a session cookie to send in the response.
 
-Likewise, the _NullSegment_ retains authentication information in an object property instead of in a `$_SESSION` segment. Unlike the normal _Segment_, which only retains data when `$_SESSION` is present, the _NullSegment_ will always retain data that is set into it. When the request is over, all authentication information retained in the _NullSegment_ will disappear.
+Similarly, the _NullSegment_ retains authentication information in an object property instead of in a `$_SESSION` segment. Unlike the normal _Segment_, which only retains data when `$_SESSION` is present, the _NullSegment_ will always retain data that is set into it. When the request is over, all information retained in the _NullSegment_ will disappear.
 
 When using the _NullSession_ and _NullSegment_, you will have to check  credentials via the _LoginService_ `login()` or `forceLogin()` method on each request, which in turn will retain the authentication information in the _Segment_. In an API situation this is often preferable to managing an ongoing session.
 

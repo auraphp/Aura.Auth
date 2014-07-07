@@ -43,6 +43,15 @@ class HtpasswdAdapter extends AbstractAdapter
 
     /**
      *
+     * A verifier for passwords.
+     *
+     * @var VerifierInterface
+     *
+     */
+    protected $verifier;
+
+    /**
+     *
      * @param string $file
      *
      * @param VerifierInterface $verifier
@@ -53,6 +62,18 @@ class HtpasswdAdapter extends AbstractAdapter
     {
         $this->file = $file;
         $this->verifier = $verifier;
+    }
+
+    /**
+     *
+     * Return object of type VerifierInterface
+     *
+     * @return VerifierInterface
+     *
+     */
+    public function getVerifier()
+    {
+        return $this->verifier;
     }
 
     /**

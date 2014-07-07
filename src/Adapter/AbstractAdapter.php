@@ -25,27 +25,6 @@ abstract class AbstractAdapter implements AdapterInterface
 {
     /**
      *
-     * A verifier for passwords.
-     *
-     * @var VerifierInterface
-     *
-     */
-    protected $verifier;
-
-    /**
-     *
-     * Return object of type VerifierInterface
-     *
-     * @return VerifierInterface
-     *
-     */
-    public function getVerifier()
-    {
-        return $this->verifier;
-    }
-
-    /**
-     *
      * @param mixed $input
      *
      * @return bool
@@ -88,7 +67,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return bool
      *
      */
-    protected function checkInput(&$input)
+    protected function checkInput($input)
     {
         if (empty($input['username'])) {
             throw new Exception\UsernameMissing;
