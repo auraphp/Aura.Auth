@@ -62,6 +62,15 @@ class PdoAdapter extends AbstractAdapter
 
     /**
      *
+     * A verifier for passwords.
+     *
+     * @var VerifierInterface
+     *
+     */
+    protected $verifier;
+
+    /**
+     *
      * Constructor
      *
      * @param \PDO $pdo
@@ -100,6 +109,18 @@ class PdoAdapter extends AbstractAdapter
             throw new Exception\PasswordColumnNotSpecified;
         }
         $this->cols = $cols;
+    }
+
+    /**
+     *
+     * Return object of type VerifierInterface
+     *
+     * @return VerifierInterface
+     *
+     */
+    public function getVerifier()
+    {
+        return $this->verifier;
     }
 
     /**
