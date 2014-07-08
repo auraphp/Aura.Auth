@@ -4,9 +4,60 @@
 
 Track IP numbers through _ResumeService_? This may break with proxies.
 
-## Adapters/Verifiers
+## Add OAuth Support
 
-Add OAuth2 adapters?
+It might be that all one has to do is build a custom adapter and inject the provider of one's choice. The redirect URL given to the provider needs to be an action that invokes the LoginService. The adapter for that service can be based on, for example, the League client:
+
+```php
+<?php
+namespace Custom\Auth\Adapter;
+
+use Aura\Auth\Adapter\AdapterInterface;
+use Aura\Auth\Exception;
+use League\OAuth2\Client\Provider\AbstractProvider;
+
+class LeagueOAuth2Adapter implements AdapterInterface
+{
+   public function __construct(AbstractProvider $provider)
+   {
+       $this->provider = $provider;
+   }
+
+   public function login($input)
+   {
+       if (! isset($input['code'])) {
+           throw new Exception('Authorization code missing.')
+       }
+
+       $token = $this->provider->getAccessToken(
+           'authorization_code',
+           array('code' => $input['code'])
+       );
+
+       $details = $this->provider->getUserDetails($token);
+       $data = $details->getArrayCopy();
+       $data['token'] = $token;
+
+       $username = $data['nickname'];
+       unset($data['nickname']);
+
+       return array($username, $data);
+   }
+
+   public function logout()
+   {
+       // do nothing
+   }
+
+   public function resume()
+   {
+       // do nothing
+   }
+}
+?>
+```
+
+This could perhaps be provided as a bundle.
 
 ## Verifiers
 
