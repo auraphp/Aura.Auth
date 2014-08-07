@@ -58,7 +58,7 @@ class PasswordVerifier implements VerifierInterface
      */
     public function verify($plaintext, $hashvalue, array $extra = array())
     {
-        if (is_string($this->algo)) {
+        if (is_string($this->algo) && !empty($this->algo)) {
             return hash($this->algo, $plaintext) === $hashvalue;
         } else {
             return password_verify($plaintext, $hashvalue);
