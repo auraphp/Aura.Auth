@@ -775,8 +775,7 @@ class LeagueOAuth2Adapter implements AdapterInterface
     }
 
     /**
-     * @param mixed $user
-     * @param array $info
+     * @param Auth $auth
      * Logout method is required to fulfill the contract with AdapterInterface
      */
     public function logout(Auth $auth)
@@ -785,6 +784,7 @@ class LeagueOAuth2Adapter implements AdapterInterface
     }
 
     /**
+     * @param Auth $auth
      * Resume method required to fulfill the contract with AdapterInterface
      */
     public function resume(Auth $auth)
