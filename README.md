@@ -744,7 +744,7 @@ class LeagueOAuth2Adapter implements AdapterInterface
      * This method must be implemented to fulfill the contract
      * with AdapterInterface
      */
-    public function login($input)
+    public function login(array $input)
     {
         if (!isset($input['code'])) {
             throw new Exception('Authorization code missing.');
@@ -779,7 +779,7 @@ class LeagueOAuth2Adapter implements AdapterInterface
      * @param array $info
      * Logout method is required to fulfill the contract with AdapterInterface
      */
-    public function logout($user, array $info = array())
+    public function logout(Auth $auth)
     {
         //nothing to do here
     }
@@ -787,31 +787,7 @@ class LeagueOAuth2Adapter implements AdapterInterface
     /**
      * Resume method required to fulfill the contract with AdapterInterface
      */
-    public function resume()
-    {
-        // nothing to do here
-    }
-
-    /**
-     * getUser method required to fulfill contract with AdapterInterface
-     */
-    public function getUser()
-    {
-        // nothing to do here
-    }
-
-    /**
-     * getInfo method required to fulfill contract with AdapterInterface
-     */
-    public function getInfo()
-    {
-        // nothing to do here
-    }
-
-    /**
-     * getError method required to fulfill contract with AdapterInterface
-     */
-    public function getError()
+    public function resume(Auth $auth)
     {
         // nothing to do here
     }
