@@ -723,7 +723,7 @@ use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Auth\Exception;
 use League\OAuth2\Client\Provider\IdentityProvider;
 
-class GithubAuthAdapter implements AdapterInterface
+class LeagueOAuth2Adapter implements AdapterInterface
 {
 
     /**
@@ -771,7 +771,7 @@ class GithubAuthAdapter implements AdapterInterface
         $data['token'] = $token;
         $username = $data['nickname'];
         unset($data['nickname']);
-        return ($username, $data);
+        return [$username, $data];
     }
 
     /**
@@ -838,7 +838,7 @@ use \League\OAuth2\Client\Provider\Github;
 use \Aura\Auth\Exception;
 
 require_once 'vendor/autoload.php';
-require_once 'vendor/aura/auth/autoload.php';
+
 $githubProvider = new Github(array(
     'clientId' => 'xxxxxxxxxxxxxxxx',
     'clientSecret' => 'xxxxxxxxxxxxxxxxxxxx',
@@ -849,7 +849,7 @@ if (!isset($_GET['code'])) {
     header('Location: ' . $githubProvider->getAuthorizationUrl());
     exit;
 } else {
-    $auraAdapter = new Adapter\GithubAuthAdapter($githubProvider);
+    $auraAdapter = new Adapter\LeagueOAuth2Adapter($githubProvider);
     try {
         // array is the username and an array of info and indicates successful
         // login
