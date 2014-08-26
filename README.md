@@ -810,8 +810,9 @@ look like.
 <?php
 namespace OAuth2;
 
-use \League\OAuth2\Client\Provider\Github;
-use \Aura\Auth\Exception;
+use League\OAuth2\Client\Provider\Github;
+use OAuth2\Adapter\LeagueOAuth2Adapter;
+use Aura\Auth\Exception;
 
 require_once 'vendor/autoload.php';
 
@@ -825,7 +826,7 @@ if (!isset($_GET['code'])) {
     header('Location: ' . $githubProvider->getAuthorizationUrl());
     exit;
 } else {
-    $auraAdapter = new Adapter\LeagueOAuth2Adapter($githubProvider);
+    $auraAdapter = new LeagueOAuth2Adapter($githubProvider);
     try {
         // array is the username and an array of info and indicates successful
         // login
