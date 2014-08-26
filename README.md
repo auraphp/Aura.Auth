@@ -701,3 +701,168 @@ When using the _NullSession_ and _NullSegment_, you will have to check  credenti
 ### Custom Services
 
 You are not restricted to the login, logout, and resume services provided by this package. However, if you build a service of your own, or if you extend one of the provided services, you will have to instantiate that customized service object manually, instead of using the _AuthFactory_. This can be tedious but is not difficult, especially when using a dependency injection container system such as [Aura.Di](https://github.com/auraphp/Aura.Auth).
+
+### OAuth Services
+
+Should you desire to handle your authentication through a 3rd party service that
+uses OAuth 2.0, you'll need to write an adapter that implements
+```Aura\Auth\Adapter\AdapterInterface``` and provide your own implementation for
+fetching the access token and user information. Your implementation can be
+something you've written yourself or it can be an existing OAuth2 client.
+
+The following example will demonstrate how you'd go about creating this adapter
+using the [PHP League's OAuth2
+Client](https://github.com/thephpleague/oauth2-client). We'll also be using
+Github as the service provider for this example.
+
+```php
+<?php
+namespace OAuth2\Adapter;
+
+use Aura\Auth\Adapter\AdapterInterface;
+use Aura\Auth\Exception;
+use League\OAuth2\Client\Provider\IdentityProvider;
+
+class GithubAuthAdapter implements AdapterInterface
+{
+
+    /**
+     * @var \League\OAuth2\Client\Provider\IdentityProvider
+     * The identity provider that the adapter will use
+     */
+    protected $provider;
+
+    public function __construct(IdentityProvider $provider)
+    {
+        $this->provider = $provider;
+    }
+
+    /**
+     * @param $input an input containing the OAuth 2 code
+     * @return array the username and details for the user
+     * @throws \Aura\Auth\Exception
+     * This method must be implemented to fulfill the contract
+     * with AdapterInterface
+     */
+    public function login($input)
+    {
+        if (!isset($input['code'])) {
+            throw new Exception('Authorization code missing.');
+        }
+
+        $token = $this->provider->getAccessToken(
+            'authorization_code',
+            array('code' => $input['code'])
+        );
+
+        $details = $this->provider->getUserDetails($token);
+        $data = [
+            'uid' => $details->__get('uid'),
+            'nickname' => $details->__get('nickname'),
+            'name' => $details->__get('name'),
+            'firstName' => $details->__get('firstName'),
+            'lastName' => $details->__get('lastName'),
+            'email' => $details->__get('email'),
+            'location' => $details->__get('location'),
+            'description' => $details->__get('description'),
+            'imageUrl' => $details->__get('imageUrl'),
+            'urls' => $details->__get('urls'),
+        ];
+        $data['token'] = $token;
+        $username = $data['nickname'];
+        unset($data['nickname']);
+        return ($username, $data);
+    }
+
+    /**
+     * @param mixed $user
+     * @param array $info
+     * Logout method is required to fulfill the contract with AdapterInterface
+     */
+    public function logout($user, array $info = array())
+    {
+        //nothing to do here
+    }
+
+    /**
+     * Resume method required to fulfill the contract with AdapterInterface
+     */
+    public function resume()
+    {
+        // nothing to do here
+    }
+
+    /**
+     * getUser method required to fulfill contract with AdapterInterface
+     */
+    public function getUser()
+    {
+        // nothing to do here
+    }
+
+    /**
+     * getInfo method required to fulfill contract with AdapterInterface
+     */
+    public function getInfo()
+    {
+        // nothing to do here
+    }
+
+    /**
+     * getError method required to fulfill contract with AdapterInterface
+     */
+    public function getError()
+    {
+        // nothing to do here
+    }
+}
+?>
+```
+
+As you can see in the code, your adapter will be accepting a client as a
+parameter and using that client to fulfill the
+\Aura\Auth\Adapter\AdapterInterface contract. This adapter would be commonly
+used in an OAuth2 Callback process. Essentially, once you provide your
+credentials and authenticate with the 3rd Party service (in this case Github),
+you will be redirected back to a script on your server where you'll have to
+verify that you sent the request by sending an verification code back to the
+service. This is why it's a good idea to use a good OAuth2 client in lieu of
+writing your own. Below is an example of what this OAuth2 callback code might
+look like.
+
+```php
+<?php
+namespace OAuth2;
+
+use \League\OAuth2\Client\Provider\Github;
+use \Aura\Auth\Exception;
+
+require_once 'vendor/autoload.php';
+require_once 'vendor/aura/auth/autoload.php';
+$githubProvider = new Github(array(
+    'clientId' => 'xxxxxxxxxxxxxxxx',
+    'clientSecret' => 'xxxxxxxxxxxxxxxxxxxx',
+    'redirectUri' => 'http://aura.auth.dev/'
+));
+
+if (!isset($_GET['code'])) {
+    header('Location: ' . $githubProvider->getAuthorizationUrl());
+    exit;
+} else {
+    $auraAdapter = new Adapter\GithubAuthAdapter($githubProvider);
+    try {
+        // array is the username and an array of info and indicates successful
+        // login
+        $data = $githubAdapter->login($_GET);
+    } catch (Exception $e) {
+        // handle the exception
+    }
+}
+```
+
+The fact that not every 3rd Party Service returns data the same way means it's
+not reasonable for Aura to try to handle every different data set out of the
+box. By writing this little bit of code, you can easily implement Aura Auth for
+your 3rd Party OAuth2 services.
+  
+
