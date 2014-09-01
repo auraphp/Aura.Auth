@@ -59,7 +59,7 @@ class HtpasswdAdapter extends AbstractAdapter
      *
      * @param VerifierInterface $verifier
      *
-     * @return void
+     * @return null
      */
     public function __construct($file, VerifierInterface $verifier)
     {

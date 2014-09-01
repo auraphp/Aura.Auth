@@ -21,23 +21,18 @@ class PasswordVerifier implements VerifierInterface
 {
     /**
      *
-     * @var string
+     * The hashing algorithm to use.
+     *
+     * @var string|int
      *
      */
     protected $algo;
 
     /**
      *
-     * @var array
+     * Constructor.
      *
-     */
-    protected $opts;
-
-    /**
-     *
-     * Constructor
-     *
-     * @param mixed $algo
+     * @param string|int $algo The hashing algorithm to use.
      *
      */
     public function __construct($algo)
@@ -46,6 +41,8 @@ class PasswordVerifier implements VerifierInterface
     }
 
     /**
+     *
+     * Verifies a password against a hash.
      *
      * @param string $plaintext Plaintext password.
      *

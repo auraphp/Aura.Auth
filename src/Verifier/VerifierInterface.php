@@ -21,11 +21,13 @@ interface VerifierInterface
 {
     /**
      *
-     * @param string $plaintext Plaintext
+     * Verify that a plaintext password matches a hashed one.
      *
-     * @param string $hashvalue encrypted string
+     * @param string $plaintext Plaintext password.
      *
-     * @param array $extra Optional array if used by verify
+     * @param string $hashvalue Hashed password.
+     *
+     * @param array $extra Optional array of data.
      *
      * @return bool
      *

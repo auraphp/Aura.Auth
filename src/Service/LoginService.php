@@ -44,9 +44,11 @@ class LoginService
 
     /**
      *
-     *  @param AdapterInterface $adapter
+     * Constructor.
      *
-     *  @param SessionInterface $session
+     * @param AdapterInterface $adapter A credential-storage adapter.
+     *
+     * @param SessionInterface $session A session manager.
      *
      */
     public function __construct(
@@ -59,13 +61,13 @@ class LoginService
 
     /**
      *
-     * Login user
+     * Logs the user in via the credential adapter.
      *
-     * @param Auth $auth
+     * @param Auth $auth The authentication tracking object.
      *
-     * @param array $input
+     * @param array $input The credential input.
      *
-     * @return void
+     * @return null
      *
      */
     public function login(Auth $auth, array $input)
@@ -78,7 +80,7 @@ class LoginService
      *
      * Forces a successful login.
      *
-     * @param Auth $auth
+     * @param Auth $auth The authentication tracking object.
      *
      * @param string $name The authenticated user name.
      *

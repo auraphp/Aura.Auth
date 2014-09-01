@@ -72,17 +72,15 @@ class PdoAdapter extends AbstractAdapter
      *
      * Constructor
      *
-     * @param \PDO $pdo
+     * @param \PDO $pdo A PDO connection.
      *
-     * @param VerifierInterface $verifier
+     * @param VerifierInterface $verifier A password verifier.
      *
-     * @param array $cols
+     * @param array $cols The columns to be selected.
      *
-     * @param string $from
+     * @param string $from The table (and joins) to select from.
      *
-     * @param string $where
-     *
-     * @return self
+     * @param string $where The where clause to use.
      *
      */
     public function __construct(
@@ -99,6 +97,19 @@ class PdoAdapter extends AbstractAdapter
         $this->where = $where;
     }
 
+    /**
+     *
+     * Set the $cols property.
+     *
+     * @param array $cols The columns to select.
+     *
+     * @return null
+     *
+     * @throws Exception\UsernameColumnNotSpecified
+     *
+     * @throws Exception\PasswordColumnNotSpecified
+     *
+     */
     protected function setCols($cols)
     {
         if (! isset($cols[0]) || trim($cols[0] == '')) {
@@ -112,7 +123,7 @@ class PdoAdapter extends AbstractAdapter
 
     /**
      *
-     * Return object of type VerifierInterface
+     * Returns the password verifier.
      *
      * @return VerifierInterface
      *
@@ -124,12 +135,12 @@ class PdoAdapter extends AbstractAdapter
 
     /**
      *
-     * Log in with username/password credentials.
+     * Verifies the username/password credentials.
      *
      * @param array $input An array of credential data, including any data to
      * bind to the query.
      *
-     * @return bool True on success, false on failure.
+     * @return array An array of login data.
      *
      */
     public function login(array $input)
@@ -145,11 +156,15 @@ class PdoAdapter extends AbstractAdapter
 
     /**
      *
-     * Fetch a row from the table
+     * Fetches a single matching row from the database.
      *
-     * @param array $input
+     * @param array $input The user input.
      *
-     * @return array
+     * @return array The found row.
+     *
+     * @throws Exception\UsernameNotFound when no row is found.
+     *
+     * @throws Exception\MultipleMatches where more than one row is found.
      *
      */
     protected function fetchRow($input)
@@ -169,11 +184,12 @@ class PdoAdapter extends AbstractAdapter
     }
 
     /**
-     * Fetch Rows
      *
-     * @param mixed $stm
+     * Fetches all matching rows from the database.
      *
-     * @param mixed $bind
+     * @param string $stm The SQL statement to execute.
+     *
+     * @param array $bind Values to bind to the query.
      *
      * @return array
      *
@@ -188,7 +204,7 @@ class PdoAdapter extends AbstractAdapter
 
     /**
      *
-     * Build SQL query
+     * Builds the SQL statement for finding the user data.
      *
      * @return string
      *
@@ -203,7 +219,7 @@ class PdoAdapter extends AbstractAdapter
 
     /**
      *
-     * Build Select Cols
+     * Builds the SELECT column list.
      *
      * @return string
      *
@@ -217,7 +233,8 @@ class PdoAdapter extends AbstractAdapter
     }
 
     /**
-     * Get the select from
+     *
+     * Builds the FROM clause.
      *
      * @return string
      *
@@ -228,9 +245,11 @@ class PdoAdapter extends AbstractAdapter
     }
 
     /**
-     * Build where
+     *
+     * Builds the WHERE clause.
      *
      * @return string
+     *
      */
     protected function buildSelectWhere()
     {
@@ -243,9 +262,15 @@ class PdoAdapter extends AbstractAdapter
 
     /**
      *
-     * Password verification
+     * Verifies the password.
+     *
+     * @param array $input The user input array.
+     *
+     * @param array $data The data from the database.
      *
      * @return bool
+     *
+     * @throws Exception\PasswordIncorrect
      *
      */
     protected function verify($input, $data)

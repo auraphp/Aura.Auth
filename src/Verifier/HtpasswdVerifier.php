@@ -12,7 +12,12 @@ namespace Aura\Auth\Verifier;
 
 /**
  *
- * Htaccess password Verifier
+ * Verfies passwords from htpasswd files; supports APR1/MD5, DES, SHA1, and
+ * Bcrypt.
+ *
+ * The APR1/MD5 implementation was originally written by Mike Wallner
+ * <mike@php.net>; any flaws are the fault of Paul M. Jones
+ * <pmjones88@gmail.com>.
  *
  * @package Aura.Auth
  *
@@ -21,11 +26,13 @@ class HtpasswdVerifier implements VerifierInterface
 {
     /**
      *
-     * @param string $plaintext Plaintext
+     * Verifies a plaintext password against a hash.
      *
-     * @param string $hashvalue encrypted string
+     * @param string $plaintext Plaintext password.
      *
-     * @param array $extra Optional array if used by verify
+     * @param string $hashvalue Comparison hash.
+     *
+     * @param array $extra Optional array if used by verify.
      *
      * @return bool
      *
@@ -49,9 +56,17 @@ class HtpasswdVerifier implements VerifierInterface
         return $this->des($plaintext, $hashvalue);
     }
 
-    // use SHA1 encryption.  pack SHA binary into hexadecimal,
-    // then encode into characters using base64. this is per
-    // Tomas V. V. Cox.
+    /**
+     *
+     * Verify using SHA1 hashing.
+     *
+     * @param string $plaintext Plaintext password.
+     *
+     * @param string $hashvalue Comparison hash.
+     *
+     * @return bool
+     *
+     */
     protected function sha($plaintext, $hashvalue)
     {
         $hex = sha1($plaintext, true);
@@ -61,17 +76,13 @@ class HtpasswdVerifier implements VerifierInterface
 
     /**
      *
-     * APR compatible MD5 encryption.
+     * Verify using APR compatible MD5 hashing.
      *
-     * @author Mike Wallner <mike@php.net>
+     * @param string $plaintext Plaintext password.
      *
-     * @author Paul M. Jones (minor modfications) <pmjones@solarphp.com>
+     * @param string $hashvalue Comparison hash.
      *
-     * @param string $plain Plaintext to crypt.
-     *
-     * @param string $salt The salt to use for encryption.
-     *
-     * @return string The APR MD5 encrypted string.
+     * @return bool
      *
      */
     protected function apr1($plaintext, $hashvalue)
@@ -85,6 +96,17 @@ class HtpasswdVerifier implements VerifierInterface
         return $computed_hash === $hashvalue;
     }
 
+    /**
+     *
+     * Compute the context.
+     *
+     * @param string $plaintext Plaintext password.
+     *
+     * @param string $salt The salt.
+     *
+     * @return string
+     *
+     */
     protected function computeContext($plaintext, $salt)
     {
         $length = strlen($plaintext);
@@ -102,6 +124,19 @@ class HtpasswdVerifier implements VerifierInterface
         return $context;
     }
 
+    /**
+     *
+     * Compute the binary.
+     *
+     * @param string $plaintext Plaintext password.
+     *
+     * @param string $salt The salt.
+     *
+     * @param string $context The context.
+     *
+     * @return string
+     *
+     */
     protected function computeBinary($plaintext, $salt, $context)
     {
         $binary = hash('md5', $context, true);
@@ -119,6 +154,15 @@ class HtpasswdVerifier implements VerifierInterface
         return $binary;
     }
 
+    /**
+     *
+     * Compute the P value for a binary.
+     *
+     * @param string $binary The binary.
+     *
+     * @return string
+     *
+     */
     protected function computeP($binary)
     {
         $p = array();
@@ -142,10 +186,6 @@ class HtpasswdVerifier implements VerifierInterface
      *
      * Convert to allowed 64 characters for encryption.
      *
-     * @author Mike Wallner <mike@php.net>
-     *
-     * @author Paul M. Jones (minor modfications) <pmjones@solarphp.com>
-     *
      * @param string $value The value to convert.
      *
      * @param int $count The number of characters.
@@ -164,13 +204,25 @@ class HtpasswdVerifier implements VerifierInterface
         return $result;
     }
 
-    // Note that crypt() will only check up to the first 8
-    // characters of a password; chars after 8 are ignored. This
-    // means that if the real password is "atecharsnine", the
-    // word "atechars" would be valid.  This is bad.  As a
-    // workaround, if the password provided by the user is
-    // longer than 8 characters, this method will *not* validate
-    // it.
+    /**
+     *
+     * Verify using DES hashing.
+     *
+     * Note that crypt() will only check up to the first 8
+     * characters of a password; chars after 8 are ignored. This
+     * means that if the real password is "atecharsnine", the
+     * word "atechars" would be valid.  This is bad.  As a
+     * workaround, if the password provided by the user is
+     * longer than 8 characters, this method will *not* verify
+     * it.
+     *
+     * @param string $plaintext Plaintext password.
+     *
+     * @param string $hashvalue Comparison hash.
+     *
+     * @return bool
+     *
+     */
     protected function des($plaintext, $hashvalue)
     {
         if (strlen($plaintext) > 8) {
