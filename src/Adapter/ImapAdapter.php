@@ -32,14 +32,57 @@ class ImapAdapter extends AbstractAdapter
      */
     protected $mailbox;
 
-    protected $options;
+    /**
+     *
+     * Options for the imap_open() call.
+     *
+     * @var int
+     *
+     */
+    protected $options = 0;
 
-    protected $retries;
+    /**
+     *
+     * Try to connect this many times.
+     *
+     * @var int
+     *
+     */
+    protected $retries = 1;
 
+    /**
+     *
+     * Params for the imap_open() call.
+     *
+     * @var array|null
+     *
+     */
     protected $params;
 
+    /**
+     *
+     * An object to intercept PHP calls.
+     *
+     * @var Phpfunc
+     *
+     */
     protected $phpfunc;
 
+    /**
+     *
+     * Constructor.
+     *
+     * @param Phpfunc $phpfunc An object to intercept PHP calls.
+     *
+     * @param string $mailbox The imap_open() mailbox string.
+     *
+     * @param int $options Options for the imap_open() call.
+     *
+     * @param int $retries Try connecting this many times.
+     *
+     * @param array $params Params for the imap_open() call.
+     *
+     */
     public function __construct(
         Phpfunc $phpfunc,
         $mailbox,
@@ -56,12 +99,14 @@ class ImapAdapter extends AbstractAdapter
 
     /**
      *
-     * Log in with username/password credentials.
+     * Verifies a set of credentials.
      *
      * @param array $input An array of credential data, including any data to
      * bind to the query.
      *
-     * @return bool True on success, false on failure.
+     * @return array An array of login data.
+     *
+     * @throws Exception\ConnectionFailed when the IMAP connection fails.
      *
      */
     public function login(array $input)

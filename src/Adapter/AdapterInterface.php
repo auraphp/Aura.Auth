@@ -23,7 +23,7 @@ interface AdapterInterface
 {
     /**
      *
-     * Verifies set of credentials against a storage backend.
+     * Verifies a set of credentials against a storage backend.
      *
      * @param array $input Credential input.
      *

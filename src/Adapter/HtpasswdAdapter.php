@@ -82,7 +82,7 @@ class HtpasswdAdapter extends AbstractAdapter
 
     /**
      *
-     * Verifies set of credentials.
+     * Verifies a set of credentials.
      *
      * @param array $input An array with keys 'username' and 'password'.
      *
