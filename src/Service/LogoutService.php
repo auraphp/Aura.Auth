@@ -17,7 +17,7 @@ use Aura\Auth\Auth;
 
 /**
  *
- * Logout handler
+ * Logout handler.
  *
  * @package Aura.Auth
  *
@@ -26,6 +26,8 @@ class LogoutService
 {
     /**
      *
+     * A credential storage adapter.
+     *
      * @var AdapterInterface
      *
      */
@@ -33,7 +35,7 @@ class LogoutService
 
     /**
      *
-     * session
+     * A session manager.
      *
      * @var SessionInterface
      *
@@ -42,11 +44,11 @@ class LogoutService
 
     /**
      *
-     *  @param Auth $auth
+     * Constructor.
      *
-     *  @param AdapterInterface $adapter
+     * @param AdapterInterface $adapter A credential storage adapter.
      *
-     *  @param SessionInterface $adapter
+     * @param SessionInterface $session A session manager.
      *
      */
     public function __construct(
@@ -59,11 +61,13 @@ class LogoutService
 
     /**
      *
-     * Logout user
+     * Log the user out via the adapter.
      *
-     * @param Auth $auth
+     * @param Auth $auth An authentication tracker.
      *
-     * @param string $status see Status class
+     * @param string $status The status after logout.
+     *
+     * @return null
      *
      */
     public function logout(Auth $auth, $status = Status::ANON)
@@ -76,9 +80,9 @@ class LogoutService
      *
      * Forces a successful logout.
      *
-     * @param Auth $auth
+     * @param Auth $auth An authentication tracker.
      *
-     * @param string $status The new authentication status.
+     * @param string $status The status after logout.
      *
      * @return string The new authentication status.
      *

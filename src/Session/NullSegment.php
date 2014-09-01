@@ -20,13 +20,22 @@ namespace Aura\Auth\Session;
  */
 class NullSegment implements SegmentInterface
 {
+    /**
+     *
+     * The segment data.
+     *
+     * @var array
+     *
+     */
     protected $data = array();
 
     /**
      *
-     * @param mixed $key
+     * Gets a value from the segment.
      *
-     * @param mixed $alt
+     * @param mixed $key A key for the segment value.
+     *
+     * @param mixed $alt Return this value if the segment key does not exist.
      *
      * @return mixed
      *
@@ -42,11 +51,11 @@ class NullSegment implements SegmentInterface
 
     /**
      *
-     * @param mixed $key
+     * Sets a value in the segment.
      *
-     * @param mixed $val
+     * @param mixed $key The key in the segment.
      *
-     * @return mixed
+     * @param mixed $val The value to set.
      *
      */
     public function set($key, $val)

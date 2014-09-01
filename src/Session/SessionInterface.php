@@ -12,7 +12,7 @@ namespace Aura\Auth\Session;
 
 /**
  *
- * Authentication manager.
+ * Interface for a session manager.
  *
  * @package Aura.Auth
  *
@@ -21,21 +21,21 @@ interface SessionInterface
 {
     /**
      *
-     * start session
+     * Starts a session.
      *
      */
     public function start();
 
     /**
      *
-     * start only if one already exists
+     * Resumes a previously-existing session.
      *
      */
     public function resume();
 
     /**
      *
-     * regenerate the session id
+     * Regenerates the session ID.
      *
      */
     public function regenerateId();

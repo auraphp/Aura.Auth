@@ -38,8 +38,6 @@ class Auth
      *
      * @param SegmentInterface $segment A session data store.
      *
-     * @return self
-     *
      */
     public function __construct(SegmentInterface $segment)
     {
@@ -48,17 +46,21 @@ class Auth
 
     /**
      *
-     * @param string $status @see Status constants
+     * Sets the authentication values.
      *
-     * @param int $first_active First active at
+     * @param string $status The authentication status.
      *
-     * @param int $last_active Last active at
+     * @param int $first_active First active at this Unix time.
      *
-     * @param string $username username
+     * @param int $last_active Last active at this Unix time.
      *
-     * @param array $userdata set the user data
+     * @param string $username The username.
      *
-     * @return string @see Status constants
+     * @param array $userdata Arbitrary user data.
+     *
+     * @return null
+     *
+     * @see Status for constants and their values.
      *
      */
     public function set(
@@ -127,7 +129,9 @@ class Auth
      *
      * Sets the current authentication status.
      *
-     * @param string $status
+     * @param string $status The authentication status.
+     *
+     * @return null
      *
      */
     public function setStatus($status)
@@ -151,7 +155,9 @@ class Auth
      *
      * Sets the initial authentication time.
      *
-     * @param int $first_active
+     * @param int $first_active The initial authentication Unix time.
+     *
+     * @return null
      *
      */
     public function setFirstActive($first_active)
@@ -175,7 +181,9 @@ class Auth
      *
      * Sets the last active time.
      *
-     * @param int $last_active
+     * @param int $last_active The last active Unix time.
+     *
+     * @return null
      *
      */
     public function setLastActive($last_active)
@@ -199,7 +207,9 @@ class Auth
      *
      * Sets the current user name.
      *
-     * @param string $name
+     * @param string $username The username.
+     *
+     * @return null
      *
      */
     public function setUserName($username)
@@ -223,7 +233,9 @@ class Auth
      *
      * Sets the current user data.
      *
-     * @param array $data
+     * @param array $data The user data.
+     *
+     * @return null
      *
      */
     public function setUserData(array $userdata)

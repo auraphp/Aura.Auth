@@ -22,6 +22,8 @@ class Segment implements SegmentInterface
 {
     /**
      *
+     * The name of the $_SESSION segment, typically a class name.
+     *
      * @var string
      *
      */
@@ -29,7 +31,9 @@ class Segment implements SegmentInterface
 
     /**
      *
-     * @param bool $segment
+     * Constructor.
+     *
+     * @param bool $name The name of the $_SESSION segment.
      *
      */
     public function __construct($name = 'Aura\Auth\Auth')
@@ -39,9 +43,11 @@ class Segment implements SegmentInterface
 
     /**
      *
-     * @param mixed $key
+     * Gets a value from the segment.
      *
-     * @param mixed $alt
+     * @param mixed $key A key for the segment value.
+     *
+     * @param mixed $alt Return this value if the segment key does not exist.
      *
      * @return mixed
      *
@@ -57,11 +63,11 @@ class Segment implements SegmentInterface
 
     /**
      *
-     * @param mixed $key
+     * Sets a value in the segment.
      *
-     * @param mixed $val
+     * @param mixed $key The key in the segment.
      *
-     * @return mixed
+     * @param mixed $val The value to set.
      *
      */
     public function set($key, $val)

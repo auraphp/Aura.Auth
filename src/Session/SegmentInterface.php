@@ -12,6 +12,8 @@ namespace Aura\Auth\Session;
 
 /**
  *
+ * Interface for segment of the $_SESSION array.
+ *
  * @package Aura.Auth
  *
  */
@@ -19,22 +21,24 @@ interface SegmentInterface
 {
     /**
      *
-     * Getter
+     * Gets a value from the segment.
      *
-     * @param mixed $key
+     * @param mixed $key A key for the segment value.
      *
-     * @param mixed $alt Useful when you want to return if the key is null
+     * @param mixed $alt Return this value if the segment key does not exist.
+     *
+     * @return mixed
      *
      */
     public function get($key, $alt = null);
 
     /**
      *
-     * Setter
+     * Sets a value in the segment.
      *
-     * @param mixed $key
+     * @param mixed $key The key in the segment.
      *
-     * @param mixed $val
+     * @param mixed $val The value to set.
      *
      */
     public function set($key, $val);

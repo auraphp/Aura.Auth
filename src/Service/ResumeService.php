@@ -17,7 +17,7 @@ use Aura\Auth\Session\Timer;
 
 /**
  *
- * Resume Service
+ * Resume handler.
  *
  * @package Aura.Auth
  *
@@ -26,6 +26,8 @@ class ResumeService
 {
     /**
      *
+     * A credential storage adapter.
+     *
      * @var AdapterInterface
      *
      */
@@ -33,7 +35,7 @@ class ResumeService
 
     /**
      *
-     * session
+     * A session manager.
      *
      * @var SessionInterface
      *
@@ -41,7 +43,8 @@ class ResumeService
     protected $session;
 
     /**
-     * Timer
+     *
+     * A session timer.
      *
      * @var Timer
      *
@@ -49,7 +52,8 @@ class ResumeService
     protected $timer;
 
     /**
-     * logout_service
+     *
+     * The logout handler to use if the session has timed out.
      *
      * @var LogoutService
      *
@@ -58,15 +62,16 @@ class ResumeService
 
     /**
      *
-     *  @param Auth $auth
+     * Constructor.
      *
-     *  @param AdapterInterface $adapter
+     * @param AdapterInterface $adapter A credential storage adapter.
      *
-     *  @param SessionInterface $adapter
+     * @param SessionInterface $session A session manager.
      *
-     *  @param Timer $timer
+     * @param Timer $timer A session timer.
      *
-     *  @param LogoutService $logout_service
+     * @param LogoutService $logout_service The logout handler to use if the
+     * session has timed out.
      *
      */
     public function __construct(
@@ -86,6 +91,8 @@ class ResumeService
      * Resumes any previous session, logging out the user as idled or
      * expired if needed.
      *
+     * @param Auth $auth An authentication tracker.
+     *
      * @return bool Whether or not a session still exists.
      *
      */
@@ -101,6 +108,8 @@ class ResumeService
     /**
      *
      * Sets the user timeout status, and logs out if expired.
+     *
+     * @param Auth $auth An authentication tracker.
      *
      * @return bool
      *

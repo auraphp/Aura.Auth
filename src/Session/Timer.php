@@ -68,8 +68,6 @@ class Timer
      *
      * @param int $expire_ttl The maximum authentication time in seconds.
      *
-     * @return self
-     *
      */
     public function __construct(
         $ini_gc_maxlifetime = 1440,

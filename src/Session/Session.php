@@ -21,6 +21,8 @@ class Session implements SessionInterface
 {
     /**
      *
+     * A copy of the $_COOKIE array.
+     *
      * @var array
      *
      */
@@ -28,7 +30,9 @@ class Session implements SessionInterface
 
     /**
      *
-     * @param array $cookie
+     * Constructor.
+     *
+     * @param array $cookie A copy of the $_COOKIE array.
      *
      */
     public function __construct(array $cookie)
@@ -38,7 +42,7 @@ class Session implements SessionInterface
 
     /**
      *
-     * Start Session
+     * Starts a session.
      *
      * @return bool
      *
@@ -50,7 +54,7 @@ class Session implements SessionInterface
 
     /**
      *
-     * Resume previous session
+     * Resumes a previously-started session.
      *
      * @return bool
      *
@@ -70,7 +74,7 @@ class Session implements SessionInterface
 
     /**
      *
-     * Re generate session id
+     * Regenerates a session ID.
      *
      * @return mixed
      *
