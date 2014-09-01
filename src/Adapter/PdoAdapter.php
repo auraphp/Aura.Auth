@@ -13,7 +13,6 @@ namespace Aura\Auth\Adapter;
 use PDO;
 use Aura\Auth\Verifier\VerifierInterface;
 use Aura\Auth\Exception;
-use Aura\Auth\Auth;
 
 /**
  *
