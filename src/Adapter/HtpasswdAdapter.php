@@ -36,6 +36,8 @@ class HtpasswdAdapter extends AbstractAdapter
 {
     /**
      *
+     * The httpasswd credential file.
+     *
      * @var string
      *
      */
@@ -52,7 +54,9 @@ class HtpasswdAdapter extends AbstractAdapter
 
     /**
      *
-     * @param string $file
+     * Constructor.
+     *
+     * @param string $file The htpasswd file path.
      *
      * @param VerifierInterface $verifier
      *
@@ -80,7 +84,9 @@ class HtpasswdAdapter extends AbstractAdapter
      *
      * Verifies set of credentials.
      *
-     * @param array $input A list of credentials to verify
+     * @param array $input An array with keys 'username' and 'password'.
+     *
+     * @return array An array of login data.
      *
      */
     public function login(array $input)
@@ -88,12 +94,24 @@ class HtpasswdAdapter extends AbstractAdapter
         $this->checkInput($input);
         $username = $input['username'];
         $password = $input['password'];
-        $hashvalue = $this->fetchEncrypted($username);
+        $hashvalue = $this->fetchHashedPassword($username);
         $this->verify($password, $hashvalue);
         return array($username, array());
     }
 
-    protected function fetchEncrypted($username)
+    /**
+     *
+     * Reads the hashed password for a username from the htpasswd file.
+     *
+     * @param string $username The username to find in the htpasswd file.
+     *
+     * @return string
+     *
+     * @throws Exception\UsernameNotFound when the username is not found in the
+     * htpasswd file.
+     *
+     */
+    protected function fetchHashedPassword($username)
     {
         // force the full, real path to the file
         $real = realpath($this->file);
@@ -125,6 +143,19 @@ class HtpasswdAdapter extends AbstractAdapter
         throw new Exception\UsernameNotFound;
     }
 
+    /**
+     *
+     * Verifies the input password against the hashed password.
+     *
+     * @param string $password The input password.
+     *
+     * @param string $hashvalue The hashed password in htpasswd.
+     *
+     * @return null
+     *
+     * @throws Exception\PasswordIncorrect on failed verification.
+     *
+     */
     protected function verify($password, $hashvalue)
     {
         if (! $this->verifier->verify($password, $hashvalue)) {

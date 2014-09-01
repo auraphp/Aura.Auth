@@ -23,28 +23,38 @@ interface AdapterInterface
 {
     /**
      *
-     * Resumes a previous session.
+     * Verifies set of credentials against a storage backend.
      *
-     */
-    public function resume(Auth $auth);
-
-    /**
+     * @param array $input Credential input.
      *
-     * @param array $input
-     *
-     * @return null
+     * @return array An array of login data on success.
      *
      */
     public function login(array $input);
 
     /**
      *
-     * Logout a user resetting all the values
+     * Handle logout logic against the storage backend.
      *
-     * @param Auth $auth
+     * @param Auth $auth The authentication obbject to be logged out.
+     *
+     * @param string $status The new authentication status after logout.
+     *
+     * @return null
+     *
+     * @see Status
+     *
+     */
+    public function logout(Auth $auth, $status = Status::ANON);
+
+    /**
+     *
+     * Handle a resumed session against the storage backend.
+     *
+     * @param Auth $auth The authentication object to be resumed.
      *
      * @return null
      *
      */
-    public function logout(Auth $auth);
+    public function resume(Auth $auth);
 }

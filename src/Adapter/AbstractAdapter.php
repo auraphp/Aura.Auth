@@ -25,22 +25,26 @@ abstract class AbstractAdapter implements AdapterInterface
 {
     /**
      *
-     * @param mixed $input
+     * Verifies set of credentials against a storage backend.
      *
-     * @return bool
+     * @param array $input Credential input.
+     *
+     * @return array An array of login data on success.
      *
      */
     abstract public function login(array $input);
 
     /**
      *
-     * Logout a user resetting all the values
+     * Handle logout logic against the storage backend.
      *
-     * @param Auth $auth
+     * @param Auth $auth The authentication obbject to be logged out.
      *
-     * @param string $status @see Status
+     * @param string $status The new authentication status after logout.
      *
-     * @return bool
+     * @return null
+     *
+     * @see Status
      *
      */
     public function logout(Auth $auth, $status = Status::ANON)
@@ -50,9 +54,11 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      *
-     * Resume logged in session
+     * Handle a resumed session against the storage backend.
      *
-     * @param Auth $auth
+     * @param Auth $auth The authentication object to be resumed.
+     *
+     * @return null
      *
      */
     public function resume(Auth $auth)
@@ -61,6 +67,8 @@ abstract class AbstractAdapter implements AdapterInterface
     }
 
     /**
+     *
+     * Check the credential input for completeness.
      *
      * @param array $input
      *
