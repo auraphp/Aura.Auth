@@ -25,7 +25,7 @@ class Common extends Config
     public function define(Container $di)
     {
         /**
-         * Services.
+         * Services
          */
         $di->set('aura/auth:auth', $di->lazyNew('Aura\Auth\Auth'));
         $di->set('aura/auth:login_service', $di->lazyNew('Aura\Auth\Service\LoginService'));
@@ -60,6 +60,8 @@ class Common extends Config
          */
         $di->params['Aura\Auth\Adapter\PdoAdapter'] = array(
             'verifier' => $di->lazyNew('Aura\Auth\Verifier\PasswordVerifier'),
+            'from' => 'users',
+            'cols' => array('username', 'password'),
         );
 
         /**
@@ -91,7 +93,7 @@ class Common extends Config
         $di->params['Aura\Auth\Service\ResumeService'] = array(
             'adapter' => $di->lazyGet('aura/auth:adapter'),
             'session' => $di->lazyGet('aura/auth:session'),
-            'timer' => $di->lazyNew('aura/auth:timer'),
+            'timer' => $di->lazyNew('Aura\Auth\Session\Timer'),
             'logout_service' => $di->lazyGet('aura/auth:logout_service'),
         );
 
