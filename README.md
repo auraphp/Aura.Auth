@@ -752,7 +752,7 @@ if ($auth->isAnon()) {
 
 #### Custom Services
 
-You are not restricted to the login, logout, and resume services provided by this package. However, if you build a service of your own, or if you extend one of the provided services, you will have to instantiate that customized service object manually, instead of using the _AuthFactory_. This can be tedious but is not difficult, especially when using a dependency injection container system such as [Aura.Di](https://github.com/auraphp/Aura.Auth).
+You are not restricted to the login, logout, and resume services provided by this package. However, if you build a service of your own, or if you extend one of the provided services, you will have to instantiate that customized service object manually, instead of using the _AuthFactory_. This can be tedious but is not difficult, especially when using a dependency injection container system such as [Aura.Di](https://github.com/auraphp/Aura.Di).
 
 
 ### Session Management
