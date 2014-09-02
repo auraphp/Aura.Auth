@@ -19,7 +19,7 @@ use PDO;
 
 /**
  *
- * Auth Factory
+ * Factory for Auth package objects.
  *
  * @package Aura.Auth
  *
@@ -29,6 +29,8 @@ class AuthFactory
 {
     /**
      *
+     * A session manager.
+     *
      * @var SessionInterface
      *
      */
@@ -36,11 +38,24 @@ class AuthFactory
 
     /**
      *
+     * A session segment.
+     *
      * @var SegmentInterface
      *
      */
     protected $segment;
 
+    /**
+     *
+     * Constructor.
+     *
+     * @param array $cookie A copy of $_COOKIES.
+     *
+     * @param SessionInterface $session A session manager.
+     *
+     * @param SegmentInterface $segment A session segment.
+     *
+     */
     public function __construct(
         array $cookie,
         SessionInterface $session = null,
@@ -59,7 +74,7 @@ class AuthFactory
 
     /**
      *
-     * Returns a new Auth object.
+     * Returns a new authentication tracker.
      *
      * @return Auth
      *
@@ -71,9 +86,9 @@ class AuthFactory
 
     /**
      *
-     * Login Service
+     * Returns a new login service instance.
      *
-     * @param AdapterInterface $adapter
+     * @param AdapterInterface $adapter The adapter to use with the service.
      *
      * @return Service\LoginService
      *
@@ -88,9 +103,9 @@ class AuthFactory
 
     /**
      *
-     * Logout Service
+     * Returns a new logout service instance.
      *
-     * @param AdapterInterface $adapter
+     * @param AdapterInterface $adapter The adapter to use with the service.
      *
      * @return Service\LogoutService
      *
@@ -105,13 +120,14 @@ class AuthFactory
 
     /**
      *
-     * Resume if started else start a new session
+     * Returns a new "resume session" service.
      *
-     * @param AdapterInterface $adapter
+     * @param AdapterInterface $adapter The adapter to use with the service, and
+     * with the underlying logout service.
      *
-     * @param int $idle_ttl
+     * @param int $idle_ttl The session idle time in seconds.
      *
-     * @param int $expire_ttl
+     * @param int $expire_ttl The session expire time in seconds.
      *
      * @return Service\ResumeService
      *
@@ -146,12 +162,12 @@ class AuthFactory
 
     /**
      *
-     * If no adapter provided create Adapter\NullAdapter else
-     * the same adapter passed
+     * Make sure we have an Adapter instance, even if only a NullAdapter.
      *
-     * @param Adapterinterface $adapter
+     * @param Adapterinterface $adapter Check to make sure this is an Adapter
+     * instance.
      *
-     * @return Adapterinterface
+     * @return AdapterInterface
      *
      */
     protected function fixAdapter(AdapterInterface $adapter = null)
@@ -166,15 +182,17 @@ class AuthFactory
      *
      * Returns a new PDO adapter.
      *
-     * @param PDO $pdo
+     * @param PDO $pdo A PDO connection.
      *
-     * @param string|object $verifier_spec
+     * @param mixed $verifier_spec Specification to pick a verifier: if an
+     * object, assume a VerifierInterface; otherwise, assume a PASSWORD_*
+     * constant for a PasswordVerifier.
      *
-     * @param array $cols
+     * @param array $cols Select these columns.
      *
-     * @param string $from
+     * @param string $from Select from this table (and joins).
      *
-     * @param string $where
+     * @param string $where WHERE conditions for the select.
      *
      * @return Adapter\PdoAdapter
      *
@@ -203,9 +221,9 @@ class AuthFactory
 
     /**
      *
-     * Returns a new Htpasswd adapter.
+     * Returns a new HtpasswdAdapter.
      *
-     * @param string $file
+     * @param string $file Path to the htpasswd file.
      *
      * @return Adapter\HtpasswdAdapter
      *
@@ -219,6 +237,21 @@ class AuthFactory
         );
     }
 
+    /**
+     *
+     * Returns a new ImapAdapter.
+     *
+     * @param string $mailbox An imap_open() mailbox string.
+     *
+     * @param int $options Options for the imap_open() call.
+     *
+     * @param int $retries Try to connect this many times.
+     *
+     * @param array $params Set these params after opening the connection.
+     *
+     * @return Adapter\ImapAdapter
+     *
+     */
     public function newImapAdapter(
         $mailbox,
         $options = 0,
@@ -234,6 +267,20 @@ class AuthFactory
         );
     }
 
+    /**
+     *
+     * Returns a new LdapAdapter.
+     *
+     * @param string $server An LDAP server string.
+     *
+     * @param string $dnformat A distinguised name format string for looking up
+     * the username.
+     *
+     * @param array $options Use these connection options.
+     *
+     * @return Adapter\LdapAdapter
+     *
+     */
     public function newLdapAdapter(
         $server,
         $dnformat,
