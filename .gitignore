@@ -1,2 +1,2 @@
-/tests/config/vendor
-/tests/config/composer.*
+/tests/container/vendor
+/tests/container/composer.*
