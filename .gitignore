@@ -1,2 +1,2 @@
-/vendor/
-/composer.lock
+/tests/container/vendor
+/tests/container/composer.*

@@ -26,12 +26,16 @@ Alternatively, [download a release](https://github.com/auraphp/Aura.Auth/release
 [![Code Coverage](https://scrutinizer-ci.com/g/auraphp/Aura.Auth/badges/coverage.png?b=develop-2)](https://scrutinizer-ci.com/g/auraphp/Aura.Auth/?branch=develop-2)
 [![Build Status](https://travis-ci.org/auraphp/Aura.Auth.png?branch=develop-2)](https://travis-ci.org/auraphp/Aura.Auth)
 
-To run the [PHPUnit][] tests at the command line, go to the _tests_ directory and issue `phpunit`.
+To run the unit tests at the command line, go to the _tests/unit_ directory and issue `./phpunit.sh`. (This requires [PHPUnit][] to be available as `phpunit`.)
+
+To run the [Aura.Di][] container configuration tests at the command line, go to the _tests/container_ directory and issue `./phpunit.sh`. (This requires [PHPUnit][] to be available as `phpunit` and [Composer][] to be available as `composer`.)
 
 This library attempts to comply with [PSR-1][], [PSR-2][], and [PSR-4][]. If
 you notice compliance oversights, please send a patch via pull request.
 
+[Aura.Di]: https://github.com/auraphp/Aura.Di
 [PHPUnit]: http://phpunit.de/manual/
+[Composer]: http://getcomposer.org/
 [PSR-1]: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-1-basic-coding-standard.md
 [PSR-2]: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-2-coding-style-guide.md
 [PSR-4]: https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-4-autoloader.md
@@ -752,7 +756,7 @@ if ($auth->isAnon()) {
 
 #### Custom Services
 
-You are not restricted to the login, logout, and resume services provided by this package. However, if you build a service of your own, or if you extend one of the provided services, you will have to instantiate that customized service object manually, instead of using the _AuthFactory_. This can be tedious but is not difficult, especially when using a dependency injection container system such as [Aura.Di](https://github.com/auraphp/Aura.Auth).
+You are not restricted to the login, logout, and resume services provided by this package. However, if you build a service of your own, or if you extend one of the provided services, you will have to instantiate that customized service object manually, instead of using the _AuthFactory_. This can be tedious but is not difficult, especially when using a dependency injection container system such as [Aura.Di](https://github.com/auraphp/Aura.Di).
 
 
 ### Session Management
