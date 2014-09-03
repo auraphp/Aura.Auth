@@ -1,47 +1,27 @@
 <?php
 namespace Aura\Auth\_Config;
 
-use Aura\Di\ContainerBuilder;
+use Aura\Di\ContainerAssertionsTrait;
 
 class CommonTest extends \PHPUnit_Framework_TestCase
 {
-    protected $di;
+    use ContainerAssertionsTrait;
 
     public function setUp()
     {
-        $builder = new ContainerBuilder;
-        $services = array();
-        $configs = array('Aura\Auth\_Config\Common');
-        $this->di = $builder->newInstance($services, $configs);
-    }
-
-    protected function assertService($name, $class)
-    {
-        $this->assertInstanceOf(
-            $class,
-            $this->di->get($name)
-        );
-    }
-
-    protected function assertNewInstance(
-        $class,
-        $params = array(),
-        $setter = array()
-    ) {
-        $this->assertInstanceOf(
-            $class,
-            $this->di->newInstance($class, $params, $setter)
-        );
+        $this->setUpContainer(array(
+            'Aura\Auth\_Config\Common',
+        ));
     }
 
     public function test()
     {
-        $this->assertService('aura/auth:auth', 'Aura\Auth\Auth');
-        $this->assertService('aura/auth:login_service', 'Aura\Auth\Service\LoginService');
-        $this->assertService('aura/auth:logout_service', 'Aura\Auth\Service\LogoutService');
-        $this->assertService('aura/auth:resume_service', 'Aura\Auth\Service\ResumeService');
-        $this->assertService('aura/auth:session', 'Aura\Auth\Session\Session');
-        $this->assertService('aura/auth:adapter', 'Aura\Auth\Adapter\NullAdapter');
+        $this->assertGet('aura/auth:auth', 'Aura\Auth\Auth');
+        $this->assertGet('aura/auth:login_service', 'Aura\Auth\Service\LoginService');
+        $this->assertGet('aura/auth:logout_service', 'Aura\Auth\Service\LogoutService');
+        $this->assertGet('aura/auth:resume_service', 'Aura\Auth\Service\ResumeService');
+        $this->assertGet('aura/auth:session', 'Aura\Auth\Session\Session');
+        $this->assertGet('aura/auth:adapter', 'Aura\Auth\Adapter\NullAdapter');
 
         $this->assertNewInstance('Aura\Auth\Adapter\HtpasswdAdapter');
         $this->assertNewInstance('Aura\Auth\Adapter\ImapAdapter');
