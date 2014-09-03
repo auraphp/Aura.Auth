@@ -114,10 +114,10 @@ class HtpasswdVerifier implements VerifierInterface
         $context = $plaintext . '$apr1$' . $salt;
 
         for ($i = $length; $i > 0; $i -= 16) {
-            $context .= substr($hash, 0, min(16 , $i));
+            $context .= substr($hash, 0, min(16, $i));
         }
 
-        for ( $i = $length; $i > 0; $i >>= 1) {
+        for ($i = $length; $i > 0; $i >>= 1) {
             $context .= ($i & 1) ? chr(0) : $plaintext[0];
         }
 
@@ -140,7 +140,7 @@ class HtpasswdVerifier implements VerifierInterface
     protected function computeBinary($plaintext, $salt, $context)
     {
         $binary = hash('md5', $context, true);
-        for($i = 0; $i < 1000; $i++) {
+        for ($i = 0; $i < 1000; $i++) {
             $new = ($i & 1) ? $plaintext : $binary;
             if ($i % 3) {
                 $new .= $salt;
