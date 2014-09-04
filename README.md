@@ -28,10 +28,11 @@ Alternatively, [download a release](https://github.com/auraphp/Aura.Auth/release
 
 To run the unit tests at the command line, go to the _tests/unit_ directory and issue `./phpunit.sh`. (This requires [PHPUnit][] to be available as `phpunit`.)
 
+[PHPUnit]: http://phpunit.de/manual/
+
 To run the [Aura.Di][] container configuration tests at the command line, go to the _tests/container_ directory and issue `./phpunit.sh`. (This requires [PHPUnit][] to be available as `phpunit` and [Composer][] to be available as `composer`.)
 
 [Aura.Di]: https://github.com/auraphp/Aura.Di
-[PHPUnit]: http://phpunit.de/manual/
 [Composer]: http://getcomposer.org/
 
 This library attempts to comply with [PSR-1][], [PSR-2][], and [PSR-4][]. If
