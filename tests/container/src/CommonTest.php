@@ -1,39 +1,42 @@
 <?php
 namespace Aura\Auth\_Config;
 
-use Aura\Di\ContainerAssertionsTrait;
+use Aura\Di\_Config\AbstractContainerTest;
 
-class CommonTest extends \PHPUnit_Framework_TestCase
+class CommonTest extends AbstractContainerTest
 {
-    use ContainerAssertionsTrait;
-
-    public function setUp()
+    protected function getConfigClasses()
     {
-        $this->setUpContainer(array(
-            'Aura\Auth\_Config\Common',
-        ));
+        return array(
+            'Aura\Auth\_Config\Common'
+        );
     }
 
-    public function test()
+    public function provideGet()
     {
-        $this->assertGet('aura/auth:auth', 'Aura\Auth\Auth');
-        $this->assertGet('aura/auth:login_service', 'Aura\Auth\Service\LoginService');
-        $this->assertGet('aura/auth:logout_service', 'Aura\Auth\Service\LogoutService');
-        $this->assertGet('aura/auth:resume_service', 'Aura\Auth\Service\ResumeService');
-        $this->assertGet('aura/auth:session', 'Aura\Auth\Session\Session');
-        $this->assertGet('aura/auth:adapter', 'Aura\Auth\Adapter\NullAdapter');
+        return array(
+            array('aura/auth:auth', 'Aura\Auth\Auth'),
+            array('aura/auth:login_service', 'Aura\Auth\Service\LoginService'),
+            array('aura/auth:logout_service', 'Aura\Auth\Service\LogoutService'),
+            array('aura/auth:resume_service', 'Aura\Auth\Service\ResumeService'),
+            array('aura/auth:session', 'Aura\Auth\Session\Session'),
+            array('aura/auth:adapter', 'Aura\Auth\Adapter\NullAdapter'),
+        );
+    }
 
-        $this->assertNewInstance('Aura\Auth\Adapter\HtpasswdAdapter');
-        $this->assertNewInstance('Aura\Auth\Adapter\ImapAdapter');
-        $this->assertNewInstance('Aura\Auth\Adapter\LdapAdapter');
-        $this->assertNewInstance('Aura\Auth\Adapter\PdoAdapter', array(
-            'pdo' => new FakePDO
-        ));
-        $this->assertNewInstance('Aura\Auth\Auth');
-        $this->assertNewInstance('Aura\Auth\Service\LoginService');
-        $this->assertNewInstance('Aura\Auth\Service\LogoutService');
-        $this->assertNewInstance('Aura\Auth\Service\ResumeService');
-        $this->assertNewInstance('Aura\Auth\Session\Timer');
-        $this->assertNewInstance('Aura\Auth\Session\Session');
+    public function provideNewInstance()
+    {
+        return array(
+            array('Aura\Auth\Adapter\HtpasswdAdapter'),
+            array('Aura\Auth\Adapter\ImapAdapter'),
+            array('Aura\Auth\Adapter\LdapAdapter'),
+            array('Aura\Auth\Adapter\PdoAdapter', array('pdo' => new FakePDO)),
+            array('Aura\Auth\Auth'),
+            array('Aura\Auth\Service\LoginService'),
+            array('Aura\Auth\Service\LogoutService'),
+            array('Aura\Auth\Service\ResumeService'),
+            array('Aura\Auth\Session\Timer'),
+            array('Aura\Auth\Session\Session'),
+        );
     }
 }
