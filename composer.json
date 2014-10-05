@@ -8,7 +8,6 @@
         "authentication"
     ],
     "homepage": "http://auraphp.com/Aura.Auth",
-    "version": "2.0.0-dev",
     "license": "BSD-2-Clause",
     "authors": [
         {
