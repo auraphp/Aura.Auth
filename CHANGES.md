@@ -1,1 +1,1 @@
-- still in development
+Initial 2.0.0 beta release.
