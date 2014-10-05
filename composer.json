@@ -7,7 +7,7 @@
         "authenticate",
         "authentication"
     ],
-    "homepage": "http://auraphp.com/Aura.Auth",
+    "homepage": "https://github.com/auraphp/Aura.Auth",
     "license": "BSD-2-Clause",
     "authors": [
         {
