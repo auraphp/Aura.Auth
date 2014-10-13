@@ -5,7 +5,7 @@ Provides authentication functionality and session tracking using various adapter
 - Apache htpasswd files
 - SQL tables via the [PDO](http://php.net/pdo) extension
 - IMAP/POP/NNTP via the [imap](http://php.net/imap) extension
-- LDAP and Active Directory via the [ldap](http://php.net.ldap) extension
+- LDAP and Active Directory via the [ldap](http://php.net/ldap) extension
 - OAuth via customized adapters
 
 Note that the purpose of this package is only to authenticate user credentials. It does not currently, and probably will not in the future, handle user account creation and management. That is more properly the domain of application-level functionality, or at least a separate Aura bundle.
