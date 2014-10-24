@@ -74,7 +74,7 @@ class PdoAdapter extends AbstractAdapter
      *
      * @param \PDO $pdo A PDO connection.
      *
-     * @param VerifierInterface $verifier A password verifier.
+     * @param VerifierInterface|int $verifier A password verifier.
      *
      * @param array $cols The columns to be selected.
      *
@@ -91,10 +91,10 @@ class PdoAdapter extends AbstractAdapter
         $where = null
     ) {
         $this->pdo = $pdo;
-        if(is_int($verifier)) {
-            $this->verifier = new Aura\Auth\Verifier\PasswordVerifier($verifier);
-        } else {
+        if($verifier instanceof VerifierInterface) {
             $this->verifier = $verifier;
+        } else if(is_int($verifier) || is_string($verifier)) {
+            $this->verifier = new Aura\Auth\Verifier\PasswordVerifier($verifier);
         }
         $this->setCols($cols);
         $this->from = $from;
