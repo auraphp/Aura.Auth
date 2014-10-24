@@ -91,7 +91,11 @@ class PdoAdapter extends AbstractAdapter
         $where = null
     ) {
         $this->pdo = $pdo;
-        $this->verifier = $verifier;
+        if(is_int($verifier)) {
+            $this->verifier = new Aura\Auth\Verifier\PasswordVerifier($verifier);
+        } else {
+            $this->verifier = $verifier;
+        }
         $this->setCols($cols);
         $this->from = $from;
         $this->where = $where;
