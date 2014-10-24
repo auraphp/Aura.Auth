@@ -358,7 +358,7 @@ Here is a legacy example where passwords are MD5 hashed in an accounts table:
 ```php
 <?php
 $pdo = new \PDO(...);
-$hash = 'md5';
+$hash = new PasswordVerifier('md5');
 $cols = ('username', 'md5password');
 $from = 'accounts';
 $pdo_adapter = $auth_factory->newPdoAdapter($pdo, $hash, $cols, $from);
@@ -370,7 +370,7 @@ Here is a modern, more complex example that uses bcrypt instead of md5, retrieve
 ```php
 <?php
 $pdo = new \PDO(...);
-$hash = PASSWORD_BCRYPT;
+$hash = new PasswordVerifier(PASSWORD_BCRYPT);
 $cols = array(
     'accounts.username', // "AS username" is added by the adapter
     'accounts.bcryptpass', // "AS password" is added by the adapter
