@@ -150,7 +150,7 @@ echo $auth->getStatus(); // VALID
 $logout_service = $auth_factory->newLogoutService();
 
 // use the service to force $auth to a logged-out state
-$logout_service->forceLogout();
+$logout_service->forceLogout($auth);
 
 // now the authentication status is anonymous/invalid
 echo $auth->getStatus(); // ANON
