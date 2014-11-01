@@ -253,7 +253,7 @@ class PdoAdapter extends AbstractAdapter
      */
     protected function buildSelectWhere()
     {
-        $where = "username = :username";
+        $where = $this->cols[0]." = :username";
         if ($this->where) {
             $where .= " AND ({$this->where})";
         }
