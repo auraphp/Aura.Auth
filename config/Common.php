@@ -38,21 +38,25 @@ class Common extends Config
          * Aura\Auth\Adapter\HtpasswdAdapter
          */
         $di->params['Aura\Auth\Adapter\HtpasswdAdapter'] = array(
-            'verifier' => $di->lazyNew('Aura\Auth\Verifier\HtpasswdVerifier')
+            'verifier' => $di->lazyNew('Aura\Auth\Verifier\HtpasswdVerifier'),
+            'file' => 'NO_FILE_SPECIFIED',
         );
 
         /**
          * Aura\Auth\Adapter\ImapAdapter
          */
         $di->params['Aura\Auth\Adapter\ImapAdapter'] = array(
-            'phpfunc' => $di->lazyNew('Aura\Auth\Phpfunc')
+            'phpfunc' => $di->lazyNew('Aura\Auth\Phpfunc'),
+            'mailbox' => 'NO_MAILBOX_SPECIFIED',
         );
 
         /**
          * Aura\Auth\Adapter\LdapAdapter
          */
         $di->params['Aura\Auth\Adapter\LdapAdapter'] = array(
-            'phpfunc' => $di->lazyNew('Aura\Auth\Phpfunc')
+            'phpfunc' => $di->lazyNew('Aura\Auth\Phpfunc'),
+            'server' => 'NO_SERVER_SPECIFIED',
+            'dnformat' => 'NO_DNFORMAT_SPECIFIED',
         );
 
         /**
@@ -112,6 +116,13 @@ class Common extends Config
          */
         $di->params['Aura\Auth\Session\Session'] = array(
             'cookie' => $_COOKIE,
+        );
+
+        /**
+         * Aura\Auth\Verifier\PasswordVerifier
+         */
+        $di->params['Aura\Auth\Verifier\PasswordVerifier'] = array(
+            'algo' => 'NO_ALGO_SPECIFIED',
         );
     }
 }
