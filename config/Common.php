@@ -39,7 +39,6 @@ class Common extends Config
          */
         $di->params['Aura\Auth\Adapter\HtpasswdAdapter'] = array(
             'verifier' => $di->lazyNew('Aura\Auth\Verifier\HtpasswdVerifier'),
-            'file' => 'NO_FILE_SPECIFIED',
         );
 
         /**
@@ -47,7 +46,6 @@ class Common extends Config
          */
         $di->params['Aura\Auth\Adapter\ImapAdapter'] = array(
             'phpfunc' => $di->lazyNew('Aura\Auth\Phpfunc'),
-            'mailbox' => 'NO_MAILBOX_SPECIFIED',
         );
 
         /**
@@ -55,8 +53,6 @@ class Common extends Config
          */
         $di->params['Aura\Auth\Adapter\LdapAdapter'] = array(
             'phpfunc' => $di->lazyNew('Aura\Auth\Phpfunc'),
-            'server' => 'NO_SERVER_SPECIFIED',
-            'dnformat' => 'NO_DNFORMAT_SPECIFIED',
         );
 
         /**

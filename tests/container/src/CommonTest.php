@@ -32,10 +32,20 @@ class CommonTest extends AbstractContainerTest
     public function provideNewInstance()
     {
         return array(
-            array('Aura\Auth\Adapter\HtpasswdAdapter'),
-            array('Aura\Auth\Adapter\ImapAdapter'),
-            array('Aura\Auth\Adapter\LdapAdapter'),
-            array('Aura\Auth\Adapter\PdoAdapter', array('pdo' => new FakePDO)),
+            array('Aura\Auth\Adapter\HtpasswdAdapter', array(
+                'file' => 'fake-file',
+            )),
+            array('Aura\Auth\Adapter\ImapAdapter', array(
+                'mailbox' => 'fake-mailbox',
+            )),
+            array('Aura\Auth\Adapter\LdapAdapter', array(
+                'server' => 'fake-server',
+                'dnformat' => 'fake-dnformat',
+            )),
+            array('Aura\Auth\Adapter\PdoAdapter', array(
+                'pdo' => new FakePDO,
+                'verifier' => new \Aura\Auth\Verifier\PasswordVerifier('md5'),
+            )),
             array('Aura\Auth\Auth'),
             array('Aura\Auth\Service\LoginService'),
             array('Aura\Auth\Service\LogoutService'),
