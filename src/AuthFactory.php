@@ -13,6 +13,8 @@ namespace Aura\Auth;
 use Aura\Auth\Adapter;
 use Aura\Auth\Service;
 use Aura\Auth\Session;
+use Aura\Auth\Session\SessionInterface;
+use Aura\Auth\Session\SegmentInterface;
 use Aura\Auth\Verifier;
 use Aura\Auth\Adapter\AdapterInterface;
 use PDO;
