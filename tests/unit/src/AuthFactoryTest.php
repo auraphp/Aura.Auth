@@ -2,6 +2,8 @@
 namespace Aura\Auth;
 
 use PDO;
+use Aura\Auth\Session\Session;
+use Aura\Auth\Session\Segment;
 use Aura\Auth\Verifier\FakeVerifier;
 
 class AuthFactoryTest extends \PHPUnit_Framework_TestCase
@@ -16,6 +18,12 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
     public function testNewAuth()
     {
         $auth = $this->factory->newInstance(array());
+        $this->assertInstanceOf('Aura\Auth\Auth', $auth);
+    }
+
+    public function testNewAuthWithSessionAndSegment()
+    {
+        $auth = $this->factory->newInstance(array(), new Session(array()), new Segment);
         $this->assertInstanceOf('Aura\Auth\Auth', $auth);
     }
 
