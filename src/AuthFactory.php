@@ -275,7 +275,7 @@ class AuthFactory
      *
      * @param string $server An LDAP server string.
      *
-     * @param string $dnformat A distinguised name format string for looking up
+     * @param string $dnformat A distinguished name format string for looking up
      * the username.
      *
      * @param array $options Use these connection options.
