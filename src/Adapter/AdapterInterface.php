@@ -36,7 +36,7 @@ interface AdapterInterface
      *
      * Handle logout logic against the storage backend.
      *
-     * @param Auth $auth The authentication obbject to be logged out.
+     * @param Auth $auth The authentication object to be logged out.
      *
      * @param string $status The new authentication status after logout.
      *
