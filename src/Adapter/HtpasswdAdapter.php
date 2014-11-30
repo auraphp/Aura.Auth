@@ -53,18 +53,47 @@ class HtpasswdAdapter extends AbstractAdapter
 
     /**
      *
+     * A username derrived from the server vars (if provided)
+     *
+     * @var string
+     *
+     */
+    protected $username;
+
+    /**
+     *
+     * A password derrived from the server vars (if provided)
+     *
+     * @var string
+     *
+     */
+    protected $password;
+
+    /**
+     *
      * Constructor.
      *
      * @param string $file The htpasswd file path.
      *
      * @param VerifierInterface $verifier
      *
+     * @param array $serverVars
+     *
      * @return null
      */
-    public function __construct($file, VerifierInterface $verifier)
+    public function __construct($file, VerifierInterface $verifier, array $serverVars = [])
     {
         $this->file = $file;
         $this->verifier = $verifier;
+
+        if(isset($serverVars['PHP_AUTH_USER'])) {
+            $this->username = $serverVars['PHP_AUTH_USER'];
+        }
+
+        if(isset($serverVars['PHP_AUTH_PW'])) {
+            $this->password = $serverVars['PHP_AUTH_PW'];
+        }
+
     }
 
     /**
@@ -88,11 +117,21 @@ class HtpasswdAdapter extends AbstractAdapter
      * @return array An array of login data.
      *
      */
-    public function login(array $input)
+    public function login(array $input = array())
     {
         $this->checkInput($input);
-        $username = $input['username'];
-        $password = $input['password'];
+
+        $username = $this->username;
+        $password = $this->password;
+
+        if (isset($input['username'])) {
+            $username = $input['username'];
+        }
+
+        if (isset($input['password'])) {
+            $password = $input['password'];
+        }
+
         $hashvalue = $this->fetchHashedPassword($username);
         $this->verify($password, $hashvalue);
         return array($username, array());
@@ -159,6 +198,26 @@ class HtpasswdAdapter extends AbstractAdapter
     {
         if (! $this->verifier->verify($password, $hashvalue)) {
             throw new Exception\PasswordIncorrect;
+        }
+    }
+
+    /**
+     *
+     * Check the credential input for completeness.
+     *
+     * @param array $input
+     *
+     * @return bool
+     *
+     */
+    protected function checkInput($input)
+    {
+        if (empty($input['username']) && empty($this->username)) {
+            throw new Exception\UsernameMissing;
+        }
+
+        if (empty($input['password']) && empty($this->password)) {
+            throw new Exception\PasswordMissing;
         }
     }
 }

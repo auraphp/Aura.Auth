@@ -69,4 +69,19 @@ class HtpasswdAdapterTest extends \PHPUnit_Framework_TestCase
             'password' => '------',
         ));
     }
+
+    public function testUsingServerVarsForLogin() {
+        $serverVars = array(
+            'PHP_AUTH_USER' => 'brandon',
+            'PHP_AUTH_PW' => 'password',
+        );
+
+        $file = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'fake.htpasswd';
+        $adapter = new HtpasswdAdapter($file, new HtpasswdVerifier(), $serverVars);
+
+        list($name, $data) = $adapter->login();
+
+        $this->assertSame('brandon', $name);
+        $this->assertSame(array(), $data);
+    }
 }
