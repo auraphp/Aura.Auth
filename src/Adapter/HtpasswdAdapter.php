@@ -81,7 +81,7 @@ class HtpasswdAdapter extends AbstractAdapter
      *
      * @return null
      */
-    public function __construct($file, VerifierInterface $verifier, array $serverVars = [])
+    public function __construct($file, VerifierInterface $verifier, array $serverVars = array())
     {
         $this->file = $file;
         $this->verifier = $verifier;
