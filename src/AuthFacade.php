@@ -2,6 +2,7 @@
 namespace Aura\Auth;
 
 use Aura\Auth\Adapter\AdapterInterface;
+use Aura\Auth\Status;
 
 class AuthFacade
 {
@@ -17,28 +18,31 @@ class AuthFacade
         $this->adapter = $adapter;
     }
 
-    public function login($input)
+    public function login(array $input)
     {
         $login_service = $this->getLoginService();
         return $login_service->login($this->getAuth(), $input);
     }
 
-    public function logout()
+    public function logout($status = Status::ANON)
     {
         $logout_service = $this->getLogoutService();
         return $logout_service->logout($this->getAuth());
     }
 
-    public function forceLogout()
+    public function forceLogout($status = Status::ANON)
     {
         $logout_service = $this->getLogoutService();
-        return $logout_service->forceLogout($this->getAuth());
+        return $logout_service->forceLogout($this->getAuth(), $status);
     }
 
-    public function forceLogin($username, $userdata)
-    {
+    public function forceLogin(
+        $name,
+        array $data = array(),
+        $status = Status::VALID
+    ) {
         $login_service = $this->getLoginService();
-        return $login_service->forceLogin($this->getAuth(), $username, $userdata);
+        return $login_service->forceLogin($this->getAuth(), $name, $data, $status);
     }
 
     public function __call($method, array $params)

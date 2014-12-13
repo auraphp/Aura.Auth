@@ -3,6 +3,8 @@ namespace Aura\Auth;
 
 use PDO;
 use Aura\Auth\Verifier\PasswordVerifier;
+use Aura\Auth\Session\FakeSession;
+use Aura\Auth\Session\FakeSegment;
 
 class AuthFacadeTest extends \PHPUnit_Framework_TestCase
 {
@@ -12,7 +14,7 @@ class AuthFacadeTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $auth_factory = new AuthFactory($_COOKIE);
+        $auth_factory = new AuthFactory($_COOKIE, new FakeSession, new FakeSegment);
         $this->pdo = new PDO('sqlite::memory:');
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $this->buildTable();
@@ -99,13 +101,13 @@ class AuthFacadeTest extends \PHPUnit_Framework_TestCase
         $this->assertSame('ANON', $this->auth_facade->getStatus());
     }
 
-    public function testForceLogin($username, $userdata)
+    public function testForceLogin()
     {
         $this->assertSame('ANON', $this->auth_facade->getStatus());
-        $this->auth_facade->forceLogin(array(
-            'username' => 'boshag',
-            'password' => '123456',
-        ));
+        $this->auth_facade->forceLogin(
+            'boshag',
+            array('foo' => 'bar')
+        );
 
         $this->assertSame('VALID', $this->auth_facade->getStatus());
     }
