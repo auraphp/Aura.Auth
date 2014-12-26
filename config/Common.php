@@ -42,8 +42,7 @@ class Common extends Config
             'auth' => $di->lazyGet('aura/auth:auth'),
             'login_service' => $di->lazyGet('aura/auth:login_service'),
             'logout_service' => $di->lazyGet('aura/auth:logout_service'),
-            'resume_service' => $di->lazyGet('aura/auth:resume_service'),
-            'adapter' => $di->lazyGet('aura/auth:adapter'),
+            'resume_service' => $di->lazyGet('aura/auth:resume_service')
         );
 
         /**

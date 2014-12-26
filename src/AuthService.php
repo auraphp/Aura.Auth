@@ -1,7 +1,6 @@
 <?php
 namespace Aura\Auth;
 
-use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Auth\Auth;
 use Aura\Auth\Service\LoginService;
 use Aura\Auth\Service\LogoutService;
@@ -10,25 +9,26 @@ use Aura\Auth\Status;
 
 class AuthService
 {
-    private $auth;
+    protected $auth;
 
-    private $login_service;
+    protected $login_service;
 
-    private $logout_service;
+    protected $logout_service;
 
-    private $resume_service;
+    protected $resume_service;
 
-    private $resumed = false;
+    protected $resumed = false;
 
-    private $adapter;
-
-    public function __construct(Auth $auth, LoginService $login_service, LogoutService $logout_service, ResumeService $resume_service, AdapterInterface $adapter)
-    {
+    public function __construct(
+        Auth $auth,
+        LoginService $login_service,
+        LogoutService $logout_service,
+        ResumeService $resume_service
+    ) {
         $this->auth = $auth;
         $this->login_service  = $login_service;
         $this->logout_service = $logout_service;
         $this->resume_service = $resume_service;
-        $this->adapter = $adapter;
     }
 
     public function login(array $input)
