@@ -33,6 +33,18 @@ class Common extends Config
         $di->set('aura/auth:resume_service', $di->lazyNew('Aura\Auth\Service\ResumeService'));
         $di->set('aura/auth:session', $di->lazyNew('Aura\Auth\Session\Session'));
         $di->set('aura/auth:adapter', $di->lazyNew('Aura\Auth\Adapter\NullAdapter'));
+        $di->set('aura/auth:auth_service', $di->lazyNew('Aura\Auth\AuthService'));
+
+        /**
+         * Auth service
+         */
+        $di->params['Aura\Auth\AuthService'] = array(
+            'auth' => $di->lazyGet('aura/auth:auth'),
+            'login_service' => $di->lazyGet('aura/auth:login_service'),
+            'logout_service' => $di->lazyGet('aura/auth:logout_service'),
+            'resume_service' => $di->lazyGet('aura/auth:resume_service'),
+            'adapter' => $di->lazyGet('aura/auth:adapter'),
+        );
 
         /**
          * Aura\Auth\Adapter\HtpasswdAdapter
