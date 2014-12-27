@@ -544,7 +544,7 @@ class LeagueOAuth2Adapter implements AdapterInterface
      * @param Auth $auth
      * Logout method is required to fulfill the contract with AdapterInterface
      */
-    public function logout(Auth $auth)
+    public function logout(Auth $auth, $status = Status::ANON)
     {
         //nothing to do here
     }
