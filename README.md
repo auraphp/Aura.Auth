@@ -596,7 +596,7 @@ if (!isset($_GET['code'])) {
     try {
         // array is the username and an array of info and indicates successful
         // login
-        $data = $githubAdapter->login($_GET);
+        $data = $auraAdapter->login($_GET);
     } catch (Exception $e) {
         // handle the exception
     }
