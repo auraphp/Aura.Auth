@@ -11,6 +11,7 @@
 namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Auth;
+use Aura\Auth\Status;
 
 /**
  *

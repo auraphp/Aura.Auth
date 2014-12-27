@@ -487,6 +487,7 @@ namespace OAuth2\Adapter;
 
 use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Auth\Exception;
+use Aura\Auth\Status;
 use League\OAuth2\Client\Provider\IdentityProvider;
 
 class LeagueOAuth2Adapter implements AdapterInterface
@@ -544,7 +545,7 @@ class LeagueOAuth2Adapter implements AdapterInterface
      * @param Auth $auth
      * Logout method is required to fulfill the contract with AdapterInterface
      */
-    public function logout(Auth $auth)
+    public function logout(Auth $auth, $status = Status::ANON)
     {
         //nothing to do here
     }
@@ -596,7 +597,7 @@ if (!isset($_GET['code'])) {
     try {
         // array is the username and an array of info and indicates successful
         // login
-        $data = $githubAdapter->login($_GET);
+        $data = $auraAdapter->login($_GET);
     } catch (Exception $e) {
         // handle the exception
     }
