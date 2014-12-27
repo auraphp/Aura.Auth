@@ -487,6 +487,7 @@ namespace OAuth2\Adapter;
 
 use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Auth\Exception;
+use Aura\Auth\Status;
 use League\OAuth2\Client\Provider\IdentityProvider;
 
 class LeagueOAuth2Adapter implements AdapterInterface
