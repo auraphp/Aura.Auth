@@ -651,6 +651,9 @@ This is an example of the code needed to effect a login. Note that the `echo` st
 
 ```php
 <?php
+
+class InvalidLoginException extends Exception {}
+
 $auth = $auth_factory->newInstance();
 
 $login_service = $auth_factory->newLoginService(...);
@@ -662,25 +665,34 @@ try {
     );
     echo "You are now logged into a new session.";
 } catch (\Aura\Auth\Exception\UsernameMissing $e) {
-    echo "The 'username' field is missing or empty.";
+    $log->notice("The 'username' field is missing or empty.");
+    throw new InvalidLoginException();
 } catch (\Aura\Auth\Exception\PasswordMissing $e) {
-    echo "The 'password' field is missing or empty.";
+    $log->notice("The 'password' field is missing or empty.");
+    throw new InvalidLoginException();
 } catch (\Aura\Auth\Exception\UsernameNotFound $e) {
-    echo "The username you entered was not found.";
+    $log->warning("The username you entered was not found.");
+    throw new InvalidLoginException();
 } catch (\Aura\Auth\Exception\MultipleMatches $e) {
-    echo "There is more than one account with that username.";
+    $log->warning("There is more than one account with that username.");
+    throw new InvalidLoginException();
 } catch (\Aura\Auth\Exception\PasswordIncorrect $e) {
-    echo "The password you entered was incorrect.";
+    $log->notice("The password you entered was incorrect.");
+    throw new InvalidLoginException();
 } catch (\Aura\Auth\Exception\ConnectionFailed $e) {
-    echo "Cound not connect to IMAP or LDAP server.";
-    echo "This could be because the username or password was wrong,";
-    echo "or because the the connect operation itself failed in some way. ";
-    echo $e->getMessage();
+    $log->notice("Cound not connect to IMAP or LDAP server.");
+    $log->info("This could be because the username or password was wrong,");
+    $log->info("or because the the connect operation itself failed in some way. ");
+    $log->info($e->getMessage());
+    throw new InvalidLoginException();
 } catch (\Aura\Auth\Exception\BindFailed $e) {
-    echo "Cound not bind to LDAP server.";
-    echo "This could be because the username or password was wrong,";
-    echo "or because the the bind operations itself failed in some way. ";
-    echo $e->getMessage();
+    $log->notice("Cound not bind to LDAP server.");
+    $log->info("This could be because the username or password was wrong,");
+    $log->info("or because the the bind operations itself failed in some way. ");
+    $log->info($e->getMessage());
+    throw new InvalidLoginException();
+} catch (InvalidLoginException $e) {
+    echo "Invalid login details. Please try again";
 }
 ?>
 ```
