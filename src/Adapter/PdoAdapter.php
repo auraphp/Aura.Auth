@@ -284,7 +284,27 @@ class PdoAdapter extends AbstractAdapter
         if (! $verified) {
             throw new Exception\PasswordIncorrect;
         }
-
+        $str = substr($data['password'], 0, 4);
+        // via https://blog.engineyard.com/2014/password-security-part-3
+        if ($str == '$2y$' || $str == '$2a$' || $str == '$2x$') {
+            $info = password_get_info($data['password']);
+            if (! empty($info) &&
+                isset($info['options']) &&
+                isset($info['options']) &&
+                password_needs_rehash($data['password'], $info['algo'], $info['options'])
+            ) {
+                $hash = password_hash($input['password'], $info['algo'], $info['options']);
+                if ($hash) {
+                    $stm = "UPDATE {$from} SET {$this->cols[1]} = :password WHERE {$this->cols[0]} = :username";
+                    $sth = $this->pdo->prepare($stm);
+                    $bind = array(
+                        ':username' => $input['username'],
+                        ':password' => $hash
+                    );
+                    $sth->execute($bind);
+                }
+            }
+        }
         return true;
     }
 }
