@@ -692,6 +692,7 @@ try {
     $log->info($e->getMessage());
     throw new InvalidLoginException();
 } catch (InvalidLoginException $e) {
+    sleep(5);
     echo "Invalid login details. Please try again";
 }
 ?>
