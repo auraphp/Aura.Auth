@@ -647,12 +647,13 @@ switch (true) {
 
 #### Logging In
 
-This is an example of the code needed to effect a login. Note that the `echo` statements are intended to explain the different resulting states of the `login()` call, and may be replaced by whatever logic you feel is appropriate.
+This is an example of the code needed to effect a login. Note that the `echo` and `$log` statements are intended to explain the different resulting states of the `login()` call, and may be replaced by whatever logic you feel is appropriate.
 
 ```php
 <?php
-
-class InvalidLoginException extends Exception {}
+class InvalidLoginException extends Exception
+{
+}
 
 $auth = $auth_factory->newInstance();
 
