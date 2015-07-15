@@ -647,7 +647,7 @@ switch (true) {
 
 #### Logging In
 
-This is an example of the code needed to effect a login. Note that the `echo` statements are intended to explain the different resulting states of the `login()` call, and may be replaced by whatever logic you feel is appropriate.
+This is an example of the code needed to effect a login. Note that the `echo` and `$log` statements are intended to explain the different resulting states of the `login()` call, and may be replaced by whatever logic you feel is appropriate; in particular, you should probably not expose the exact nature of the failure, to help mitigate brute-force attempts.
 
 ```php
 <?php
@@ -659,40 +659,58 @@ $auth = $auth_factory->newInstance();
 $login_service = $auth_factory->newLoginService(...);
 
 try {
+
     $login_service->login($auth, array(
         'username' => $_POST['username'],
         'password' => $_POST['password'],
     );
     echo "You are now logged into a new session.";
+
 } catch (\Aura\Auth\Exception\UsernameMissing $e) {
+
     $log->notice("The 'username' field is missing or empty.");
     throw new InvalidLoginException();
+
 } catch (\Aura\Auth\Exception\PasswordMissing $e) {
+
     $log->notice("The 'password' field is missing or empty.");
     throw new InvalidLoginException();
+
 } catch (\Aura\Auth\Exception\UsernameNotFound $e) {
+
     $log->warning("The username you entered was not found.");
     throw new InvalidLoginException();
+
 } catch (\Aura\Auth\Exception\MultipleMatches $e) {
+
     $log->warning("There is more than one account with that username.");
     throw new InvalidLoginException();
+
 } catch (\Aura\Auth\Exception\PasswordIncorrect $e) {
+
     $log->notice("The password you entered was incorrect.");
     throw new InvalidLoginException();
+
 } catch (\Aura\Auth\Exception\ConnectionFailed $e) {
+
     $log->notice("Cound not connect to IMAP or LDAP server.");
     $log->info("This could be because the username or password was wrong,");
     $log->info("or because the the connect operation itself failed in some way. ");
     $log->info($e->getMessage());
     throw new InvalidLoginException();
+
 } catch (\Aura\Auth\Exception\BindFailed $e) {
+
     $log->notice("Cound not bind to LDAP server.");
     $log->info("This could be because the username or password was wrong,");
-    $log->info("or because the the bind operations itself failed in some way. ");
+    $log->info("or because the the bind operation itself failed in some way. ");
     $log->info($e->getMessage());
     throw new InvalidLoginException();
+
 } catch (InvalidLoginException $e) {
-    echo "Invalid login details. Please try again";
+
+    echo "Invalid login details. Please try again.";
+
 }
 ?>
 ```
