@@ -36,5 +36,10 @@
         "ext/ldap": "For LDAP integration.",
         "ext/imap": "For IMAP/POP/NNTP integration.",
         "ircmaxell/password-compat": "Provides password_verify() for PHP versions earlier than 5.5"
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Aura\\Auth\\": "tests/"
+        }
     }
 }

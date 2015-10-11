@@ -12,7 +12,7 @@ spl_autoload_register(function ($class) {
         ),
         "{$ns}\\" => array(
             __DIR__ . '/src',
-            __DIR__ . '/tests/unit/src',
+            __DIR__ . '/tests',
         ),
     );
 
