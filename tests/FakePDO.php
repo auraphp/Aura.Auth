@@ -1,5 +1,5 @@
 <?php
-namespace Aura\Auth\_Config;
+namespace Aura\Auth;
 
 use PDO;
 

@@ -1,9 +1,9 @@
 <?php
-namespace Aura\Auth\_Config;
+namespace Aura\Auth;
 
 use Aura\Di\_Config\AbstractContainerTest;
 
-class CommonTest extends AbstractContainerTest
+class ContainerTest extends AbstractContainerTest
 {
     protected function getConfigClasses()
     {
