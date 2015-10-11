@@ -43,7 +43,7 @@ class ContainerTest extends AbstractContainerTest
                 'dnformat' => 'fake-dnformat',
             )),
             array('Aura\Auth\Adapter\PdoAdapter', array(
-                'pdo' => new FakePDO,
+                'pdo' => new FakePdo,
                 'verifier' => new \Aura\Auth\Verifier\PasswordVerifier('md5'),
             )),
             array('Aura\Auth\Auth'),
