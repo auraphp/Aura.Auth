@@ -1,5 +1,7 @@
-- DOC: Updated README and docblocks.
+First stable 2.0 release.
 
-- CHG: PdoAdapter::buildSelectWhere() now honors the custom column name provided by the user.
+- (FIX) Correct AuthFactory namespace, and add test.
 
-- CHG: Turn off auto-resolution in Container tests
+- (DOC) Additions and corrections in README.
+
+- (FIX) Add missing Status in AdapterInterface.

@@ -1,7 +1,7 @@
 {
     "name": "aura/auth",
     "type": "library",
-    "description": "Aura Auth provides a unified interface to authenticate a user with local or remote authentication systems.",
+    "description": "Provides a unified interface to authenticate a user with local or remote authentication systems.",
     "keywords": [
         "auth",
         "authenticate",
