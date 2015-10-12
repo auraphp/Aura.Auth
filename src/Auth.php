@@ -3,8 +3,6 @@
  *
  * This file is part of Aura for PHP.
  *
- * @package Aura.Auth
- *
  * @license http://opensource.org/licenses/bsd-license.php BSD
  *
  */
@@ -233,7 +231,7 @@ class Auth
      *
      * Sets the current user data.
      *
-     * @param array $data The user data.
+     * @param array $userdata The user data.
      *
      * @return null
      *
