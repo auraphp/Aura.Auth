@@ -148,12 +148,11 @@ class LdapAdapter extends AbstractAdapter
             $error = $this->phpfunc->ldap_errno($conn)
                    . ': '
                    . $this->phpfunc->ldap_error($conn);
-            $this->phpfunc->ldap_close($conn);
+            $this->phpfunc->ldap_unbind($conn);
             throw new Exception\BindFailed($error);
         }
 
         $this->phpfunc->ldap_unbind($conn);
-        $this->phpfunc->ldap_close($conn);
     }
 
     /**
