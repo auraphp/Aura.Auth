@@ -416,6 +416,7 @@ You may wish to extend one of the existing adapters to add login/logout/resume b
 <?php
 use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Auth\Auth;
+use Aura\Auth\Status;
 
 class CustomAdapter implements AdapterInterface
 {
@@ -433,7 +434,7 @@ class CustomAdapter implements AdapterInterface
     }
 
     // AdapterInterface::logout()
-    public function logout(Auth $auth)
+    public function logout(Auth $auth, $status = Status::ANON);
     {
         $this->updateLogoutTime($auth->getUsername(), time());
     }
@@ -481,7 +482,7 @@ namespace OAuth2\Adapter;
 use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Auth\Exception;
 use Aura\Auth\Auth;
-use Aura\Auth\Adapter\Status;
+use Aura\Auth\Status;
 use League\OAuth2\Client\Provider\AbstractProvider;
 
 class LeagueOAuth2Adapter implements AdapterInterface
