@@ -12,7 +12,7 @@ Note that the purpose of this package is only to authenticate user credentials. 
 
 ## Foreword
 
-### Installation
+### InstallationS
 
 This library requires PHP 5.5 or later, and has no userland dependencies.  (As a special consideration, this library is compatible with PHP 5.3 and 5.4 when the [ircmaxell/password-compat](https://github.com/ircmaxell/password_compat) package is installed.)
 
@@ -434,7 +434,7 @@ class CustomAdapter implements AdapterInterface
     }
 
     // AdapterInterface::logout()
-    public function logout(Auth $auth, $status = Status::ANON);
+    public function logout(Auth $auth, $status = Status::ANON)
     {
         $this->updateLogoutTime($auth->getUsername(), time());
     }
