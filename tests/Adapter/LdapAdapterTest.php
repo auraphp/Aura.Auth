@@ -18,7 +18,6 @@ class LdapAdapterTest extends \PHPUnit_Framework_TestCase
                 'ldap_bind',
                 'ldap_unbind',
                 'ldap_set_option',
-                'ldap_close',
                 'ldap_errno',
                 'ldap_error'
             )
@@ -62,10 +61,6 @@ class LdapAdapterTest extends \PHPUnit_Framework_TestCase
 
         $this->phpfunc->expects($this->once())
             ->method('ldap_unbind')
-            ->will($this->returnValue(true));
-
-        $this->phpfunc->expects($this->once())
-            ->method('ldap_close')
             ->will($this->returnValue(true));
 
         $actual = $this->adapter->login(array(
@@ -118,7 +113,7 @@ class LdapAdapterTest extends \PHPUnit_Framework_TestCase
             ->will($this->returnValue('Operations Error'));
 
         $this->phpfunc->expects($this->once())
-            ->method('ldap_close')
+            ->method('ldap_unbind')
             ->will($this->returnValue(true));
 
         $this->setExpectedException('Aura\Auth\Exception\BindFailed');
