@@ -12,7 +12,7 @@ Note that the purpose of this package is only to authenticate user credentials. 
 
 ## Foreword
 
-### InstallationS
+### Installation
 
 This library requires PHP 5.5 or later, and has no userland dependencies.  (As a special consideration, this library is compatible with PHP 5.3 and 5.4 when the [ircmaxell/password-compat](https://github.com/ircmaxell/password_compat) package is installed.)
 
@@ -757,7 +757,7 @@ $login_service->login($auth, array(
 
 #### Logging Out
 
-This is an example of the code needed to effect a login. Note that the `echo` statements are intended to explain the different resulting states of the `logout()` call, and may be replaced by whatever logic you feel is appropriate.
+This is an example of the code needed to effect a logout. Note that the `echo` statements are intended to explain the different resulting states of the `logout()` call, and may be replaced by whatever logic you feel is appropriate.
 
 ```php
 <?php
