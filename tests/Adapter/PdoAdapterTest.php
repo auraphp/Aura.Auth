@@ -12,6 +12,10 @@ class PdoAdapterTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
+        if (false === extension_loaded('pdo_sqlite')) {
+            $this->markTestSkipped("Cannot test this adapter with pdo_sqlite extension disabled.");
+        }
+
         $this->pdo = new PDO('sqlite::memory:');
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         $this->buildTable();
