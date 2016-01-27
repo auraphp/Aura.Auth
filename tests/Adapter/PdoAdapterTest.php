@@ -2,19 +2,20 @@
 namespace Aura\Auth\Adapter;
 
 use PDO;
+use Aura\Auth\ChecksExtensionLoaded;
 use Aura\Auth\Verifier\PasswordVerifier;
 
 class PdoAdapterTest extends \PHPUnit_Framework_TestCase
 {
+    use ChecksExtensionLoaded;
+
     protected $adapter;
 
     protected $pdo;
 
     protected function setUp()
     {
-        if (false === extension_loaded('pdo_sqlite')) {
-            $this->markTestSkipped("Cannot test this adapter with pdo_sqlite extension disabled.");
-        }
+        $this->skipUnlessExtensionLoaded('pdo_sqlite');
 
         $this->pdo = new PDO('sqlite::memory:');
         $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
