@@ -2,12 +2,15 @@
 namespace Aura\Auth;
 
 use PDO;
+use Aura\Auth\ChecksExtensionLoaded;
 use Aura\Auth\Session\Session;
 use Aura\Auth\Session\Segment;
 use Aura\Auth\Verifier\FakeVerifier;
 
 class AuthFactoryTest extends \PHPUnit_Framework_TestCase
 {
+    use ChecksExtensionLoaded;
+
     protected $factory;
 
     protected function setUp()
@@ -29,6 +32,8 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testNewPdoAdapter_passwordVerifier()
     {
+        $this->skipUnlessExtensionLoaded('pdo_sqlite');
+
         $pdo = new PDO('sqlite::memory:');
         $adapter = $this->factory->newPdoAdapter(
             $pdo,
@@ -44,6 +49,8 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testNewPdoAdapter_customVerifier()
     {
+        $this->skipUnlessExtensionLoaded('pdo_sqlite');
+
         $pdo = new PDO('sqlite::memory:');
         $adapter = $this->factory->newPdoAdapter(
             $pdo,
