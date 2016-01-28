@@ -24,9 +24,12 @@ trait ChecksExtensionLoaded
      * @param string $extension The extension to check.
      *
      */
-    public function skipUnlessExtensionLoaded($extension) {
+    public function skipUnlessExtensionLoaded($extension)
+    {
         if (false === extension_loaded($extension)) {
-            $this->markTestSkipped("Cannot run this test without $extension loaded.");
+            $this->markTestSkipped(
+                "Cannot run this test without $extension loaded."
+            );
         }
     }
 }
