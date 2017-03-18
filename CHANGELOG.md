@@ -6,6 +6,7 @@
 - [Removed double closing happened in LDAP resources.](https://github.com/auraphp/Aura.Auth/pull/75)
 - Update documentation fixing typos.
 - phpunit added to require-dev of composer.
+- Updated license year.
 
 ## 2.0.0
 
