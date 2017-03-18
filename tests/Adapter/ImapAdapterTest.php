@@ -11,13 +11,12 @@ class ImapAdapterTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->phpfunc = $this->getMock(
-            'Aura\Auth\Phpfunc',
-            array(
-                'imap_open',
-                'imap_close',
-            )
-        );
+        $this->phpfunc = $this->getMockBuilder('Aura\Auth\Phpfunc')
+             ->setMethods(array(
+                 'imap_open',
+                 'imap_close',
+             ))
+             ->getMock();
 
         $this->adapter = new ImapAdapter(
             $this->phpfunc,

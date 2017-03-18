@@ -11,17 +11,16 @@ class LdapAdapterTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->phpfunc = $this->getMock(
-            'Aura\Auth\Phpfunc',
-            array(
-                'ldap_connect',
-                'ldap_bind',
-                'ldap_unbind',
-                'ldap_set_option',
-                'ldap_errno',
-                'ldap_error'
-            )
-        );
+        $this->phpfunc = $this->getMockBuilder('Aura\Auth\Phpfunc')
+             ->setMethods(array(
+                 'ldap_connect',
+                 'ldap_bind',
+                 'ldap_unbind',
+                 'ldap_set_option',
+                 'ldap_errno',
+                 'ldap_error'
+             ))
+             ->getMock();        
 
         $this->adapter = new LdapAdapter(
             $this->phpfunc,
