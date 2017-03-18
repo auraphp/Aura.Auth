@@ -7,6 +7,7 @@
 - Update documentation fixing typos.
 - phpunit added to require-dev of composer.
 - Updated license year.
+- Removed CHANGES.md file, added CHANGELOG.md instead.
 
 ## 2.0.0
 
