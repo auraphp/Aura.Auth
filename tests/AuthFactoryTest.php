@@ -29,6 +29,10 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testNewPdoAdapter_passwordVerifier()
     {
+        if (false === extension_loaded('pdo_sqlite')) {
+            $this->markTestSkipped("Cannot test this adapter with pdo_sqlite extension disabled.");
+        }
+
         $pdo = new PDO('sqlite::memory:');
         $adapter = $this->factory->newPdoAdapter(
             $pdo,
@@ -44,6 +48,10 @@ class AuthFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testNewPdoAdapter_customVerifier()
     {
+        if (false === extension_loaded('pdo_sqlite')) {
+            $this->markTestSkipped("Cannot test this adapter with pdo_sqlite extension disabled.");
+        }
+
         $pdo = new PDO('sqlite::memory:');
         $adapter = $this->factory->newPdoAdapter(
             $pdo,
