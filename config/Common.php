@@ -101,8 +101,8 @@ class Common extends Config
         $di->params['Aura\Auth\Session\Timer'] = array(
             'ini_gc_maxlifetime' => ini_get('session.gc_maxlifetime'),
             'ini_cookie_lifetime' => ini_get('session.cookie_lifetime'),
-            'idle_ttl' => 1440,
-            'expire_ttl' => 14400,
+            'idle_ttl' => 3600,             // 1 hour
+            'expire_ttl' => 86400,          // 24 hours
         );
 
         /**
