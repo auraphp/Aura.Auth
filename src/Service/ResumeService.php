@@ -91,8 +91,6 @@ class ResumeService
      *
      * @param Auth $auth An authentication tracker.
      *
-     * @return bool Whether or not a session still exists.
-     *
      */
     public function resume(Auth $auth)
     {
