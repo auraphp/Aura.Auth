@@ -134,8 +134,8 @@ class AuthFactory
      */
     public function newResumeService(
         AdapterInterface $adapter = null,
-        $idle_ttl = 1440,
-        $expire_ttl = 14400
+        $idle_ttl = 3600,               // 1 hour
+        $expire_ttl = 86400             // 24 hours
     ) {
 
         $adapter = $this->fixAdapter($adapter);
