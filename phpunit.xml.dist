@@ -4,4 +4,7 @@
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
+    <php>
+        <ini name="session.gc_maxlifetime" value="86400"/>
+    </php>
 </phpunit>
