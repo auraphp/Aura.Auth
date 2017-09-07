@@ -94,7 +94,7 @@ class Timer
     public function setIdleTtl($idle_ttl)
     {
         if ($this->ini_gc_maxlifetime < $idle_ttl) {
-            throw new Exception('session.gc_maxlifetime less than idle time');
+            throw new Exception("session.gc_maxlifetime $this->ini_gc_maxlifetime less than idle time $idle_ttl");
         }
         $this->idle_ttl = $idle_ttl;
     }
