@@ -18,6 +18,8 @@ matrix:
           dist: precise
           sudo: false
           php: 5.6
+          env:
+            - TEST_COVERAGE=true
         - os: linux
           dist: trusty
           sudo: false
@@ -39,7 +41,7 @@ before_script:
   - composer self-update
   - composer install
 script:
-  - vendor/bin/phpunit --coverage-clover=coverage.clover
+  - if [[ $TEST_COVERAGE == 'true' ]]; then vendor/bin/phpunit --coverage-clover=coverage.clover ; else vendor/bin/phpunit ; fi
 after_script:
   - wget https://scrutinizer-ci.com/ocular.phar
-  - php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+  - if [[ $TEST_COVERAGE == 'true' ]]; then php ocular.phar code-coverage:upload --format=php-clover coverage.clover ; fi
