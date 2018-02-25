@@ -352,7 +352,7 @@ Here is a legacy example where passwords are MD5 hashed in an accounts table:
 <?php
 $pdo = new \PDO(...);
 $hash = new PasswordVerifier('md5');
-$cols = ('username', 'md5password');
+$cols = array('username', 'md5password');
 $from = 'accounts';
 $pdo_adapter = $auth_factory->newPdoAdapter($pdo, $hash, $cols, $from);
 ?>
