@@ -84,7 +84,7 @@ class LdapAdapterTest extends \PHPUnit\Framework\TestCase
             ->with('ldaps://ldap.example.com:636')
             ->will($this->returnValue(false));
 
-        $this->setExpectedException('Aura\Auth\Exception\ConnectionFailed');
+        $this->expectException('Aura\Auth\Exception\ConnectionFailed');
         $this->adapter->login($input);
     }
 
@@ -115,7 +115,7 @@ class LdapAdapterTest extends \PHPUnit\Framework\TestCase
             ->method('ldap_unbind')
             ->will($this->returnValue(true));
 
-        $this->setExpectedException('Aura\Auth\Exception\BindFailed');
+        $this->expectException('Aura\Auth\Exception\BindFailed');
         $this->adapter->login(array(
             'username' => 'someusername',
             'password' => 'secretpassword'

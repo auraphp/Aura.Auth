@@ -47,13 +47,13 @@ class TimerTest extends \PHPUnit\Framework\TestCase
 
     public function testSetIdleTtl_bad()
     {
-        $this->setExpectedException('Aura\Auth\Exception');
+        $this->expectException('Aura\Auth\Exception');
         $this->timer->setIdleTtl(3601);
     }
 
     public function testSetExpireTtl_bad()
     {
-        $this->setExpectedException('Aura\Auth\Exception');
+        $this->expectException('Aura\Auth\Exception');
         $this->timer->setExpireTtl(86401);
     }
 }

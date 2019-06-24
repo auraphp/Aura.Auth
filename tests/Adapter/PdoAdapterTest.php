@@ -73,7 +73,7 @@ class PdoAdapterTest extends \PHPUnit\Framework\TestCase
 
     public function test_usernameColumnNotSpecified()
     {
-        $this->setExpectedException('Aura\Auth\Exception\UsernameColumnNotSpecified');
+        $this->expectException('Aura\Auth\Exception\UsernameColumnNotSpecified');
         $this->adapter = new PdoAdapter(
             $this->pdo,
             new PasswordVerifier('md5'),
@@ -84,7 +84,7 @@ class PdoAdapterTest extends \PHPUnit\Framework\TestCase
 
     public function test_passwordColumnNotSpecified()
     {
-        $this->setExpectedException('Aura\Auth\Exception\PasswordColumnNotSpecified');
+        $this->expectException('Aura\Auth\Exception\PasswordColumnNotSpecified');
         $this->adapter = new PdoAdapter(
             $this->pdo,
             new PasswordVerifier('md5'),
@@ -106,13 +106,13 @@ class PdoAdapterTest extends \PHPUnit\Framework\TestCase
 
     public function testLogin_usernameMissing()
     {
-        $this->setExpectedException('Aura\Auth\Exception\UsernameMissing');
+        $this->expectException('Aura\Auth\Exception\UsernameMissing');
         $this->adapter->login(array());
     }
 
     public function testLogin_passwordMissing()
     {
-        $this->setExpectedException('Aura\Auth\Exception\PasswordMissing');
+        $this->expectException('Aura\Auth\Exception\PasswordMissing');
         $this->adapter->login(array(
             'username' => 'boshag',
         ));
@@ -120,7 +120,7 @@ class PdoAdapterTest extends \PHPUnit\Framework\TestCase
 
     public function testLogin_usernameNotFound()
     {
-        $this->setExpectedException('Aura\Auth\Exception\UsernameNotFound');
+        $this->expectException('Aura\Auth\Exception\UsernameNotFound');
         $this->adapter->login(array(
             'username' => 'missing',
             'password' => '------',
@@ -129,7 +129,7 @@ class PdoAdapterTest extends \PHPUnit\Framework\TestCase
 
     public function testLogin_passwordIncorrect()
     {
-        $this->setExpectedException('Aura\Auth\Exception\PasswordIncorrect');
+        $this->expectException('Aura\Auth\Exception\PasswordIncorrect');
         $this->adapter->login(array(
             'username' => 'boshag',
             'password' => '------',
@@ -138,7 +138,7 @@ class PdoAdapterTest extends \PHPUnit\Framework\TestCase
 
     public function testLogin_multipleMatches()
     {
-        $this->setExpectedException('Aura\Auth\Exception\MultipleMatches');
+        $this->expectException('Aura\Auth\Exception\MultipleMatches');
         $this->adapter->login(array(
             'username' => 'repeat',
             'password' => '234567',

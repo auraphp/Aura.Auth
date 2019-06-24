@@ -63,7 +63,7 @@ class ImapAdapterTest extends \PHPUnit\Framework\TestCase
             ->with('{mailbox.example.com:143/imap/secure}')
             ->will($this->returnValue(false));
 
-        $this->setExpectedException('Aura\Auth\Exception\ConnectionFailed');
+        $this->expectException('Aura\Auth\Exception\ConnectionFailed');
         $this->adapter->login(array(
             'username' => 'someusername',
             'password' => 'secretpassword'
