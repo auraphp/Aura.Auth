@@ -3,35 +3,13 @@ language: php
 matrix:
     include:
         - os: linux
-          dist: precise
+          dist: trusty
           sudo: false
-          php: 5.3
-        - os: linux
-          dist: precise
-          sudo: false
-          php: 5.4
-        - os: linux
-          dist: precise
-          sudo: false
-          php: 5.5
-        - os: linux
-          dist: precise
-          sudo: false
-          php: 5.6
-          env:
-            - TEST_COVERAGE=true
+          php: 7.2
         - os: linux
           dist: trusty
           sudo: false
-          php: 7
-        - os: linux
-          dist: trusty
-          sudo: false
-          php: 7.1
-        - os: linux
-          dist: trusty
-          sudo: false
-          php: hhvm
+          php: 7.3
         - os: linux
           dist: trusty
           sudo: false
