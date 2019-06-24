@@ -174,7 +174,7 @@ The _ResumeService_ exists to address this problem. When you call the `resume()`
 
     - If the session has been idle for too long (i.e., too much time has passed since the last request), the _ResumeService_ will log the user out automatically and return to the calling code.
 
-    - If the session session has expired (i.e., the total logged-in time has been too long), the _ResumeService_ will likewise log the user out automatically and return to the calling code.
+    - If the session has expired (i.e., the total logged-in time has been too long), the _ResumeService_ will likewise log the user out automatically and return to the calling code.
 
     - Otherwise, the _ResumeService_ will update the last-active time on the _Auth_ object and return to the calling code.
 
@@ -352,7 +352,7 @@ Here is a legacy example where passwords are MD5 hashed in an accounts table:
 <?php
 $pdo = new \PDO(...);
 $hash = new PasswordVerifier('md5');
-$cols = ('username', 'md5password');
+$cols = array('username', 'md5password');
 $from = 'accounts';
 $pdo_adapter = $auth_factory->newPdoAdapter($pdo, $hash, $cols, $from);
 ?>
