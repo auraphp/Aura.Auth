@@ -10,10 +10,6 @@ matrix:
           dist: trusty
           sudo: false
           php: 7.3
-        - os: linux
-          dist: trusty
-          sudo: false
-          php: nightly
 
 before_script:
   - composer self-update
