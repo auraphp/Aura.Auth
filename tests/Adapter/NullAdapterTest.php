@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Adapter;
 
-class NullAdapterTest extends \PHPUnit_Framework_TestCase
+class NullAdapterTest extends \PHPUnit\Framework\TestCase
 {
     protected $adapter;
 

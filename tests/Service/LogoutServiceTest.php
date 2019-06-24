@@ -8,7 +8,7 @@ use Aura\Auth\Session\Timer;
 use Aura\Auth\Auth;
 use Aura\Auth\Status;
 
-class LogoutServiceTest extends \PHPUnit_Framework_TestCase
+class LogoutServiceTest extends \PHPUnit\Framework\TestCase
 {
     protected $session;
 

@@ -4,7 +4,7 @@ namespace Aura\Auth\Session;
 /**
  * @runTestsInSeparateProcesses
  */
-class SessionTest extends \PHPUnit_Framework_TestCase
+class SessionTest extends \PHPUnit\Framework\TestCase
 {
     protected function setUp()
     {

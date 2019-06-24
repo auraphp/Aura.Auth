@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth;
 
-class PhpfuncTest extends \PHPUnit_Framework_TestCase
+class PhpfuncTest extends \PHPUnit\Framework\TestCase
 {
     protected $phpfunc;
 

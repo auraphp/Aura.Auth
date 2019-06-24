@@ -3,7 +3,7 @@ namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Phpfunc;
 
-class ImapAdapterTest extends \PHPUnit_Framework_TestCase
+class ImapAdapterTest extends \PHPUnit\Framework\TestCase
 {
     protected $phpfunc;
 

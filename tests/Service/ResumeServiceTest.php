@@ -8,7 +8,7 @@ use Aura\Auth\Session\Timer;
 use Aura\Auth\Auth;
 use Aura\Auth\Status;
 
-class ResumeServiceTest extends \PHPUnit_Framework_TestCase
+class ResumeServiceTest extends \PHPUnit\Framework\TestCase
 {
     protected $segment;
 

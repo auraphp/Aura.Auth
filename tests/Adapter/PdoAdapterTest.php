@@ -4,7 +4,7 @@ namespace Aura\Auth\Adapter;
 use PDO;
 use Aura\Auth\Verifier\PasswordVerifier;
 
-class PdoAdapterTest extends \PHPUnit_Framework_TestCase
+class PdoAdapterTest extends \PHPUnit\Framework\TestCase
 {
     protected $adapter;
 

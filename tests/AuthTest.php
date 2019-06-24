@@ -4,7 +4,7 @@ namespace Aura\Auth;
 use Aura\Auth\Session\FakeSegment;
 use Aura\Auth\Status;
 
-class AuthTest extends \PHPUnit_Framework_TestCase
+class AuthTest extends \PHPUnit\Framework\TestCase
 {
     protected $auth;
 

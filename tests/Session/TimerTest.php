@@ -3,7 +3,7 @@ namespace Aura\Auth\Session;
 
 use Aura\Auth\Status;
 
-class TimerTest extends \PHPUnit_Framework_TestCase
+class TimerTest extends \PHPUnit\Framework\TestCase
 {
     protected $timer;
 

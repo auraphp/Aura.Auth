@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Verifier;
 
-class PasswordVerifierTest extends \PHPUnit_Framework_TestCase
+class PasswordVerifierTest extends \PHPUnit\Framework\TestCase
 {
     public function testBcrypt()
     {

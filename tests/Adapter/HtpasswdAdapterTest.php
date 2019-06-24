@@ -3,7 +3,7 @@ namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Verifier\HtpasswdVerifier;
 
-class HtpasswdAdapterTest extends \PHPUnit_Framework_TestCase
+class HtpasswdAdapterTest extends \PHPUnit\Framework\TestCase
 {
     protected $adapter;
 

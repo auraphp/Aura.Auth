@@ -3,7 +3,7 @@ namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Phpfunc;
 
-class LdapAdapterTest extends \PHPUnit_Framework_TestCase
+class LdapAdapterTest extends \PHPUnit\Framework\TestCase
 {
     protected $adapter;
 

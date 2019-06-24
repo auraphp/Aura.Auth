@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth;
 
-use Aura\Di\_Config\AbstractContainerTest;
+use Aura\Di\ContainerTest as AbstractContainerTest;
 
 class ContainerTest extends AbstractContainerTest
 {

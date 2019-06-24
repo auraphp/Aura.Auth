@@ -6,7 +6,7 @@ use Aura\Auth\Session\Session;
 use Aura\Auth\Session\Segment;
 use Aura\Auth\Verifier\FakeVerifier;
 
-class AuthFactoryTest extends \PHPUnit_Framework_TestCase
+class AuthFactoryTest extends \PHPUnit\Framework\TestCase
 {
     protected $factory;
 
