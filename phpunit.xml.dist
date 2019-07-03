@@ -1,10 +1,10 @@
 <phpunit bootstrap="./phpunit.php">
     <testsuites>
-        <testsuite>
+        <testsuite name="tests">
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
     <php>
-        <ini name="session.gc_maxlifetime" value="3600"/>
+        <ini name="session.gc_maxlifetime" value="86400"/>
     </php>
 </phpunit>

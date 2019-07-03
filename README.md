@@ -14,7 +14,7 @@ Note that the purpose of this package is only to authenticate user credentials. 
 
 ### Installation
 
-This library requires PHP 5.5 or later, and has no userland dependencies.  (As a special consideration, this library is compatible with PHP 5.3 and 5.4 when the [ircmaxell/password-compat](https://github.com/ircmaxell/password_compat) package is installed.)
+This library requires PHP 7.2 or later, and has no userland dependencies.
 
 It is installable and autoloadable via Composer as [aura/auth](https://packagist.org/packages/aura/auth).
 

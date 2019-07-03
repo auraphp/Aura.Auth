@@ -8,7 +8,7 @@ use Aura\Auth\Session\Timer;
 use Aura\Auth\Auth;
 use Aura\Auth\Status;
 
-class ResumeServiceTest extends \PHPUnit_Framework_TestCase
+class ResumeServiceTest extends \PHPUnit\Framework\TestCase
 {
     protected $segment;
 
@@ -31,7 +31,7 @@ class ResumeServiceTest extends \PHPUnit_Framework_TestCase
         $this->segment = new FakeSegment;
         $this->session = new FakeSession;
         $this->adapter = new FakeAdapter;
-        $this->timer = new Timer(1440, 14400);
+        $this->timer = new Timer(3600, 86400);
 
         $this->auth = new Auth($this->segment);
 
@@ -79,7 +79,7 @@ class ResumeServiceTest extends \PHPUnit_Framework_TestCase
         $this->login_service->forceLogin($this->auth, 'boshag');
         $this->assertTrue($this->auth->isValid());
 
-        $this->auth->setLastActive(time() - 1441);
+        $this->auth->setLastActive(time() - 3601);
 
         $this->resume_service->resume($this->auth);
         $this->assertTrue($this->auth->isIdle());
@@ -92,7 +92,7 @@ class ResumeServiceTest extends \PHPUnit_Framework_TestCase
         $this->login_service->forceLogin($this->auth, 'boshag');
         $this->assertTrue($this->auth->isValid());
 
-        $this->auth->setFirstActive(time() - 14441);
+        $this->auth->setFirstActive(time() - 86401);
 
         $this->resume_service->resume($this->auth);
         $this->assertTrue($this->auth->isExpired());

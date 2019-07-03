@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Session;
 
-class NullSessionTest extends \PHPUnit_Framework_TestCase
+class NullSessionTest extends \PHPUnit\Framework\TestCase
 {
     protected $session;
 

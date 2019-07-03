@@ -3,7 +3,7 @@ namespace Aura\Auth\Adapter;
 
 use Aura\Auth\Verifier\HtpasswdVerifier;
 
-class HtpasswdAdapterTest extends \PHPUnit_Framework_TestCase
+class HtpasswdAdapterTest extends \PHPUnit\Framework\TestCase
 {
     protected $adapter;
 
@@ -21,7 +21,7 @@ class HtpasswdAdapterTest extends \PHPUnit_Framework_TestCase
     public function testLogin_fileNotReadable()
     {
         $this->setAdapter('no-such-file');
-        $this->setExpectedException('Aura\Auth\Exception\FileNotReadable');
+        $this->expectException('Aura\Auth\Exception\FileNotReadable');
         $this->adapter->login(array(
             'username' => 'boshag',
             'password' => '123456',
@@ -40,13 +40,13 @@ class HtpasswdAdapterTest extends \PHPUnit_Framework_TestCase
 
     public function testLogin_usernameMissing()
     {
-        $this->setExpectedException('Aura\Auth\Exception\UsernameMissing');
+        $this->expectException('Aura\Auth\Exception\UsernameMissing');
         $this->adapter->login(array());
     }
 
     public function testLogin_passwordMissing()
     {
-        $this->setExpectedException('Aura\Auth\Exception\PasswordMissing');
+        $this->expectException('Aura\Auth\Exception\PasswordMissing');
         $this->adapter->login(array(
             'username' => 'boshag',
         ));
@@ -54,7 +54,7 @@ class HtpasswdAdapterTest extends \PHPUnit_Framework_TestCase
 
     public function testLogin_usernameNotFound()
     {
-        $this->setExpectedException('Aura\Auth\Exception\UsernameNotFound');
+        $this->expectException('Aura\Auth\Exception\UsernameNotFound');
         $this->adapter->login(array(
             'username' => 'nouser',
             'password' => 'nopass',
@@ -63,7 +63,7 @@ class HtpasswdAdapterTest extends \PHPUnit_Framework_TestCase
 
     public function testLogin_passwordIncorrect()
     {
-        $this->setExpectedException('Aura\Auth\Exception\PasswordIncorrect');
+        $this->expectException('Aura\Auth\Exception\PasswordIncorrect');
         $this->adapter->login(array(
             'username' => 'boshag',
             'password' => '------',

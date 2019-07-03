@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Verifier;
 
-class HtpasswdVerifierTest extends \PHPUnit_Framework_TestCase
+class HtpasswdVerifierTest extends \PHPUnit\Framework\TestCase
 {
     public function setUp()
     {

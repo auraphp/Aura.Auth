@@ -3,38 +3,38 @@ namespace Aura\Auth\Session;
 
 use Aura\Auth\Status;
 
-class TimerTest extends \PHPUnit_Framework_TestCase
+class TimerTest extends \PHPUnit\Framework\TestCase
 {
     protected $timer;
 
     protected function setUp()
     {
-        $this->timer = new Timer(1440, 14400);
+        $this->timer = new Timer(3600, 86400);
     }
 
     public function testHasExpired()
     {
         $this->assertFalse($this->timer->hasExpired(time()));
-        $this->assertTrue($this->timer->hasExpired(time() - 14441));
+        $this->assertTrue($this->timer->hasExpired(time() - 86401));
     }
 
     public function testHasIdled()
     {
         $this->assertFalse($this->timer->hasIdled(time()));
-        $this->assertTrue($this->timer->hasIdled(time() - 1441));
+        $this->assertTrue($this->timer->hasIdled(time() - 3601));
     }
 
     public function testGetTimeoutStatus()
     {
         $actual = $this->timer->getTimeoutStatus(
-            time() - 14441,
+            time() - 86401,
             time()
         );
         $this->assertSame(Status::EXPIRED, $actual);
 
         $actual = $this->timer->getTimeoutStatus(
-            time() - 1442,
-            time() - 1441
+            time() - 3602,
+            time() - 3601
         );
 
         $this->assertSame(Status::IDLE, $actual);
@@ -47,13 +47,13 @@ class TimerTest extends \PHPUnit_Framework_TestCase
 
     public function testSetIdleTtl_bad()
     {
-        $this->setExpectedException('Aura\Auth\Exception');
-        $this->timer->setIdleTtl(1441);
+        $this->expectException('Aura\Auth\Exception');
+        $this->timer->setIdleTtl(3601);
     }
 
     public function testSetExpireTtl_bad()
     {
-        $this->setExpectedException('Aura\Auth\Exception');
-        $this->timer->setExpireTtl(14441);
+        $this->expectException('Aura\Auth\Exception');
+        $this->timer->setExpireTtl(86401);
     }
 }

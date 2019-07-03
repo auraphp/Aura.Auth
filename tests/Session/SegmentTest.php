@@ -1,7 +1,7 @@
 <?php
 namespace Aura\Auth\Session;
 
-class SegmentTest extends \PHPUnit_Framework_TestCase
+class SegmentTest extends \PHPUnit\Framework\TestCase
 {
     protected $segment;
 

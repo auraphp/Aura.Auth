@@ -43,7 +43,7 @@ class Timer
      * @var int
      *
      */
-    protected $idle_ttl = 1440;
+    protected $idle_ttl = 3600;             // 1 hour
 
     /**
      *
@@ -52,7 +52,7 @@ class Timer
      * @var int
      *
      */
-    protected $expire_ttl = 14400;
+    protected $expire_ttl = 86400;          // 24 hours
 
     /**
      *
@@ -68,10 +68,10 @@ class Timer
      *
      */
     public function __construct(
-        $ini_gc_maxlifetime = 1440,
+        $ini_gc_maxlifetime = 86401,        // 24 hours plus 1 second
         $ini_cookie_lifetime = 0,
-        $idle_ttl = 1440,
-        $expire_ttl = 14400
+        $idle_ttl = 3600,                   // 1 hour
+        $expire_ttl = 86400                 // 24 hours
     ) {
         $this->ini_gc_maxlifetime = $ini_gc_maxlifetime;
         $this->ini_cookie_lifetime = $ini_cookie_lifetime;
@@ -94,7 +94,7 @@ class Timer
     public function setIdleTtl($idle_ttl)
     {
         if ($this->ini_gc_maxlifetime < $idle_ttl) {
-            throw new Exception("session.gc_maxlifetime $this->ini_gc_maxlifetime less than idle time $idle_ttl");
+            throw new Exception("session.gc_maxlifetime {$this->ini_gc_maxlifetime} less than idle time $idle_ttl");
         }
         $this->idle_ttl = $idle_ttl;
     }
