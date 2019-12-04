@@ -20,7 +20,7 @@ use Aura\Di\Container;
  */
 class Common extends Config
 {
-    public function define(Container $di)
+    public function define(Container $di): void
     {
         /**
          * Services
