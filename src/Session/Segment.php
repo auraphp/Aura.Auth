@@ -31,7 +31,7 @@ class Segment implements SegmentInterface
      *
      * Constructor.
      *
-     * @param bool $name The name of the $_SESSION segment.
+     * @param string $name The name of the $_SESSION segment.
      *
      */
     public function __construct($name = 'Aura\Auth\Auth')
