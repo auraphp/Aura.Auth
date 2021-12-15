@@ -5,7 +5,7 @@ class NullSegmentTest extends \PHPUnit\Framework\TestCase
 {
     protected $segment;
 
-    public function setUp()
+    public function setUp() : void
     {
         $this->segment = new NullSegment;
     }

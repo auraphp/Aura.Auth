@@ -26,7 +26,7 @@ class ResumeServiceTest extends \PHPUnit\Framework\TestCase
 
     protected $resume_service;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->segment = new FakeSegment;
         $this->session = new FakeSession;

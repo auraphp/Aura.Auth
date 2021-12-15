@@ -7,7 +7,7 @@ class TimerTest extends \PHPUnit\Framework\TestCase
 {
     protected $timer;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->timer = new Timer(3600, 86400);
     }

@@ -7,7 +7,7 @@ class HtpasswdAdapterTest extends \PHPUnit\Framework\TestCase
 {
     protected $adapter;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $file = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'fake.htpasswd';
         $this->setAdapter($file);

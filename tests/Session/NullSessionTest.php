@@ -5,7 +5,7 @@ class NullSessionTest extends \PHPUnit\Framework\TestCase
 {
     protected $session;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->session = new NullSession;
     }

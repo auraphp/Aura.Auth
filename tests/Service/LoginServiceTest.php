@@ -20,7 +20,7 @@ class LoginServiceTest extends \PHPUnit\Framework\TestCase
 
     protected $login_service;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->segment = new FakeSegment;
         $this->session = new FakeSession;

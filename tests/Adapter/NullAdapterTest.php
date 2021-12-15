@@ -5,7 +5,7 @@ class NullAdapterTest extends \PHPUnit\Framework\TestCase
 {
     protected $adapter;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->adapter = new NullAdapter;
     }

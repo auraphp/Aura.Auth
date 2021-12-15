@@ -10,7 +10,7 @@ class AuthTest extends \PHPUnit\Framework\TestCase
 
     protected $segment;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->segment = new FakeSegment;
         $this->auth = new Auth($this->segment);
