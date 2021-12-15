@@ -22,7 +22,7 @@ class LogoutServiceTest extends \PHPUnit\Framework\TestCase
 
     protected $logout_service;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->segment = new FakeSegment;
         $this->session = new FakeSession;

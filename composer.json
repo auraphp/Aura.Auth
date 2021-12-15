@@ -33,11 +33,11 @@
         }
     },
 
-    "minimum-stability": "dev",
+    "minimum-stability": "stable",
     "require-dev": {
         "acclimate/container": "^2",
-        "aura/di": "~4.0",
-        "phpunit/phpunit": "~7"
+        "phpunit/phpunit": "~8",
+        "vimeo/psalm": "~v4.15"
     },
     "autoload-dev": {
         "psr-4": {

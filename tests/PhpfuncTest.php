@@ -5,7 +5,7 @@ class PhpfuncTest extends \PHPUnit\Framework\TestCase
 {
     protected $phpfunc;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->phpfunc = new Phpfunc;
     }

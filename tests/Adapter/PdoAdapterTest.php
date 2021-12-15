@@ -10,7 +10,7 @@ class PdoAdapterTest extends \PHPUnit\Framework\TestCase
 
     protected $pdo;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         if (false === extension_loaded('pdo_sqlite')) {
             $this->markTestSkipped("Cannot test this adapter with pdo_sqlite extension disabled.");

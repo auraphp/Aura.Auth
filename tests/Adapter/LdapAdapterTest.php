@@ -9,7 +9,7 @@ class LdapAdapterTest extends \PHPUnit\Framework\TestCase
 
     protected $phpfunc;
 
-    protected function setUp()
+    protected function setUp() : void
     {
         $this->phpfunc = $this->getMockBuilder('Aura\Auth\Phpfunc')
              ->setMethods(array(
