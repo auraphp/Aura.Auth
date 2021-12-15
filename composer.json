@@ -16,7 +16,8 @@
         }
     ],
     "require": {
-        "php": ">=7.2.0"
+        "php": ">=7.2.0",
+        "vimeo/psalm": "4.x-dev"
     },
     "autoload": {
         "psr-4": {
