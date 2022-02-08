@@ -27,7 +27,7 @@ jobs:
       - name: "Install PHP with extensions"
         uses: "shivammathur/setup-php@v2"
         with:
-          coverage: "none"
+          coverage: xdebug
           ini-values: "memory_limit=-1"
           php-version: "${{ matrix.php-version }}"
 
@@ -46,7 +46,12 @@ jobs:
         run: "composer install --no-interaction --no-progress --no-suggest"
 
       - name: "Run tests with phpunit/phpunit"
-        run: "vendor/bin/phpunit"
+        run: php -d xdebug.mode=coverage ./vendor/bin/phpunit --coverage-clover=coverage.xml
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v2
+        with:
+          fail_ci_if_error: false
 
   psalm-tests:
     name: "Psalm Tests"
