@@ -82,7 +82,7 @@ class LoginService
      *
      * @param string $name The authenticated user name.
      *
-     * @param string $data Additional arbitrary user data.
+     * @param array $data Additional arbitrary user data.
      *
      * @param string $status The new authentication status.
      *
