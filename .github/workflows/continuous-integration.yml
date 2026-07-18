@@ -41,16 +41,6 @@ jobs:
     name: "LDAP Integration Tests"
     runs-on: "ubuntu-latest"
 
-    services:
-      openldap:
-        image: "bitnami/openldap:2.6"
-        ports:
-          - "1389:1389"
-        env:
-          LDAP_ADMIN_USERNAME: "admin"
-          LDAP_ADMIN_PASSWORD: "adminpassword"
-          LDAP_ROOT: "dc=example,dc=org"
-
     steps:
       - name: "Checkout"
         uses: "actions/checkout@v4"
@@ -68,26 +58,42 @@ jobs:
       - name: "Install dependencies with composer"
         uses: "ramsey/composer-install@v3"
 
-      - name: "Install ldap client utilities"
-        run: "sudo apt-get update && sudo apt-get install -y ldap-utils"
+      - name: "Install and configure OpenLDAP (slapd)"
+        run: |
+          # Preseed debconf so slapd installs non-interactively with a known
+          # suffix (dc=example,dc=org) and admin password, then apply it.
+          sudo debconf-set-selections <<'EOF'
+          slapd slapd/no_configuration boolean false
+          slapd slapd/domain string example.org
+          slapd shared/organization string Example Inc.
+          slapd slapd/password1 password adminpassword
+          slapd slapd/password2 password adminpassword
+          slapd slapd/backend select MDB
+          slapd slapd/purge_database boolean true
+          slapd slapd/move_old_database boolean true
+          EOF
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y slapd ldap-utils
+          sudo dpkg-reconfigure -f noninteractive slapd
+          sudo service slapd restart
 
-      - name: "Wait for OpenLDAP and load the seed data"
+      - name: "Load the seed data"
         run: |
           for i in $(seq 1 30); do
-            if ldapsearch -x -H ldap://localhost:1389 \
+            if ldapsearch -x -H ldap://localhost:389 \
                 -D "cn=admin,dc=example,dc=org" -w adminpassword \
                 -b "dc=example,dc=org" -s base >/dev/null 2>&1; then
-              echo "OpenLDAP is up."
+              echo "slapd is up."
               break
             fi
-            echo "Waiting for OpenLDAP ($i)..."
+            echo "Waiting for slapd ($i)..."
             sleep 2
           done
-          ldapadd -x -H ldap://localhost:1389 \
+          ldapadd -x -H ldap://localhost:389 \
             -D "cn=admin,dc=example,dc=org" -w adminpassword \
             -f tests/integration/ldap/seed.ldif
 
       - name: "Run the LDAP integration tests"
         env:
-          LDAP_TEST_URI: "ldap://localhost:1389"
+          LDAP_TEST_URI: "ldap://localhost:389"
         run: "vendor/bin/phpunit --group ldap"
