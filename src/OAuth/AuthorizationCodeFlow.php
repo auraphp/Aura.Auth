@@ -130,26 +130,27 @@ class AuthorizationCodeFlow
      */
     public function handleCallback(array $query): array
     {
-        // 1. Handle a provider-reported error before anything else.
-        if (isset($query['error'])) {
-            $description = isset($query['error_description'])
-                ? (string) $query['error_description']
-                : (string) $query['error'];
-            throw new Exception\OAuth2CallbackError($description);
-        }
-
-        // 2. Validate state (constant-time), consuming it so it cannot replay.
+        // 1. Validate state (constant-time), consuming it so it cannot replay.
         $expected = $this->segment->get($this->state_key);
         $this->segment->set($this->state_key, null);
 
-        $returned = isset($query['state']) ? (string) $query['state'] : '';
+        $returned = isset($query['state']) && is_string($query['state']) ? $query['state'] : '';
         if (! is_string($expected) || $expected === '' || ! hash_equals($expected, $returned)) {
             $this->segment->set($this->verifier_key, null);
             throw new Exception\OAuth2StateMismatch();
         }
 
-        // 3. Require a code, and only now surface the validated parameters.
-        if (empty($query['code'])) {
+        // 2. Handle a provider-reported error.
+        if (isset($query['error'])) {
+            $this->segment->set($this->verifier_key, null);
+            $description = isset($query['error_description']) && is_string($query['error_description'])
+                ? $query['error_description']
+                : (is_string($query['error']) ? $query['error'] : '');
+            throw new Exception\OAuth2CallbackError($description);
+        }
+
+        // 3. Require a string code, and only now surface the validated parameters.
+        if (empty($query['code']) || !is_string($query['code'])) {
             $this->segment->set($this->verifier_key, null);
             throw new Exception\AuthorizationCodeMissing();
         }
@@ -157,7 +158,7 @@ class AuthorizationCodeFlow
         $verifier = $this->segment->get($this->verifier_key);
         $this->segment->set($this->verifier_key, null);
 
-        $input = ['code' => (string) $query['code']];
+        $input = ['code' => $query['code']];
         if (is_string($verifier) && $verifier !== '') {
             $input['code_verifier'] = $verifier;
         }
