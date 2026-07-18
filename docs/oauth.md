@@ -53,6 +53,58 @@ $oauth_adapter = $auth_factory->newOAuth2Adapter($provider, [
 ?>
 ```
 
+### Mapping Options
+
+`newOAuth2Adapter()` accepts exactly two options — `username_field` and `map` —
+which are two alternative strategies for the same job: turning the provider's
+**resource owner** into the `[$username, $userdata]` pair that Aura.Auth stores
+(retrievable afterward as `$auth->getUserName()` and `$auth->getUserData()`).
+
+On login the adapter exchanges the authorization code for a token, calls the
+provider's `getResourceOwner()`, and receives the resource owner as an
+**associative array** (`$owner`) whose keys are defined by the provider and the
+scopes you requested — for Google, for example, `sub`, `email`, `name`,
+`given_name`, `picture`, and so on.
+
+- **`username_field`** — the name of a resource-owner field to use as the user
+  name. The **entire** resource-owner array is retained as the user data, so
+  other fields remain available:
+
+  ```php
+  $oauth_adapter = $auth_factory->newOAuth2Adapter($provider, [
+      'username_field' => 'email',
+  ]);
+
+  // after login:
+  $auth->getUserName();         // 'jane@example.com'  (the 'email' field)
+  $auth->getUserData()['name']; // 'Jane Doe'          (also 'picture', etc.)
+  ```
+
+- **`map`** — a callable `fn(array $owner, $token): array` that returns your own
+  `[$username, $userdata]` pair, for full control over the user name and exactly
+  what is stored (rename keys, drop fields, keep the token, use a non-email user
+  name, provide a fallback, and so on):
+
+  ```php
+  $oauth_adapter = $auth_factory->newOAuth2Adapter($provider, [
+      'map' => function (array $owner, $token) {
+          return [
+              $owner['email'],                               // -> getUserName()
+              ['name' => $owner['name'], 'token' => $token], // -> getUserData()
+          ];
+      },
+  ]);
+
+  // after login:
+  $auth->getUserName();          // 'jane@example.com'
+  $auth->getUserData()['name'];  // 'Jane Doe'
+  $auth->getUserData()['token']; // the access token you chose to keep
+  ```
+
+Normally you set one or the other. If both are given, `map` takes precedence. If
+**neither** is configured, the adapter throws
+`Aura\Auth\Exception\OAuth2MappingNotConfigured` on login.
+
 ## The Secure Flow
 
 Do **not** hand the raw `$_GET` to `login()`. Use the `AuthorizationCodeFlow`
