@@ -67,7 +67,7 @@ class AuthorizationCodeFlowTest extends \PHPUnit\Framework\TestCase
         $this->flow->getRedirectUrl();
 
         $this->expectException('Aura\Auth\Exception\OAuth2CallbackError');
-        $this->flow->handleCallback(array('error' => 'access_denied'));
+        $this->flow->handleCallback(array('state' => 'ST-abc', 'error' => 'access_denied'));
     }
 
     public function testHandleCallbackStateMismatchThrows()
