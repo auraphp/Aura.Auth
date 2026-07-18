@@ -76,6 +76,32 @@ exit;
 ?>
 ```
 
+> **Using Aura.Session instead of `session_start()`.** If you hand the factory an
+> [Aura.Session](https://github.com/auraphp/Aura.Session)-managed session and
+> segment, the segment starts/resumes the session for you on first write, so you
+> don't call `session_start()` yourself:
+>
+> ```php
+> <?php
+> use Aura\Auth\AuthFactory;
+> use Aura\Session\SessionFactory;
+>
+> $session = (new SessionFactory)->newInstance($_COOKIE);
+> $segment = $session->getSegment('Aura\Auth\Auth');
+>
+> // inject both; the OAuth flow, Auth, and the services all reuse this segment
+> $auth_factory = new AuthFactory($_COOKIE, $session, $segment);
+>
+> // no session_start() needed — getRedirectUrl()/handleCallback() persist
+> // state through the Aura.Session segment
+> ?>
+> ```
+>
+> Use the **same** `$auth_factory` (and thus the same `$segment`) for both the
+> redirect and callback halves, so the `state`/`code_verifier` written in the
+> redirect are the ones read back in the callback. See
+> [Session Management](sessions.md) for details.
+
 **Callback half** — validate, then log in with the validated input only:
 
 ```php

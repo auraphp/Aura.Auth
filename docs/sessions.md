@@ -2,6 +2,35 @@
 
 The _Service_ objects use a _Session_ object to start sessions and regenerate session IDs. (Note that they **do not** destroy sessions.) The _Session_ object uses the native PHP `session_*()` functions to manage sessions.
 
+## Using Aura.Session
+
+You don't have to write a custom wrapper to use a full-featured session library.
+Since 6.0.0, `AuthFactory` (and everything it builds — `Auth`, the
+`LoginService` / `LogoutService` / `ResumeService`, and the OAuth
+`AuthorizationCodeFlow`) type-hints the shared `Aura\Session_Interface`
+contracts. [Aura.Session](https://github.com/auraphp/Aura.Session)'s own
+`Session` and `Segment` implement those contracts, so they drop straight in:
+
+```php
+<?php
+use Aura\Auth\AuthFactory;
+use Aura\Session\SessionFactory;
+
+$session = (new SessionFactory)->newInstance($_COOKIE);
+$segment = $session->getSegment('Aura\Auth\Auth');
+
+$auth_factory = new AuthFactory($_COOKIE, $session, $segment);
+?>
+```
+
+Install it with `composer require aura/session`.
+
+Because an Aura.Session segment starts (or resumes) the session for you the
+first time a value is written to it, you no longer need to call `session_start()`
+by hand — the _LoginService_, _ResumeService_, and the OAuth flow all persist
+their data through the injected segment. Just be sure to build both halves of a
+flow from the **same** `$auth_factory`, so they share one segment.
+
 ## Custom Sessions
 
 If you wish to use an alternative means of managing sessions, implement the _SessionInterface_ on an object of your choice. One way to do this is by by wrapping a framework-specific session object and proxying the _SessionInterface_ methods to the wrapped object:
