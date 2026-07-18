@@ -11,6 +11,7 @@ namespace Aura\Auth\Service;
 use Aura\Auth\Auth;
 use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Session_Interface\SessionInterface;
+use Aura\Auth\Remember\RememberService;
 use Aura\Auth\Session\Timer;
 
 /**
@@ -60,6 +61,15 @@ class ResumeService
 
     /**
      *
+     * An optional "remember me" handler.
+     *
+     * @var RememberService|null
+     *
+     */
+    protected $remember_service;
+
+    /**
+     *
      * Constructor.
      *
      * @param AdapterInterface $adapter A credential storage adapter.
@@ -71,17 +81,22 @@ class ResumeService
      * @param LogoutService $logout_service The logout handler to use if the
      * session has timed out.
      *
+     * @param RememberService $remember_service An optional "remember me"
+     * handler; when present, an anonymous session falls back to it.
+     *
      */
     public function __construct(
         AdapterInterface $adapter,
         SessionInterface $session,
         Timer $timer,
-        LogoutService $logout_service
+        LogoutService $logout_service,
+        ?RememberService $remember_service = null
     ) {
         $this->adapter = $adapter;
         $this->session = $session;
         $this->timer = $timer;
         $this->logout_service = $logout_service;
+        $this->remember_service = $remember_service;
     }
 
     /**
@@ -100,6 +115,11 @@ class ResumeService
         if (! $this->timedOut($auth)) {
             $auth->setLastActive(time());
             $this->adapter->resume($auth);
+        }
+
+        // if still (or now) anonymous, try to be remembered
+        if ($this->remember_service && $auth->isAnon()) {
+            $this->remember_service->resume($auth);
         }
     }
 

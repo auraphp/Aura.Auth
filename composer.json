@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "aura/session-interface": "^6.0"
     },
     "autoload": {
@@ -38,8 +38,7 @@
     "prefer-stable": true,
     "require-dev": {
         "aura/session": "7.x-dev",
-        "phpunit/phpunit": "~8",
-        "vimeo/psalm": "~v4.15"
+        "phpunit/phpunit": "^11.0"
     },
     "autoload-dev": {
         "psr-4": {

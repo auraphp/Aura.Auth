@@ -52,4 +52,16 @@ class Status
      *
      */
     const VALID = 'VALID';
+
+    /**
+     *
+     * The user was re-authenticated from a "remember me" token and did not
+     * pass credentials this session. Treat as lower privilege than VALID:
+     * block password changes, administrative actions, and other sensitive
+     * operations until the user re-authenticates.
+     *
+     * @const string
+     *
+     */
+    const REMEMBERED = 'REMEMBERED';
 }

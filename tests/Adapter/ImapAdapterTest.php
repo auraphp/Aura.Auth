@@ -11,8 +11,8 @@ class ImapAdapterTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp() : void
     {
-        $this->phpfunc = $this->getMockBuilder('Aura\Auth\Phpfunc')
-             ->setMethods(array(
+        $this->phpfunc = $this->getMockBuilder(FakeImapPhpfunc::class)
+             ->onlyMethods(array(
                  'imap_open',
                  'imap_close',
              ))
@@ -44,7 +44,7 @@ class ImapAdapterTest extends \PHPUnit\Framework\TestCase
                 1,
                 null
             )
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $actual = $this->adapter->login(array(
             'username' => 'someusername',
@@ -61,7 +61,7 @@ class ImapAdapterTest extends \PHPUnit\Framework\TestCase
         $this->phpfunc->expects($this->once())
             ->method('imap_open')
             ->with('{mailbox.example.com:143/imap/secure}')
-            ->will($this->returnValue(false));
+            ->willReturn(false);
 
         $this->expectException('Aura\Auth\Exception\ConnectionFailed');
         $this->adapter->login(array(

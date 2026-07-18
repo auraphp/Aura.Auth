@@ -11,8 +11,8 @@ class LdapAdapterTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp() : void
     {
-        $this->phpfunc = $this->getMockBuilder('Aura\Auth\Phpfunc')
-             ->setMethods(array(
+        $this->phpfunc = $this->getMockBuilder(FakeLdapPhpfunc::class)
+             ->onlyMethods(array(
                  'ldap_connect',
                  'ldap_bind',
                  'ldap_unbind',
@@ -20,7 +20,7 @@ class LdapAdapterTest extends \PHPUnit\Framework\TestCase
                  'ldap_errno',
                  'ldap_error'
              ))
-             ->getMock();        
+             ->getMock();
 
         $this->adapter = new LdapAdapter(
             $this->phpfunc,
@@ -43,11 +43,11 @@ class LdapAdapterTest extends \PHPUnit\Framework\TestCase
         $this->phpfunc->expects($this->once())
             ->method('ldap_connect')
             ->with('ldaps://ldap.example.com:636')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $this->phpfunc->expects($this->any())
             ->method('ldap_set_option')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $this->phpfunc->expects($this->once())
             ->method('ldap_bind')
@@ -56,11 +56,11 @@ class LdapAdapterTest extends \PHPUnit\Framework\TestCase
                 'ou=Foo,dc=Bar,cn=users,uid=someusername',
                 'secretpassword'
             )
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $this->phpfunc->expects($this->once())
             ->method('ldap_unbind')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $actual = $this->adapter->login(array(
             'username' => 'someusername',
@@ -82,7 +82,7 @@ class LdapAdapterTest extends \PHPUnit\Framework\TestCase
         $this->phpfunc->expects($this->once())
             ->method('ldap_connect')
             ->with('ldaps://ldap.example.com:636')
-            ->will($this->returnValue(false));
+            ->willReturn(false);
 
         $this->expectException('Aura\Auth\Exception\ConnectionFailed');
         $this->adapter->login($input);
@@ -93,27 +93,27 @@ class LdapAdapterTest extends \PHPUnit\Framework\TestCase
         $this->phpfunc->expects($this->once())
             ->method('ldap_connect')
             ->with('ldaps://ldap.example.com:636')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $this->phpfunc->expects($this->any())
             ->method('ldap_set_option')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $this->phpfunc->expects($this->once())
             ->method('ldap_bind')
-            ->will($this->returnValue(false));
+            ->willReturn(false);
 
         $this->phpfunc->expects($this->once())
             ->method('ldap_errno')
-            ->will($this->returnValue(1));
+            ->willReturn(1);
 
         $this->phpfunc->expects($this->once())
             ->method('ldap_error')
-            ->will($this->returnValue('Operations Error'));
+            ->willReturn('Operations Error');
 
         $this->phpfunc->expects($this->once())
             ->method('ldap_unbind')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $this->expectException('Aura\Auth\Exception\BindFailed');
         $this->adapter->login(array(

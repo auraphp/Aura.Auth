@@ -124,6 +124,20 @@ class Auth
 
     /**
      *
+     * Was the user re-authenticated from a "remember me" token (and did not
+     * pass credentials this session)? Such a user is authenticated but should
+     * be treated as lower privilege than a VALID user.
+     *
+     * @return bool
+     *
+     */
+    public function isRemembered()
+    {
+        return $this->getStatus() == Status::REMEMBERED;
+    }
+
+    /**
+     *
      * Sets the current authentication status.
      *
      * @param string $status The authentication status.
