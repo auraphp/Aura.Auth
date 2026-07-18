@@ -38,7 +38,8 @@
     "prefer-stable": true,
     "require-dev": {
         "aura/session": "7.x-dev",
-        "phpunit/phpunit": "^11.0"
+        "phpunit/phpunit": "^11.0",
+        "league/oauth2-client": "^2.7"
     },
     "autoload-dev": {
         "psr-4": {
@@ -48,6 +49,7 @@
     },
     "suggest": {
         "ext/ldap": "For LDAP integration.",
-        "ext/imap": "For IMAP/POP/NNTP integration."
+        "ext/imap": "For IMAP/POP/NNTP integration.",
+        "league/oauth2-client": "For OAuth 2.0 integration via the OAuth2Adapter and LeagueProvider (plus a provider package such as league/oauth2-google)."
     }
 }

@@ -3,6 +3,7 @@
     "content": [
         "getting-started.md",
         "adapters.md",
+        "oauth.md",
         "service-idioms.md",
         "remember-me.md",
         "sessions.md",
