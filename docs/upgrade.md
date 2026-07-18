@@ -5,7 +5,7 @@ full list, see the [CHANGELOG](https://github.com/auraphp/Aura.Auth/blob/6.x/CHA
 
 ## PHP Version Requirement
 
-PHP 8.1 or later is now required.
+PHP 8.2 or later is now required.
 
 ## New Dependency: `aura/session-interface`
 

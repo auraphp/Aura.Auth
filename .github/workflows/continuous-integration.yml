@@ -20,7 +20,7 @@ jobs:
 
     steps:
       - name: "Checkout"
-        uses: "actions/checkout@v2"
+        uses: "actions/checkout@v4"
 
       - name: "Install PHP with extensions"
         uses: "shivammathur/setup-php@v2"
@@ -29,19 +29,8 @@ jobs:
           ini-values: "memory_limit=-1"
           php-version: "${{ matrix.php-version }}"
 
-      - name: "Determine composer cache directory"
-        id: "determine-composer-cache-directory"
-        run: "echo \"::set-output name=directory::$(composer config cache-dir)\""
-
-      - name: "Cache dependencies installed with composer"
-        uses: "actions/cache@v1"
-        with:
-          path: "${{ steps.determine-composer-cache-directory.outputs.directory }}"
-          key: "php-${{ matrix.php-version }}-composer-${{ hashFiles('**/composer.json') }}"
-          restore-keys: "php-${{ matrix.php-version }}-composer-"
-
       - name: "Install dependencies with composer"
-        run: "composer install --no-interaction --no-progress"
+        uses: "ramsey/composer-install@v3"
 
       - name: "Run tests with phpunit/phpunit"
         run: "vendor/bin/phpunit"

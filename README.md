@@ -16,7 +16,7 @@ Note that the purpose of this package is only to authenticate user credentials. 
 
 ### Installation
 
-This library requires PHP 8.1 or later, and depends only on [aura/session-interface](https://packagist.org/packages/aura/session-interface) for its shared session contracts.
+This library requires PHP 8.2 or later, and depends only on [aura/session-interface](https://packagist.org/packages/aura/session-interface) for its shared session contracts.
 
 It is installable and autoloadable via Composer as [aura/auth](https://packagist.org/packages/aura/auth).
 

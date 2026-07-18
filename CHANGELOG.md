@@ -2,7 +2,7 @@
 
 ## 6.0.0
 
-- PHP 8.1+ is now required.
+- PHP 8.2+ is now required.
 - (ADD) "Remember me" support (issue #4). A new `Aura\Auth\Remember\RememberService` issues, resumes, and forgets long-lived login tokens using the split-token (selector/validator) scheme with server-side storage and per-use token rotation. Storage is pluggable via `RememberStorageInterface`, with a PDO-backed `PdoRememberStorage` provided. A new `Status::REMEMBERED` (and `Auth::isRemembered()`) marks users re-authenticated from a cookie as lower privilege than credentialed (`VALID`) users. The `LoginService`, `LogoutService`, and `ResumeService` accept an optional `RememberService` so the feature works through existing call sites; the added constructor parameters are nullable and backward compatible. Build the pieces with `AuthFactory::newRememberService()` and `AuthFactory::newPdoRememberStorage()`. See the README "Remember Me" section.
 - (ADD) Depend on the new `aura/session-interface` (`^6.0`) package, which provides the shared session/segment contracts.
 - (CHG) `AuthFactory`, `Auth`, and the `LoginService`/`LogoutService`/`ResumeService` now type-hint the shared `Aura\Session_Interface\SessionInterface` and `SegmentInterface`. As a result an `Aura\Session\Session` and its segments — or any other implementation of the shared contracts — can now be passed to Aura.Auth directly, while the built-in light `Session`/`Segment` continue to work standalone.
