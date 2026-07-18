@@ -1,0 +1,12 @@
+{
+    "title": "Aura.Auth 6.x",
+    "content": [
+        "getting-started.md",
+        "adapters.md",
+        "service-idioms.md",
+        "remember-me.md",
+        "sessions.md",
+        "di-configuration.md",
+        "upgrade.md"
+    ]
+}

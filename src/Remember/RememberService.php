@@ -121,7 +121,7 @@ class RememberService
      * @return bool True if a token was issued.
      *
      */
-    public function remember(Auth $auth, $ttl = null)
+    public function remember(Auth $auth, $ttl = null): bool
     {
         $username = $auth->getUserName();
         if ($username === null || $username === '') {
@@ -163,7 +163,7 @@ class RememberService
      * @return bool True if the user was remembered.
      *
      */
-    public function resume(Auth $auth, $ttl = null)
+    public function resume(Auth $auth, $ttl = null): bool
     {
         if (! $auth->isAnon()) {
             return false;
@@ -231,10 +231,10 @@ class RememberService
      * @param Auth $auth The authentication tracker (unused; accepted for a
      * consistent service signature).
      *
-     * @return null
+     * @return void
      *
      */
-    public function forget(?Auth $auth = null)
+    public function forget(?Auth $auth = null): void
     {
         $parsed = $this->token->parseCookieValue(
             $this->cookie->get($this->name)
@@ -254,7 +254,7 @@ class RememberService
      * @return int
      *
      */
-    protected function expires($ttl)
+    protected function expires($ttl): int
     {
         $ttl = ($ttl === null) ? $this->ttl : $ttl;
         return time() + $ttl;

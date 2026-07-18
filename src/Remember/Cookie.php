@@ -88,7 +88,7 @@ class Cookie
      * @return mixed
      *
      */
-    public function get($name, $alt = null)
+    public function get($name, $alt = null): mixed
     {
         if (isset($this->cookie[$name])) {
             return $this->cookie[$name];
@@ -109,7 +109,7 @@ class Cookie
      * @return bool
      *
      */
-    public function set($name, $value, $expires)
+    public function set($name, $value, $expires): bool
     {
         $this->cookie[$name] = $value;
         $options = $this->options;
@@ -126,7 +126,7 @@ class Cookie
      * @return bool
      *
      */
-    public function delete($name)
+    public function delete($name): bool
     {
         unset($this->cookie[$name]);
         $options = $this->options;

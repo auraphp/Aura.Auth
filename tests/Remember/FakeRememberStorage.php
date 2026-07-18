@@ -8,7 +8,7 @@ class FakeRememberStorage implements RememberStorageInterface
 {
     public $rows = array();
 
-    public function create($selector, $hashed_validator, $username, array $userdata, $expires)
+    public function create($selector, $hashed_validator, $username, array $userdata, $expires): void
     {
         $this->rows[$selector] = array(
             'selector' => $selector,
@@ -19,12 +19,12 @@ class FakeRememberStorage implements RememberStorageInterface
         );
     }
 
-    public function findBySelector($selector)
+    public function findBySelector($selector): ?array
     {
         return isset($this->rows[$selector]) ? $this->rows[$selector] : null;
     }
 
-    public function update($selector, $hashed_validator, $expires)
+    public function update($selector, $hashed_validator, $expires): void
     {
         if (isset($this->rows[$selector])) {
             $this->rows[$selector]['hashed_validator'] = $hashed_validator;
@@ -32,12 +32,12 @@ class FakeRememberStorage implements RememberStorageInterface
         }
     }
 
-    public function deleteBySelector($selector)
+    public function deleteBySelector($selector): void
     {
         unset($this->rows[$selector]);
     }
 
-    public function deleteByUsername($username)
+    public function deleteByUsername($username): void
     {
         foreach ($this->rows as $selector => $row) {
             if ($row['username'] === $username) {
@@ -46,7 +46,7 @@ class FakeRememberStorage implements RememberStorageInterface
         }
     }
 
-    public function deleteExpired()
+    public function deleteExpired(): void
     {
         foreach ($this->rows as $selector => $row) {
             if ($row['expires'] < time()) {

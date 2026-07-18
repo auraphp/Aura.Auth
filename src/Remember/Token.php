@@ -52,7 +52,7 @@ class Token
      * @return string A 16-character hex string (8 random bytes).
      *
      */
-    public function newSelector()
+    public function newSelector(): string
     {
         return bin2hex($this->phpfunc->random_bytes(8));
     }
@@ -64,7 +64,7 @@ class Token
      * @return string A 64-character hex string (32 random bytes).
      *
      */
-    public function newValidator()
+    public function newValidator(): string
     {
         return bin2hex($this->phpfunc->random_bytes(32));
     }
@@ -78,7 +78,7 @@ class Token
      * @return string The SHA-256 hash of the validator.
      *
      */
-    public function hash($validator)
+    public function hash($validator): string
     {
         return hash('sha256', $validator);
     }
@@ -94,7 +94,7 @@ class Token
      * @return string The `selector:validator` cookie value.
      *
      */
-    public function makeCookieValue($selector, $validator)
+    public function makeCookieValue($selector, $validator): string
     {
         return $selector . ':' . $validator;
     }
@@ -109,7 +109,7 @@ class Token
      * if the value is malformed.
      *
      */
-    public function parseCookieValue($value)
+    public function parseCookieValue($value): ?array
     {
         if (! is_string($value) || strpos($value, ':') === false) {
             return null;
@@ -138,7 +138,7 @@ class Token
      * @return bool
      *
      */
-    public function verify($hashed_validator, $validator)
+    public function verify($hashed_validator, $validator): bool
     {
         return hash_equals($hashed_validator, $this->hash($validator));
     }

@@ -68,7 +68,7 @@ class PdoRememberStorage implements RememberStorageInterface
      * {@inheritDoc}
      *
      */
-    public function create($selector, $hashed_validator, $username, array $userdata, $expires)
+    public function create($selector, $hashed_validator, $username, array $userdata, $expires): void
     {
         $stm = "INSERT INTO {$this->table} "
              . "(selector, hashed_validator, username, userdata, expires) "
@@ -88,7 +88,7 @@ class PdoRememberStorage implements RememberStorageInterface
      * {@inheritDoc}
      *
      */
-    public function findBySelector($selector)
+    public function findBySelector($selector): ?array
     {
         $stm = "SELECT selector, hashed_validator, username, userdata, expires "
              . "FROM {$this->table} WHERE selector = :selector";
@@ -111,7 +111,7 @@ class PdoRememberStorage implements RememberStorageInterface
      * {@inheritDoc}
      *
      */
-    public function update($selector, $hashed_validator, $expires)
+    public function update($selector, $hashed_validator, $expires): void
     {
         $stm = "UPDATE {$this->table} "
              . "SET hashed_validator = :hashed_validator, expires = :expires "
@@ -129,7 +129,7 @@ class PdoRememberStorage implements RememberStorageInterface
      * {@inheritDoc}
      *
      */
-    public function deleteBySelector($selector)
+    public function deleteBySelector($selector): void
     {
         $stm = "DELETE FROM {$this->table} WHERE selector = :selector";
         $sth = $this->pdo->prepare($stm);
@@ -141,7 +141,7 @@ class PdoRememberStorage implements RememberStorageInterface
      * {@inheritDoc}
      *
      */
-    public function deleteByUsername($username)
+    public function deleteByUsername($username): void
     {
         $stm = "DELETE FROM {$this->table} WHERE username = :username";
         $sth = $this->pdo->prepare($stm);
@@ -153,7 +153,7 @@ class PdoRememberStorage implements RememberStorageInterface
      * {@inheritDoc}
      *
      */
-    public function deleteExpired()
+    public function deleteExpired(): void
     {
         $stm = "DELETE FROM {$this->table} WHERE expires < :now";
         $sth = $this->pdo->prepare($stm);

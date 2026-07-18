@@ -44,10 +44,10 @@ interface RememberStorageInterface
      *
      * @param int $expires The Unix time at which the token expires.
      *
-     * @return null
+     * @return void
      *
      */
-    public function create($selector, $hashed_validator, $username, array $userdata, $expires);
+    public function create($selector, $hashed_validator, $username, array $userdata, $expires): void;
 
     /**
      *
@@ -58,7 +58,7 @@ interface RememberStorageInterface
      * @return array|null The token row, or null if not found.
      *
      */
-    public function findBySelector($selector);
+    public function findBySelector($selector): ?array;
 
     /**
      *
@@ -70,10 +70,10 @@ interface RememberStorageInterface
      *
      * @param int $expires The new Unix expiry time.
      *
-     * @return null
+     * @return void
      *
      */
-    public function update($selector, $hashed_validator, $expires);
+    public function update($selector, $hashed_validator, $expires): void;
 
     /**
      *
@@ -81,10 +81,10 @@ interface RememberStorageInterface
      *
      * @param string $selector The public lookup key.
      *
-     * @return null
+     * @return void
      *
      */
-    public function deleteBySelector($selector);
+    public function deleteBySelector($selector): void;
 
     /**
      *
@@ -92,17 +92,17 @@ interface RememberStorageInterface
      *
      * @param string $username The remembered user name.
      *
-     * @return null
+     * @return void
      *
      */
-    public function deleteByUsername($username);
+    public function deleteByUsername($username): void;
 
     /**
      *
      * Deletes all expired tokens (housekeeping).
      *
-     * @return null
+     * @return void
      *
      */
-    public function deleteExpired();
+    public function deleteExpired(): void;
 }
