@@ -18,6 +18,8 @@ use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Auth\Remember;
 use Aura\Auth\Remember\RememberService;
 use Aura\Auth\Remember\RememberStorageInterface;
+use Aura\Auth\OAuth;
+use Aura\Auth\OAuth\ProviderInterface;
 use PDO;
 
 /**
@@ -232,6 +234,41 @@ class AuthFactory
     public function newPdoRememberStorage(PDO $pdo, $table = 'aura_auth_remember')
     {
         return new Remember\PdoRememberStorage($pdo, $table);
+    }
+
+    /**
+     *
+     * Returns a new OAuth 2.0 adapter.
+     *
+     * @param ProviderInterface $provider The OAuth 2.0 provider seam (for
+     * example, an OAuth\LeagueProvider).
+     *
+     * @param array $options Mapping options: `username_field` and/or `map`.
+     *
+     * @return Adapter\OAuth2Adapter
+     *
+     */
+    public function newOAuth2Adapter(ProviderInterface $provider, array $options = [])
+    {
+        return new Adapter\OAuth2Adapter($provider, $options);
+    }
+
+    /**
+     *
+     * Returns a new OAuth 2.0 authorization-code flow helper, wired to this
+     * factory's session segment for anti-CSRF state and PKCE persistence.
+     *
+     * @param ProviderInterface $provider The OAuth 2.0 provider seam.
+     *
+     * @param array $options Optional key overrides: `state_key`,
+     * `verifier_key`.
+     *
+     * @return OAuth\AuthorizationCodeFlow
+     *
+     */
+    public function newOAuth2Flow(ProviderInterface $provider, array $options = [])
+    {
+        return new OAuth\AuthorizationCodeFlow($provider, $this->segment, $options);
     }
 
     /**
