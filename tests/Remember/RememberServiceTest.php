@@ -117,6 +117,25 @@ class RememberServiceTest extends \PHPUnit\Framework\TestCase
         $service = $this->newService();
         $this->assertFalse($service->resume($auth));
         $this->assertTrue($auth->isAnon());
+
+        // no cookie was sent, so no Set-Cookie header must be emitted
+        // (resume() runs on every anonymous request; a deletion cookie here
+        // would pollute responses and break HTTP caching)
+        $this->assertArrayNotHasKey('remember', $this->phpfunc->cookies);
+    }
+
+    public function testResumeWithMalformedCookieClearsIt()
+    {
+        $auth = $this->newAuth(Status::ANON);
+        // a present but unparseable value (no selector:validator separator)
+        $service = $this->newService(array('remember' => 'garbage'));
+        $this->assertFalse($service->resume($auth));
+        $this->assertTrue($auth->isAnon());
+
+        // a malformed cookie *was* present, so it is cleared
+        $this->assertArrayHasKey('remember', $this->phpfunc->cookies);
+        $this->assertSame('', $this->phpfunc->cookies['remember']['value']);
+        $this->assertSame(1, $this->phpfunc->cookies['remember']['options']['expires']);
     }
 
     public function testResumeWithTamperedValidatorDeletesToken()

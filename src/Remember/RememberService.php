@@ -169,9 +169,17 @@ class RememberService
             return false;
         }
 
-        $parsed = $this->token->parseCookieValue(
-            $this->cookie->get($this->name)
-        );
+        // If the client sent no remember-me cookie, do nothing. In particular
+        // do NOT emit a deletion cookie: resume() runs on every unauthenticated
+        // request, and a Set-Cookie header there would needlessly pollute
+        // responses and defeat HTTP caching for anonymous users.
+        $value = $this->cookie->get($this->name);
+        if ($value === null || $value === '') {
+            return false;
+        }
+
+        // A cookie was present but is malformed; clear it.
+        $parsed = $this->token->parseCookieValue($value);
         if (! $parsed) {
             $this->cookie->delete($this->name);
             return false;
