@@ -34,9 +34,10 @@
         }
     },
 
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require-dev": {
-        "acclimate/container": "^2",
+        "aura/session": "7.x-dev",
         "phpunit/phpunit": "~8",
         "vimeo/psalm": "~v4.15"
     },
