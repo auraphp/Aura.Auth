@@ -36,3 +36,58 @@ jobs:
 
       - name: "Run tests with phpunit/phpunit"
         run: "vendor/bin/phpunit"
+
+  ldap-integration:
+    name: "LDAP Integration Tests"
+    runs-on: "ubuntu-latest"
+
+    services:
+      openldap:
+        image: "bitnami/openldap:2.6"
+        ports:
+          - "1389:1389"
+        env:
+          LDAP_ADMIN_USERNAME: "admin"
+          LDAP_ADMIN_PASSWORD: "adminpassword"
+          LDAP_ROOT: "dc=example,dc=org"
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+        with:
+          persist-credentials: false
+
+      - name: "Install PHP with the ldap extension"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "none"
+          ini-values: "memory_limit=-1"
+          php-version: "8.4"
+          extensions: "ldap"
+
+      - name: "Install dependencies with composer"
+        uses: "ramsey/composer-install@v3"
+
+      - name: "Install ldap client utilities"
+        run: "sudo apt-get update && sudo apt-get install -y ldap-utils"
+
+      - name: "Wait for OpenLDAP and load the seed data"
+        run: |
+          for i in $(seq 1 30); do
+            if ldapsearch -x -H ldap://localhost:1389 \
+                -D "cn=admin,dc=example,dc=org" -w adminpassword \
+                -b "dc=example,dc=org" -s base >/dev/null 2>&1; then
+              echo "OpenLDAP is up."
+              break
+            fi
+            echo "Waiting for OpenLDAP ($i)..."
+            sleep 2
+          done
+          ldapadd -x -H ldap://localhost:1389 \
+            -D "cn=admin,dc=example,dc=org" -w adminpassword \
+            -f tests/integration/ldap/seed.ldif
+
+      - name: "Run the LDAP integration tests"
+        env:
+          LDAP_TEST_URI: "ldap://localhost:1389"
+        run: "vendor/bin/phpunit --group ldap"
