@@ -3,15 +3,16 @@ namespace Aura\Auth;
 
 use Aura\Auth\Adapter\FakeAdapter;
 use Aura\Session\SessionFactory;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+use PHPUnit\Framework\Attributes\PreserveGlobalState;
 
 /**
  * Integration test wiring Aura.Auth against the real Aura.Session
  * implementation of the shared Session_Interface contracts, driving a
  * full login -> resume -> logout cycle through an actual PHP session.
- *
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
  */
+#[RunTestsInSeparateProcesses]
+#[PreserveGlobalState(false)]
 class SessionIntegrationTest extends \PHPUnit\Framework\TestCase
 {
     protected $session;

@@ -15,6 +15,9 @@ use Aura\Session_Interface\SessionInterface;
 use Aura\Session_Interface\SegmentInterface;
 use Aura\Auth\Verifier;
 use Aura\Auth\Adapter\AdapterInterface;
+use Aura\Auth\Remember;
+use Aura\Auth\Remember\RememberService;
+use Aura\Auth\Remember\RememberStorageInterface;
 use PDO;
 
 /**
@@ -47,6 +50,15 @@ class AuthFactory
 
     /**
      *
+     * A copy of the $_COOKIE array.
+     *
+     * @var array
+     *
+     */
+    protected $cookie;
+
+    /**
+     *
      * Constructor.
      *
      * @param array $cookie A copy of $_COOKIES.
@@ -61,6 +73,7 @@ class AuthFactory
         ?SessionInterface $session = null,
         ?SegmentInterface $segment = null
     ) {
+        $this->cookie = $cookie;
         $this->session = $session;
         if (! $this->session) {
             $this->session = new Session\Session($cookie);
@@ -93,11 +106,14 @@ class AuthFactory
      * @return Service\LoginService
      *
      */
-    public function newLoginService(?AdapterInterface $adapter = null)
-    {
+    public function newLoginService(
+        ?AdapterInterface $adapter = null,
+        ?RememberService $remember_service = null
+    ) {
         return new Service\LoginService(
             $this->fixAdapter($adapter),
-            $this->session
+            $this->session,
+            $remember_service
         );
     }
 
@@ -110,11 +126,14 @@ class AuthFactory
      * @return Service\LogoutService
      *
      */
-    public function newLogoutService(?AdapterInterface $adapter = null)
-    {
+    public function newLogoutService(
+        ?AdapterInterface $adapter = null,
+        ?RememberService $remember_service = null
+    ) {
         return new Service\LogoutService(
             $this->fixAdapter($adapter),
-            $this->session
+            $this->session,
+            $remember_service
         );
     }
 
@@ -135,7 +154,8 @@ class AuthFactory
     public function newResumeService(
         ?AdapterInterface $adapter = null,
         $idle_ttl = 3600,               // 1 hour
-        $expire_ttl = 86400             // 24 hours
+        $expire_ttl = 86400,            // 24 hours
+        ?RememberService $remember_service = null
     ) {
 
         $adapter = $this->fixAdapter($adapter);
@@ -147,6 +167,10 @@ class AuthFactory
             $expire_ttl
         );
 
+        // NOTE: the internal logout service is intentionally *not* given the
+        // remember service. An idle/expired session must not discard the
+        // remember-me token; that is exactly when we want it to re-establish
+        // the session on the next request.
         $logout_service = new Service\LogoutService(
             $adapter,
             $this->session
@@ -156,8 +180,58 @@ class AuthFactory
             $adapter,
             $this->session,
             $timer,
-            $logout_service
+            $logout_service,
+            $remember_service
         );
+    }
+
+    /**
+     *
+     * Returns a new "remember me" service.
+     *
+     * @param RememberStorageInterface $storage Server-side token storage (for
+     * example, from newPdoRememberStorage()).
+     *
+     * @param array $options Options for the service and cookie: `name` (cookie
+     * name, default "remember"), `ttl` (token lifetime in seconds, default 30
+     * days), and cookie params `path`, `domain`, `secure`, `httponly`,
+     * `samesite`.
+     *
+     * @return RememberService
+     *
+     */
+    public function newRememberService(
+        RememberStorageInterface $storage,
+        array $options = array()
+    ) {
+        $phpfunc = new Phpfunc;
+        $name = isset($options['name']) ? $options['name'] : 'remember';
+        $ttl = isset($options['ttl']) ? $options['ttl'] : 2592000; // 30 days
+
+        return new Remember\RememberService(
+            $storage,
+            $this->session,
+            new Remember\Token($phpfunc),
+            new Remember\Cookie($phpfunc, $this->cookie, $options),
+            $name,
+            $ttl
+        );
+    }
+
+    /**
+     *
+     * Returns a new PDO-backed remember-me token storage.
+     *
+     * @param PDO $pdo A PDO connection.
+     *
+     * @param string $table The table holding the tokens.
+     *
+     * @return Remember\PdoRememberStorage
+     *
+     */
+    public function newPdoRememberStorage(PDO $pdo, $table = 'aura_auth_remember')
+    {
+        return new Remember\PdoRememberStorage($pdo, $table);
     }
 
     /**

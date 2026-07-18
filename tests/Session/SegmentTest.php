@@ -1,6 +1,8 @@
 <?php
 namespace Aura\Auth\Session;
 
+use PHPUnit\Framework\Attributes\RunInSeparateProcess;
+
 class SegmentTest extends \PHPUnit\Framework\TestCase
 {
     protected $segment;
@@ -16,9 +18,7 @@ class SegmentTest extends \PHPUnit\Framework\TestCase
         $this->assertNull($this->segment->get('foo'));
     }
 
-    /**
-     * @runInSeparateProcess
-     */
+    #[RunInSeparateProcess]
     public function testWithSession()
     {
         session_start();

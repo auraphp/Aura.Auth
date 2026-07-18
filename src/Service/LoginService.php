@@ -10,6 +10,7 @@ namespace Aura\Auth\Service;
 
 use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Session_Interface\SessionInterface;
+use Aura\Auth\Remember\RememberService;
 use Aura\Auth\Status;
 use Aura\Auth\Auth;
 
@@ -42,19 +43,33 @@ class LoginService
 
     /**
      *
+     * An optional "remember me" handler.
+     *
+     * @var RememberService|null
+     *
+     */
+    protected $remember_service;
+
+    /**
+     *
      * Constructor.
      *
      * @param AdapterInterface $adapter A credential-storage adapter.
      *
      * @param SessionInterface $session A session manager.
      *
+     * @param RememberService $remember_service An optional "remember me"
+     * handler; when present, a truthy `remember` input issues a token.
+     *
      */
     public function __construct(
         AdapterInterface $adapter,
-        SessionInterface $session
+        SessionInterface $session,
+        ?RememberService $remember_service = null
     ) {
         $this->adapter = $adapter;
         $this->session = $session;
+        $this->remember_service = $remember_service;
     }
 
     /**
@@ -71,7 +86,8 @@ class LoginService
     public function login(Auth $auth, array $input)
     {
         list($name, $data) = $this->adapter->login($input);
-        $this->forceLogin($auth, $name, $data);
+        $remember = ! empty($input['remember']);
+        $this->forceLogin($auth, $name, $data, Status::VALID, $remember);
     }
 
     /**
@@ -86,6 +102,9 @@ class LoginService
      *
      * @param string $status The new authentication status.
      *
+     * @param bool $remember When true and a RememberService is present, issue a
+     * "remember me" token.
+     *
      * @return string|false The authentication status on success, or boolean
      * false on failure.
      *
@@ -94,7 +113,8 @@ class LoginService
         Auth $auth,
         $name,
         array $data = array(),
-        $status = Status::VALID
+        $status = Status::VALID,
+        $remember = false
     ) {
         $started = $this->session->resume() || $this->session->start();
         if (! $started) {
@@ -109,6 +129,10 @@ class LoginService
             $name,
             $data
         );
+
+        if ($remember && $this->remember_service) {
+            $this->remember_service->remember($auth);
+        }
 
         return $status;
     }

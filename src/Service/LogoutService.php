@@ -10,6 +10,7 @@ namespace Aura\Auth\Service;
 
 use Aura\Auth\Adapter\AdapterInterface;
 use Aura\Session_Interface\SessionInterface;
+use Aura\Auth\Remember\RememberService;
 use Aura\Auth\Status;
 use Aura\Auth\Auth;
 
@@ -42,19 +43,33 @@ class LogoutService
 
     /**
      *
+     * An optional "remember me" handler.
+     *
+     * @var RememberService|null
+     *
+     */
+    protected $remember_service;
+
+    /**
+     *
      * Constructor.
      *
      * @param AdapterInterface $adapter A credential storage adapter.
      *
      * @param SessionInterface $session A session manager.
      *
+     * @param RememberService $remember_service An optional "remember me"
+     * handler; when present, its token is discarded on logout.
+     *
      */
     public function __construct(
         AdapterInterface $adapter,
-        SessionInterface $session
+        SessionInterface $session,
+        ?RememberService $remember_service = null
     ) {
         $this->adapter = $adapter;
         $this->session = $session;
+        $this->remember_service = $remember_service;
     }
 
     /**
@@ -87,6 +102,10 @@ class LogoutService
      */
     public function forceLogout(Auth $auth, $status = Status::ANON)
     {
+        if ($this->remember_service) {
+            $this->remember_service->forget($auth);
+        }
+
         $this->session->regenerateId();
 
         $auth->set(

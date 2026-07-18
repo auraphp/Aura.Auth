@@ -1,9 +1,9 @@
 <?php
 namespace Aura\Auth\Session;
 
-/**
- * @runTestsInSeparateProcesses
- */
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
+
+#[RunTestsInSeparateProcesses]
 class SessionTest extends \PHPUnit\Framework\TestCase
 {
     protected $session;
