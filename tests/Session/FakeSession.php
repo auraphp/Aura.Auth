@@ -11,20 +11,21 @@ class FakeSession implements SessionInterface
     public $allow_start = true;
     public $allow_resume = true;
 
-    public function start()
+    public function start(): bool
     {
         $this->started = $this->allow_start;
         return $this->started;
     }
 
-    public function resume()
+    public function resume(): bool
     {
         $this->resumed = $this->allow_resume;
         return $this->resumed;
     }
 
-    public function regenerateId()
+    public function regenerateId(): bool
     {
         $this->session_id ++;
+        return true;
     }
 }

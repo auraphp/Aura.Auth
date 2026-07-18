@@ -10,7 +10,7 @@ namespace Aura\Auth\Service;
 
 use Aura\Auth\Auth;
 use Aura\Auth\Adapter\AdapterInterface;
-use Aura\Auth\Session\SessionInterface;
+use Aura\Session_Interface\SessionInterface;
 use Aura\Auth\Session\Timer;
 
 /**

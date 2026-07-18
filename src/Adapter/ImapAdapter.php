@@ -86,7 +86,7 @@ class ImapAdapter extends AbstractAdapter
         $mailbox,
         $options = 0,
         $retries = 1,
-        array $params = null
+        ?array $params = null
     ) {
         $this->phpfunc = $phpfunc;
         $this->mailbox = $mailbox;

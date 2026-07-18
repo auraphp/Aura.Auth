@@ -24,7 +24,7 @@ class NullSession implements SessionInterface
      * @return bool
      *
      */
-    public function start()
+    public function start(): bool
     {
         return true;
     }
@@ -36,7 +36,7 @@ class NullSession implements SessionInterface
      * @return bool
      *
      */
-    public function resume()
+    public function resume(): bool
     {
         return false;
     }
@@ -45,10 +45,10 @@ class NullSession implements SessionInterface
      *
      * Re generate session id
      *
-     * @return mixed
+     * @return bool
      *
      */
-    public function regenerateId()
+    public function regenerateId(): bool
     {
         return true;
     }

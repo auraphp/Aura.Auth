@@ -45,7 +45,7 @@ class Session implements SessionInterface
      * @return bool
      *
      */
-    public function start()
+    public function start(): bool
     {
         return session_start();
     }
@@ -57,7 +57,7 @@ class Session implements SessionInterface
      * @return bool
      *
      */
-    public function resume()
+    public function resume(): bool
     {
         if (session_id() !== '') {
             return true;
@@ -74,10 +74,10 @@ class Session implements SessionInterface
      *
      * Regenerates a session ID.
      *
-     * @return mixed
+     * @return bool
      *
      */
-    public function regenerateId()
+    public function regenerateId(): bool
     {
         return session_regenerate_id(true);
     }

@@ -11,8 +11,8 @@ namespace Aura\Auth;
 use Aura\Auth\Adapter;
 use Aura\Auth\Service;
 use Aura\Auth\Session;
-use Aura\Auth\Session\SessionInterface;
-use Aura\Auth\Session\SegmentInterface;
+use Aura\Session_Interface\SessionInterface;
+use Aura\Session_Interface\SegmentInterface;
 use Aura\Auth\Verifier;
 use Aura\Auth\Adapter\AdapterInterface;
 use PDO;
@@ -58,8 +58,8 @@ class AuthFactory
      */
     public function __construct(
         array $cookie,
-        SessionInterface $session = null,
-        SegmentInterface $segment = null
+        ?SessionInterface $session = null,
+        ?SegmentInterface $segment = null
     ) {
         $this->session = $session;
         if (! $this->session) {
@@ -93,7 +93,7 @@ class AuthFactory
      * @return Service\LoginService
      *
      */
-    public function newLoginService(AdapterInterface $adapter = null)
+    public function newLoginService(?AdapterInterface $adapter = null)
     {
         return new Service\LoginService(
             $this->fixAdapter($adapter),
@@ -110,7 +110,7 @@ class AuthFactory
      * @return Service\LogoutService
      *
      */
-    public function newLogoutService(AdapterInterface $adapter = null)
+    public function newLogoutService(?AdapterInterface $adapter = null)
     {
         return new Service\LogoutService(
             $this->fixAdapter($adapter),
@@ -133,7 +133,7 @@ class AuthFactory
      *
      */
     public function newResumeService(
-        AdapterInterface $adapter = null,
+        ?AdapterInterface $adapter = null,
         $idle_ttl = 3600,               // 1 hour
         $expire_ttl = 86400             // 24 hours
     ) {
@@ -170,7 +170,7 @@ class AuthFactory
      * @return AdapterInterface
      *
      */
-    protected function fixAdapter(AdapterInterface $adapter = null)
+    protected function fixAdapter(?AdapterInterface $adapter = null)
     {
         if ($adapter === null) {
             $adapter = new Adapter\NullAdapter;
@@ -256,7 +256,7 @@ class AuthFactory
         $mailbox,
         $options = 0,
         $retries = 1,
-        array $params = null
+        ?array $params = null
     ) {
         return new Adapter\ImapAdapter(
             new Phpfunc,

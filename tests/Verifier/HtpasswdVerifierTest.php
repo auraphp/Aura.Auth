@@ -3,6 +3,8 @@ namespace Aura\Auth\Verifier;
 
 class HtpasswdVerifierTest extends \PHPUnit\Framework\TestCase
 {
+    protected $verifier;
+
     public function setUp() : void
     {
         $this->verifier = new HtpasswdVerifier;

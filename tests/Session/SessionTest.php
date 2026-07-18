@@ -6,6 +6,8 @@ namespace Aura\Auth\Session;
  */
 class SessionTest extends \PHPUnit\Framework\TestCase
 {
+    protected $session;
+
     protected function setUp() : void
     {
         $this->setSession();

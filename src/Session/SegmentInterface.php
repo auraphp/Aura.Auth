@@ -8,36 +8,19 @@
  */
 namespace Aura\Auth\Session;
 
+use Aura\Session_Interface\SegmentInterface as BaseSegmentInterface;
+
 /**
  *
  * Interface for segment of the $_SESSION array.
  *
+ * @deprecated Type-hint against {@see \Aura\Session_Interface\SegmentInterface}
+ * instead. This interface is retained for backward compatibility and simply
+ * re-exports the shared contract.
+ *
  * @package Aura.Auth
  *
  */
-interface SegmentInterface
+interface SegmentInterface extends BaseSegmentInterface
 {
-    /**
-     *
-     * Gets a value from the segment.
-     *
-     * @param mixed $key A key for the segment value.
-     *
-     * @param mixed $alt Return this value if the segment key does not exist.
-     *
-     * @return mixed
-     *
-     */
-    public function get($key, $alt = null);
-
-    /**
-     *
-     * Sets a value in the segment.
-     *
-     * @param mixed $key The key in the segment.
-     *
-     * @param mixed $val The value to set.
-     *
-     */
-    public function set($key, $val);
 }

@@ -8,33 +8,19 @@
  */
 namespace Aura\Auth\Session;
 
+use Aura\Session_Interface\SessionInterface as BaseSessionInterface;
+
 /**
  *
  * Interface for a session manager.
  *
+ * @deprecated Type-hint against {@see \Aura\Session_Interface\SessionInterface}
+ * instead. This interface is retained for backward compatibility and simply
+ * re-exports the shared contract.
+ *
  * @package Aura.Auth
  *
  */
-interface SessionInterface
+interface SessionInterface extends BaseSessionInterface
 {
-    /**
-     *
-     * Starts a session.
-     *
-     */
-    public function start();
-
-    /**
-     *
-     * Resumes a previously-existing session.
-     *
-     */
-    public function resume();
-
-    /**
-     *
-     * Regenerates the session ID.
-     *
-     */
-    public function regenerateId();
 }

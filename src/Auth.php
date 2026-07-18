@@ -8,8 +8,7 @@
  */
 namespace Aura\Auth;
 
-use Aura\Auth\Session\SegmentInterface;
-use Aura\Auth\Session\SessionInterface;
+use Aura\Session_Interface\SegmentInterface;
 use Aura\Auth\Session\Timer;
 
 /**
