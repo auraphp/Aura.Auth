@@ -5,6 +5,15 @@
 # tests can exercise users living at different points in the tree -- the
 # multi-level user tree case from issue #45.
 
+# Read-only service account used for the bind-search-rebind flow: the adapter
+# binds as this DN first, searches for the user, then rebinds as the user.
+dn: cn=service,dc=example,dc=org
+objectClass: organizationalRole
+objectClass: simpleSecurityObject
+cn: service
+description: Read-only service account for bind-search-rebind
+userPassword: servicepassword
+
 dn: ou=people,dc=example,dc=org
 objectClass: organizationalUnit
 ou: people

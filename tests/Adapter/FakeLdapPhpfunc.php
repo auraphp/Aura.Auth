@@ -21,6 +21,14 @@ class FakeLdapPhpfunc extends Phpfunc
     {
     }
 
+    public function ldap_search(...$args)
+    {
+    }
+
+    public function ldap_get_entries(...$args)
+    {
+    }
+
     public function ldap_set_option(...$args)
     {
     }

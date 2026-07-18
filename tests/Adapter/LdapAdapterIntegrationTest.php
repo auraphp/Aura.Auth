@@ -96,4 +96,74 @@ class LdapAdapterIntegrationTest extends \PHPUnit\Framework\TestCase
             'password' => 'whatever',
         ));
     }
+
+    /**
+     * Builds an adapter configured for the bind-search-rebind flow. The
+     * service account, base DN and filter match tests/integration/ldap/seed.ldif.
+     */
+    protected function newSearchAdapter()
+    {
+        return new LdapAdapter(
+            new Phpfunc(),
+            $this->server,
+            // dnformat is unused in search mode
+            'uid=%s,dc=example,dc=org',
+            array(
+                LDAP_OPT_PROTOCOL_VERSION => 3,
+                LDAP_OPT_REFERRALS => 0,
+            ),
+            array(
+                'binddn' => 'cn=service,dc=example,dc=org',
+                'bindpw' => 'servicepassword',
+                'basedn' => 'dc=example,dc=org',
+                'filter' => '(uid=%s)',
+                'attributes' => array('cn', 'mail'),
+            )
+        );
+    }
+
+    public function testSearchLogin_findsUserUnderPeople()
+    {
+        // alice lives under ou=people but the search starts at the root DN,
+        // proving discovery does not depend on a fixed OU path.
+        list($username, $attributes) = $this->newSearchAdapter()->login(array(
+            'username' => 'alice',
+            'password' => 'alicepassword',
+        ));
+
+        $this->assertSame('alice', $username);
+        $this->assertSame('alice@example.org', $attributes['mail']);
+        $this->assertSame('Alice Employee', $attributes['cn']);
+    }
+
+    public function testSearchLogin_findsUserUnderContractors()
+    {
+        // bob lives under a *different* OU; the same single base DN finds him,
+        // which is the multi-level tree case from issue #45.
+        list($username, $attributes) = $this->newSearchAdapter()->login(array(
+            'username' => 'bob',
+            'password' => 'bobpassword',
+        ));
+
+        $this->assertSame('bob', $username);
+        $this->assertSame('bob@example.org', $attributes['mail']);
+    }
+
+    public function testSearchLogin_wrongPassword()
+    {
+        $this->expectException('Aura\Auth\Exception\BindFailed');
+        $this->newSearchAdapter()->login(array(
+            'username' => 'alice',
+            'password' => 'wrongpassword',
+        ));
+    }
+
+    public function testSearchLogin_unknownUser()
+    {
+        $this->expectException('Aura\Auth\Exception\UsernameNotFound');
+        $this->newSearchAdapter()->login(array(
+            'username' => 'nobody',
+            'password' => 'whatever',
+        ));
+    }
 }
