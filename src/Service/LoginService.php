@@ -80,10 +80,10 @@ class LoginService
      *
      * @param array $input The credential input.
      *
-     * @return null
+     * @return void
      *
      */
-    public function login(Auth $auth, array $input)
+    public function login(Auth $auth, array $input): void
     {
         list($name, $data) = $this->adapter->login($input);
         $remember = ! empty($input['remember']);
@@ -115,7 +115,7 @@ class LoginService
         array $data = array(),
         $status = Status::VALID,
         $remember = false
-    ) {
+    ): string|false {
         $started = $this->session->resume() || $this->session->start();
         if (! $started) {
             return false;

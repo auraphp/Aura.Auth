@@ -30,5 +30,5 @@ interface VerifierInterface
      * @return bool
      *
      */
-    public function verify($plaintext, $hashvalue, array $extra = array());
+    public function verify($plaintext, $hashvalue, array $extra = array()): bool;
 }

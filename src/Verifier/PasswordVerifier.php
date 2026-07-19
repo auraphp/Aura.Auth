@@ -51,7 +51,7 @@ class PasswordVerifier implements VerifierInterface
      * @return bool
      *
      */
-    public function verify($plaintext, $hashvalue, array $extra = array())
+    public function verify($plaintext, $hashvalue, array $extra = array()): bool
     {
         if (is_string($this->algo) && $this->algo !== PASSWORD_BCRYPT) {
             return hash($this->algo, $plaintext) === $hashvalue;

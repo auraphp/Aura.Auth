@@ -72,7 +72,7 @@ class HtpasswdAdapter extends AbstractAdapter
      * @return VerifierInterface
      *
      */
-    public function getVerifier()
+    public function getVerifier(): VerifierInterface
     {
         return $this->verifier;
     }
@@ -86,7 +86,7 @@ class HtpasswdAdapter extends AbstractAdapter
      * @return array An array of login data.
      *
      */
-    public function login(array $input)
+    public function login(array $input): array
     {
         $this->checkInput($input);
         $username = $input['username'];
@@ -108,7 +108,7 @@ class HtpasswdAdapter extends AbstractAdapter
      * htpasswd file.
      *
      */
-    protected function fetchHashedPassword($username)
+    protected function fetchHashedPassword($username): string
     {
         // force the full, real path to the file
         $real = realpath($this->file);
@@ -148,12 +148,12 @@ class HtpasswdAdapter extends AbstractAdapter
      *
      * @param string $hashvalue The hashed password in htpasswd.
      *
-     * @return null
+     * @return void
      *
      * @throws Exception\PasswordIncorrect on failed verification.
      *
      */
-    protected function verify($password, $hashvalue)
+    protected function verify($password, $hashvalue): void
     {
         if (! $this->verifier->verify($password, $hashvalue)) {
             throw new Exception\PasswordIncorrect;

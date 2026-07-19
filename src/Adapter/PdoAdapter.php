@@ -101,14 +101,14 @@ class PdoAdapter extends AbstractAdapter
      *
      * @param array $cols The columns to select.
      *
-     * @return null
+     * @return void
      *
      * @throws Exception\UsernameColumnNotSpecified
      *
      * @throws Exception\PasswordColumnNotSpecified
      *
      */
-    protected function setCols($cols)
+    protected function setCols(array $cols): void
     {
         if (! isset($cols[0]) || trim($cols[0] == '')) {
             throw new Exception\UsernameColumnNotSpecified;
@@ -126,7 +126,7 @@ class PdoAdapter extends AbstractAdapter
      * @return VerifierInterface
      *
      */
-    public function getVerifier()
+    public function getVerifier(): VerifierInterface
     {
         return $this->verifier;
     }
@@ -141,7 +141,7 @@ class PdoAdapter extends AbstractAdapter
      * @return array An array of login data.
      *
      */
-    public function login(array $input)
+    public function login(array $input): array
     {
         $this->checkInput($input);
         $data = $this->fetchRow($input);
@@ -165,7 +165,7 @@ class PdoAdapter extends AbstractAdapter
      * @throws Exception\MultipleMatches where more than one row is found.
      *
      */
-    protected function fetchRow($input)
+    protected function fetchRow($input): array
     {
         $stm = $this->buildSelect();
         $rows = $this->fetchRows($stm, $input);
@@ -192,7 +192,7 @@ class PdoAdapter extends AbstractAdapter
      * @return array
      *
      */
-    protected function fetchRows($stm, $bind)
+    protected function fetchRows($stm, $bind): array
     {
         $sth = $this->pdo->prepare($stm);
         unset($bind['password']);
@@ -207,7 +207,7 @@ class PdoAdapter extends AbstractAdapter
      * @return string
      *
      */
-    protected function buildSelect()
+    protected function buildSelect(): string
     {
         $cols = $this->buildSelectCols();
         $from = $this->buildSelectFrom();
@@ -222,7 +222,7 @@ class PdoAdapter extends AbstractAdapter
      * @return string
      *
      */
-    protected function buildSelectCols()
+    protected function buildSelectCols(): string
     {
         $cols = $this->cols;
         $cols[0] .= ' AS username';
@@ -237,7 +237,7 @@ class PdoAdapter extends AbstractAdapter
      * @return string
      *
      */
-    protected function buildSelectFrom()
+    protected function buildSelectFrom(): string
     {
         return $this->from;
     }
@@ -249,7 +249,7 @@ class PdoAdapter extends AbstractAdapter
      * @return string
      *
      */
-    protected function buildSelectWhere()
+    protected function buildSelectWhere(): string
     {
         $where = $this->cols[0] . " = :username";
         if ($this->where) {
@@ -271,7 +271,7 @@ class PdoAdapter extends AbstractAdapter
      * @throws Exception\PasswordIncorrect
      *
      */
-    protected function verify($input, $data)
+    protected function verify($input, $data): bool
     {
         $verified = $this->verifier->verify(
             $input['password'],

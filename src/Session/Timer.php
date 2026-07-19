@@ -88,10 +88,10 @@ class Timer
      * @throws Exception when the session garbage collection max lifetime is
      * less than the idle time.
      *
-     * @return null
+     * @return void
      *
      */
-    public function setIdleTtl($idle_ttl)
+    public function setIdleTtl($idle_ttl): void
     {
         if ($this->ini_gc_maxlifetime < $idle_ttl) {
             throw new Exception("session.gc_maxlifetime {$this->ini_gc_maxlifetime} less than idle time $idle_ttl");
@@ -106,7 +106,7 @@ class Timer
      * @return int
      *
      */
-    public function getIdleTtl()
+    public function getIdleTtl(): int
     {
         return $this->idle_ttl;
     }
@@ -120,10 +120,10 @@ class Timer
      * @throws Exception when the session cookie lifetime is less than the
      * authentication lifetime.
      *
-     * @return null
+     * @return void
      *
      */
-    public function setExpireTtl($expire_ttl)
+    public function setExpireTtl($expire_ttl): void
     {
         $bad = $this->ini_cookie_lifetime > 0
             && $this->ini_cookie_lifetime < $expire_ttl;
@@ -140,7 +140,7 @@ class Timer
      * @return int
      *
      */
-    public function getExpireTtl()
+    public function getExpireTtl(): int
     {
         return $this->expire_ttl;
     }
@@ -154,7 +154,7 @@ class Timer
      * @return bool
      *
      */
-    public function hasExpired($first_active)
+    public function hasExpired($first_active): bool
     {
         return $this->expire_ttl <= 0
             || ($first_active + $this->getExpireTtl()) < time();
@@ -169,7 +169,7 @@ class Timer
      * @return bool
      *
      */
-    public function hasIdled($last_active)
+    public function hasIdled($last_active): bool
     {
         return $this->idle_ttl <= 0
             || ($last_active + $this->getIdleTtl()) < time();
@@ -186,7 +186,7 @@ class Timer
      * @return string
      *
      */
-    public function getTimeoutStatus($first_active, $last_active)
+    public function getTimeoutStatus($first_active, $last_active): ?string
     {
         if ($this->hasExpired($first_active)) {
             return Status::EXPIRED;
@@ -195,5 +195,7 @@ class Timer
         if ($this->hasIdled($last_active)) {
             return Status::IDLE;
         }
+
+        return null;
     }
 }

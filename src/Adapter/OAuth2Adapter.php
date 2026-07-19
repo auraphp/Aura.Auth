@@ -89,7 +89,7 @@ class OAuth2Adapter extends AbstractAdapter
      * `username_field` was configured.
      *
      */
-    public function login(array $input)
+    public function login(array $input): array
     {
         if (empty($input['code'])) {
             throw new Exception\AuthorizationCodeMissing();

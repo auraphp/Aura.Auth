@@ -55,7 +55,7 @@ class Auth
      *
      * @param array $userdata Arbitrary user data.
      *
-     * @return null
+     * @return void
      *
      * @see Status for constants and their values.
      *
@@ -66,7 +66,7 @@ class Auth
         $last_active,
         $username,
         array $userdata
-    ) {
+    ): void {
         $this->setStatus($status);
         $this->setFirstActive($first_active);
         $this->setLastActive($last_active);
@@ -81,7 +81,7 @@ class Auth
      * @return bool
      *
      */
-    public function isValid()
+    public function isValid(): bool
     {
         return $this->getStatus() == Status::VALID;
     }
@@ -93,7 +93,7 @@ class Auth
      * @return bool
      *
      */
-    public function isAnon()
+    public function isAnon(): bool
     {
         return $this->getStatus() == Status::ANON;
     }
@@ -105,7 +105,7 @@ class Auth
      * @return bool
      *
      */
-    public function isIdle()
+    public function isIdle(): bool
     {
         return $this->getStatus() == Status::IDLE;
     }
@@ -117,7 +117,7 @@ class Auth
      * @return bool
      *
      */
-    public function isExpired()
+    public function isExpired(): bool
     {
         return $this->getStatus() == Status::EXPIRED;
     }
@@ -131,7 +131,7 @@ class Auth
      * @return bool
      *
      */
-    public function isRemembered()
+    public function isRemembered(): bool
     {
         return $this->getStatus() == Status::REMEMBERED;
     }
@@ -142,10 +142,10 @@ class Auth
      *
      * @param string $status The authentication status.
      *
-     * @return null
+     * @return void
      *
      */
-    public function setStatus($status)
+    public function setStatus($status): void
     {
         $this->segment->set('status', $status);
     }
@@ -157,7 +157,7 @@ class Auth
      * @return string
      *
      */
-    public function getStatus()
+    public function getStatus(): string
     {
         return $this->segment->get('status', Status::ANON);
     }
@@ -168,10 +168,10 @@ class Auth
      *
      * @param int $first_active The initial authentication Unix time.
      *
-     * @return null
+     * @return void
      *
      */
-    public function setFirstActive($first_active)
+    public function setFirstActive($first_active): void
     {
         $this->segment->set('first_active', $first_active);
     }
@@ -180,10 +180,10 @@ class Auth
      *
      * Gets the initial authentication time.
      *
-     * @return int
+     * @return ?int
      *
      */
-    public function getFirstActive()
+    public function getFirstActive(): ?int
     {
         return $this->segment->get('first_active');
     }
@@ -194,10 +194,10 @@ class Auth
      *
      * @param int $last_active The last active Unix time.
      *
-     * @return null
+     * @return void
      *
      */
-    public function setLastActive($last_active)
+    public function setLastActive($last_active): void
     {
         $this->segment->set('last_active', $last_active);
     }
@@ -206,10 +206,10 @@ class Auth
      *
      * Gets the last active time.
      *
-     * @return int
+     * @return ?int
      *
      */
-    public function getLastActive()
+    public function getLastActive(): ?int
     {
         return $this->segment->get('last_active');
     }
@@ -220,10 +220,10 @@ class Auth
      *
      * @param string $username The username.
      *
-     * @return null
+     * @return void
      *
      */
-    public function setUserName($username)
+    public function setUserName($username): void
     {
         $this->segment->set('username', $username);
     }
@@ -232,10 +232,10 @@ class Auth
      *
      * Gets the current user name.
      *
-     * @return string
+     * @return ?string
      *
      */
-    public function getUserName()
+    public function getUserName(): ?string
     {
         return $this->segment->get('username');
     }
@@ -246,10 +246,10 @@ class Auth
      *
      * @param array $userdata The user data.
      *
-     * @return null
+     * @return void
      *
      */
-    public function setUserData(array $userdata)
+    public function setUserData(array $userdata): void
     {
         $this->segment->set('userdata', $userdata);
     }
@@ -261,7 +261,7 @@ class Auth
      * @return array
      *
      */
-    public function getUserData()
+    public function getUserData(): array
     {
         return $this->segment->get('userdata', array());
     }

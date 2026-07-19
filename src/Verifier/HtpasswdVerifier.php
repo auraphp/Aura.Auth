@@ -35,7 +35,7 @@ class HtpasswdVerifier implements VerifierInterface
      * @return bool
      *
      */
-    public function verify($plaintext, $hashvalue, array $extra = array())
+    public function verify($plaintext, $hashvalue, array $extra = array()): bool
     {
         $hashvalue = trim($hashvalue);
 
@@ -65,7 +65,7 @@ class HtpasswdVerifier implements VerifierInterface
      * @return bool
      *
      */
-    protected function sha($plaintext, $hashvalue)
+    protected function sha($plaintext, $hashvalue): bool
     {
         $hex = sha1($plaintext, true);
         $computed_hash = '{SHA}' . base64_encode($hex);
@@ -83,7 +83,7 @@ class HtpasswdVerifier implements VerifierInterface
      * @return bool
      *
      */
-    protected function apr1($plaintext, $hashvalue)
+    protected function apr1($plaintext, $hashvalue): bool
     {
         $salt = preg_replace('/^\$apr1\$([^$]+)\$.*/', '\\1', $hashvalue);
         $context = $this->computeContext($plaintext, $salt);
@@ -105,7 +105,7 @@ class HtpasswdVerifier implements VerifierInterface
      * @return string
      *
      */
-    protected function computeContext($plaintext, $salt)
+    protected function computeContext($plaintext, $salt): string
     {
         $length = strlen($plaintext);
         $hash = hash('md5', $plaintext . $salt . $plaintext, true);
@@ -135,7 +135,7 @@ class HtpasswdVerifier implements VerifierInterface
      * @return string
      *
      */
-    protected function computeBinary($plaintext, $salt, $context)
+    protected function computeBinary($plaintext, $salt, $context): string
     {
         $binary = hash('md5', $context, true);
         for ($i = 0; $i < 1000; $i++) {
@@ -161,7 +161,7 @@ class HtpasswdVerifier implements VerifierInterface
      * @return string
      *
      */
-    protected function computeP($binary)
+    protected function computeP($binary): string
     {
         $p = array();
         for ($i = 0; $i < 5; $i++) {
@@ -191,7 +191,7 @@ class HtpasswdVerifier implements VerifierInterface
      * @return string The converted value.
      *
      */
-    protected function convert64($value, $count)
+    protected function convert64($value, $count): string
     {
         $charset = './0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
         $result = '';
@@ -221,7 +221,7 @@ class HtpasswdVerifier implements VerifierInterface
      * @return bool
      *
      */
-    protected function des($plaintext, $hashvalue)
+    protected function des($plaintext, $hashvalue): bool
     {
         if (strlen($plaintext) > 8) {
             return false;
