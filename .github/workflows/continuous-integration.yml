@@ -46,6 +46,9 @@ jobs:
         uses: "actions/checkout@v4"
         with:
           persist-credentials: false
+          # ocular's tokenless upload resolves the commit's ancestry from git,
+          # so it needs the full history rather than a shallow clone.
+          fetch-depth: 0
 
       - name: "Install PHP with coverage driver"
         uses: "shivammathur/setup-php@v2"
@@ -60,9 +63,23 @@ jobs:
       - name: "Generate clover coverage"
         run: "vendor/bin/phpunit --coverage-clover=coverage.clover"
 
+      # ocular.phar bundles Guzzle 3, whose is_resource() cURL-handle checks
+      # break on PHP 8 (handles are objects there), failing with "Invalid handle
+      # provided". Switch to PHP 7.4 just to run the upload; the clover was
+      # already generated above on PHP 8.4.
+      - name: "Switch to PHP 7.4 for the ocular upload"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "none"
+          php-version: "7.4"
+
       - name: "Upload coverage to Scrutinizer"
         run: |
-          wget -q https://scrutinizer-ci.com/ocular.phar
+          # scrutinizer-ci.com is behind Cloudflare, which returns 403 to the
+          # default Wget/curl user-agent; send a browser UA so the download is
+          # allowed. (no -q, so any failure still reports its reason.)
+          wget --user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+            -O ocular.phar https://scrutinizer-ci.com/ocular.phar
           php ocular.phar code-coverage:upload --format=php-clover coverage.clover
 
   ldap-integration:
