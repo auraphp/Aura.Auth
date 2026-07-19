@@ -105,4 +105,49 @@ class AuthFactoryTest extends \PHPUnit\Framework\TestCase
         $service = $this->factory->newResumeService();
         $this->assertInstanceOf('Aura\Auth\Service\ResumeService', $service);
     }
+
+    public function testNewPdoThrottleStorage()
+    {
+        if (false === extension_loaded('pdo_sqlite')) {
+            $this->markTestSkipped("Cannot test without the pdo_sqlite extension.");
+        }
+        $storage = $this->factory->newPdoThrottleStorage(new PDO('sqlite::memory:'));
+        $this->assertInstanceOf('Aura\Auth\Throttle\PdoThrottleStorage', $storage);
+    }
+
+    public function testNewRedisThrottleStorage_wrapsRawClient()
+    {
+        $storage = $this->factory->newRedisThrottleStorage(
+            new \Aura\Auth\Throttle\FakeRedis()
+        );
+        $this->assertInstanceOf('Aura\Auth\Throttle\RedisThrottleStorage', $storage);
+    }
+
+    public function testNewRedisThrottleStorage_acceptsClientInterface()
+    {
+        $storage = $this->factory->newRedisThrottleStorage(
+            new \Aura\Auth\Throttle\FakeRedisClient()
+        );
+        $this->assertInstanceOf('Aura\Auth\Throttle\RedisThrottleStorage', $storage);
+    }
+
+    public function testNewThrottleService()
+    {
+        $service = $this->factory->newThrottleService(
+            new \Aura\Auth\Throttle\FakeThrottleStorage()
+        );
+        $this->assertInstanceOf('Aura\Auth\Throttle\ThrottleService', $service);
+    }
+
+    public function testNewThrottleAdapter()
+    {
+        $throttle = $this->factory->newThrottleService(
+            new \Aura\Auth\Throttle\FakeThrottleStorage()
+        );
+        $adapter = $this->factory->newThrottleAdapter(
+            new \Aura\Auth\Adapter\FakeAdapter(),
+            $throttle
+        );
+        $this->assertInstanceOf('Aura\Auth\Adapter\ThrottleAdapter', $adapter);
+    }
 }

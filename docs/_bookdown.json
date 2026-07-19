@@ -6,6 +6,7 @@
         "oauth.md",
         "service-idioms.md",
         "remember-me.md",
+        "throttling.md",
         "sessions.md",
         "di-configuration.md",
         "upgrade.md"
