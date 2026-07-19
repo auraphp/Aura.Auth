@@ -21,19 +21,9 @@
     },
     "autoload": {
         "psr-4": {
-            "Aura\\Auth\\": "src/",
-            "Aura\\Auth\\_Config\\": "config/"
+            "Aura\\Auth\\": "src/"
         }
     },
-    "extra": {
-        "aura": {
-            "type": "library",
-            "config": {
-                "common": "Aura\\Auth\\_Config\\Common"
-            }
-        }
-    },
-
     "minimum-stability": "dev",
     "prefer-stable": true,
     "require-dev": {
