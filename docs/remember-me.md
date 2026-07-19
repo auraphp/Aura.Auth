@@ -69,6 +69,7 @@ $remember_service = $auth_factory->newRememberService($storage, array(
     'samesite' => 'Lax',        // SameSite policy (default 'Lax')
     'path'     => '/',
     'domain'   => '',
+    // 'user_loader' => $fn,    // optional; see "Refreshing User Data" below
 ));
 
 $login_service  = $auth_factory->newLoginService($adapter, $remember_service);
@@ -113,6 +114,43 @@ Once wired, the feature works through the call sites you already have:
   $logout_service->logout($auth);
   ?>
   ```
+
+## Refreshing User Data On Resume
+
+By default, `resume()` restores the user data **snapshot** that was captured in
+storage when the token was issued. If an administrator later changes the user
+(new roles, a changed email, a disabled account), a remembered session keeps
+serving the stale copy until the next full credential login.
+
+To pick up such changes, pass an optional `user_loader` callable. It receives the
+remembered user name and returns the fresh user data on each resume:
+
+```php
+<?php
+$remember_service = $auth_factory->newRememberService($storage, array(
+    'user_loader' => function ($username) use ($pdo) {
+        $stm = $pdo->prepare('SELECT * FROM users WHERE username = :username');
+        $stm->execute(array('username' => $username));
+        $user = $stm->fetch(PDO::FETCH_ASSOC);
+
+        // return null to reject: the user no longer exists or is disabled,
+        // which revokes the token and leaves the visitor anonymous.
+        if (! $user || ! $user['is_active']) {
+            return null;
+        }
+
+        // otherwise return the fresh user data to restore
+        unset($user['password']);
+        return $user;
+    },
+));
+?>
+```
+
+The loader's return value is used in place of the stored snapshot; the remembered
+user name is preserved as the identity. Returning `null` treats the user as gone:
+the token is deleted from storage, the cookie is cleared, and `resume()` returns
+`false` (exactly like an expired or tampered token).
 
 ## Log Out Everywhere
 

@@ -22,7 +22,7 @@ class RememberServiceTest extends \PHPUnit\Framework\TestCase
         $this->phpfunc = new FakePhpfunc;
     }
 
-    protected function newService(array $cookie = array())
+    protected function newService(array $cookie = array(), ?callable $user_loader = null)
     {
         return new RememberService(
             $this->storage,
@@ -30,7 +30,8 @@ class RememberServiceTest extends \PHPUnit\Framework\TestCase
             new Token($this->phpfunc),
             new Cookie($this->phpfunc, $cookie),
             'remember',
-            2592000
+            2592000,
+            $user_loader
         );
     }
 
@@ -170,6 +171,57 @@ class RememberServiceTest extends \PHPUnit\Framework\TestCase
         $resume = $this->newService(array('remember' => $cookie_value));
         $this->assertFalse($resume->resume($auth));
         $this->assertCount(0, $this->storage->rows);
+    }
+
+    public function testResumeWithUserLoaderRefreshesUserData()
+    {
+        // issue a token carrying the snapshot userdata ('foo' => 'bar')
+        $service = $this->newService();
+        $service->remember($this->newAuth(Status::VALID));
+        $cookie_value = $this->phpfunc->cookies['remember']['value'];
+
+        // a loader that re-fetches fresh data from the "source of truth"
+        $seen_username = null;
+        $loader = function ($username) use (&$seen_username) {
+            $seen_username = $username;
+            return array('role' => 'admin');
+        };
+
+        $auth = $this->newAuth(Status::ANON);
+        $resume = $this->newService(array('remember' => $cookie_value), $loader);
+        $this->assertTrue($resume->resume($auth));
+
+        // the loader was called with the remembered username
+        $this->assertSame('boshag', $seen_username);
+
+        // the refreshed data replaces the stored snapshot; identity is kept
+        $this->assertTrue($auth->isRemembered());
+        $this->assertSame('boshag', $auth->getUserName());
+        $this->assertSame(array('role' => 'admin'), $auth->getUserData());
+    }
+
+    public function testResumeWithUserLoaderReturningNullRevokesToken()
+    {
+        // issue a token
+        $service = $this->newService();
+        $service->remember($this->newAuth(Status::VALID));
+        $cookie_value = $this->phpfunc->cookies['remember']['value'];
+        $this->assertCount(1, $this->storage->rows);
+
+        // the user no longer exists / is disabled in the source of truth
+        $loader = function ($username) {
+            return null;
+        };
+
+        $auth = $this->newAuth(Status::ANON);
+        $resume = $this->newService(array('remember' => $cookie_value), $loader);
+        $this->assertFalse($resume->resume($auth));
+
+        // no session established, and the token is revoked and cookie cleared
+        $this->assertTrue($auth->isAnon());
+        $this->assertCount(0, $this->storage->rows);
+        $this->assertSame('', $this->phpfunc->cookies['remember']['value']);
+        $this->assertSame(1, $this->phpfunc->cookies['remember']['options']['expires']);
     }
 
     public function testForgetDeletesTokenAndCookie()

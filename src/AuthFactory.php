@@ -196,8 +196,9 @@ class AuthFactory
      *
      * @param array $options Options for the service and cookie: `name` (cookie
      * name, default "remember"), `ttl` (token lifetime in seconds, default 30
-     * days), and cookie params `path`, `domain`, `secure`, `httponly`,
-     * `samesite`.
+     * days), `user_loader` (an optional `fn(string $username): ?array` to
+     * re-fetch fresh user data on resume), and cookie params `path`, `domain`,
+     * `secure`, `httponly`, `samesite`.
      *
      * @return RememberService
      *
@@ -209,6 +210,7 @@ class AuthFactory
         $phpfunc = new Phpfunc;
         $name = isset($options['name']) ? $options['name'] : 'remember';
         $ttl = isset($options['ttl']) ? $options['ttl'] : 2592000; // 30 days
+        $user_loader = isset($options['user_loader']) ? $options['user_loader'] : null;
 
         return new Remember\RememberService(
             $storage,
@@ -216,7 +218,8 @@ class AuthFactory
             new Remember\Token($phpfunc),
             new Remember\Cookie($phpfunc, $this->cookie, $options),
             $name,
-            $ttl
+            $ttl,
+            $user_loader
         );
     }
 
