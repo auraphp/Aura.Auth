@@ -148,7 +148,7 @@ class HtpasswdAdapter extends AbstractAdapter
      *
      * @param string $hashvalue The hashed password in htpasswd.
      *
-     * @return null
+     * @return void
      *
      * @throws Exception\PasswordIncorrect on failed verification.
      *

@@ -88,7 +88,7 @@ class Timer
      * @throws Exception when the session garbage collection max lifetime is
      * less than the idle time.
      *
-     * @return null
+     * @return void
      *
      */
     public function setIdleTtl($idle_ttl): void
@@ -120,7 +120,7 @@ class Timer
      * @throws Exception when the session cookie lifetime is less than the
      * authentication lifetime.
      *
-     * @return null
+     * @return void
      *
      */
     public function setExpireTtl($expire_ttl): void

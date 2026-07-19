@@ -106,7 +106,7 @@ class ResumeService
      *
      * @param Auth $auth An authentication tracker.
      *
-     * @return null
+     * @return void
      *
      */
     public function resume(Auth $auth): void

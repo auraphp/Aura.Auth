@@ -80,7 +80,7 @@ class LoginService
      *
      * @param array $input The credential input.
      *
-     * @return null
+     * @return void
      *
      */
     public function login(Auth $auth, array $input): void

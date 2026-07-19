@@ -80,7 +80,7 @@ class LogoutService
      *
      * @param string $status The status after logout.
      *
-     * @return null
+     * @return void
      *
      */
     public function logout(Auth $auth, $status = Status::ANON): void

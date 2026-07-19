@@ -40,7 +40,7 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @param string $status The new authentication status after logout.
      *
-     * @return null
+     * @return void
      *
      * @see Status
      *
@@ -56,7 +56,7 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @param Auth $auth The authentication object to be resumed.
      *
-     * @return null
+     * @return void
      *
      */
     public function resume(Auth $auth): void

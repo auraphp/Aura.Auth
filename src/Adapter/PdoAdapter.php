@@ -101,7 +101,7 @@ class PdoAdapter extends AbstractAdapter
      *
      * @param array $cols The columns to select.
      *
-     * @return null
+     * @return void
      *
      * @throws Exception\UsernameColumnNotSpecified
      *

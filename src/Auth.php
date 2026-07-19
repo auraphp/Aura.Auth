@@ -55,7 +55,7 @@ class Auth
      *
      * @param array $userdata Arbitrary user data.
      *
-     * @return null
+     * @return void
      *
      * @see Status for constants and their values.
      *
@@ -142,7 +142,7 @@ class Auth
      *
      * @param string $status The authentication status.
      *
-     * @return null
+     * @return void
      *
      */
     public function setStatus($status): void
@@ -168,7 +168,7 @@ class Auth
      *
      * @param int $first_active The initial authentication Unix time.
      *
-     * @return null
+     * @return void
      *
      */
     public function setFirstActive($first_active): void
@@ -180,7 +180,7 @@ class Auth
      *
      * Gets the initial authentication time.
      *
-     * @return int
+     * @return ?int
      *
      */
     public function getFirstActive(): ?int
@@ -194,7 +194,7 @@ class Auth
      *
      * @param int $last_active The last active Unix time.
      *
-     * @return null
+     * @return void
      *
      */
     public function setLastActive($last_active): void
@@ -206,7 +206,7 @@ class Auth
      *
      * Gets the last active time.
      *
-     * @return int
+     * @return ?int
      *
      */
     public function getLastActive(): ?int
@@ -220,7 +220,7 @@ class Auth
      *
      * @param string $username The username.
      *
-     * @return null
+     * @return void
      *
      */
     public function setUserName($username): void
@@ -232,7 +232,7 @@ class Auth
      *
      * Gets the current user name.
      *
-     * @return string
+     * @return ?string
      *
      */
     public function getUserName(): ?string
@@ -246,7 +246,7 @@ class Auth
      *
      * @param array $userdata The user data.
      *
-     * @return null
+     * @return void
      *
      */
     public function setUserData(array $userdata): void
