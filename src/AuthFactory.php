@@ -219,7 +219,7 @@ class AuthFactory
         return new Remember\RememberService(
             $storage,
             $this->session,
-            new Remember\Token($phpfunc),
+            new Token\SplitToken($phpfunc),
             new Remember\Cookie($phpfunc, $this->cookie, $options),
             $name,
             $ttl,

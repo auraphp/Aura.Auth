@@ -6,7 +6,7 @@
  * @license http://opensource.org/licenses/MIT-license.php MIT
  *
  */
-namespace Aura\Auth\Remember;
+namespace Aura\Auth\Token;
 
 use Aura\Auth\Phpfunc;
 
@@ -14,15 +14,18 @@ use Aura\Auth\Phpfunc;
  *
  * A split-token ("selector : validator") value object and helper.
  *
- * The cookie carries `selector:validator`. The `selector` is a public lookup
+ * A token value is `selector:validator`. The `selector` is a public lookup
  * key; the `validator` is a secret compared in constant time against a stored
  * SHA-256 hash. This is the scheme described at
  * https://paragonie.com/blog/2015/04/secure-authentication-php-with-long-term-persistence
  *
+ * The scheme is transport-agnostic: "remember me" carries the value in a
+ * cookie, while API authentication carries it in a request header.
+ *
  * @package Aura.Auth
  *
  */
-class Token
+class SplitToken
 {
     /**
      *
@@ -85,31 +88,31 @@ class Token
 
     /**
      *
-     * Builds the cookie value from a selector and validator.
+     * Builds the token value from a selector and validator.
      *
      * @param string $selector The public lookup key.
      *
      * @param string $validator The secret validator.
      *
-     * @return string The `selector:validator` cookie value.
+     * @return string The `selector:validator` token value.
      *
      */
-    public function makeCookieValue($selector, $validator): string
+    public function makeValue($selector, $validator): string
     {
         return $selector . ':' . $validator;
     }
 
     /**
      *
-     * Parses a `selector:validator` cookie value.
+     * Parses a `selector:validator` token value.
      *
-     * @param string $value The raw cookie value.
+     * @param string $value The raw token value.
      *
      * @return array|null An array with `selector` and `validator` keys, or null
      * if the value is malformed.
      *
      */
-    public function parseCookieValue($value): ?array
+    public function parseValue($value): ?array
     {
         if (! is_string($value) || strpos($value, ':') === false) {
             return null;
@@ -133,7 +136,7 @@ class Token
      *
      * @param string $hashed_validator The stored SHA-256 hash.
      *
-     * @param string $validator The validator presented in the cookie.
+     * @param string $validator The validator presented by the client.
      *
      * @return bool
      *

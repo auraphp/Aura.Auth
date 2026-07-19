@@ -4,6 +4,7 @@ namespace Aura\Auth\Remember;
 use Aura\Auth\Auth;
 use Aura\Auth\Status;
 use Aura\Auth\FakePhpfunc;
+use Aura\Auth\Token\SplitToken;
 use Aura\Auth\Session\FakeSession;
 use Aura\Auth\Session\FakeSegment;
 
@@ -27,7 +28,7 @@ class RememberServiceTest extends \PHPUnit\Framework\TestCase
         return new RememberService(
             $this->storage,
             $this->session,
-            new Token($this->phpfunc),
+            new SplitToken($this->phpfunc),
             new Cookie($this->phpfunc, $cookie),
             'remember',
             2592000,
