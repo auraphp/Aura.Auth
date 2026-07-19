@@ -50,6 +50,7 @@
     "suggest": {
         "ext/ldap": "For LDAP integration.",
         "ext/imap": "For IMAP/POP/NNTP integration.",
-        "league/oauth2-client": "For OAuth 2.0 integration via the OAuth2Adapter and LeagueProvider (plus a provider package such as league/oauth2-google)."
+        "league/oauth2-client": "For OAuth 2.0 integration via the OAuth2Adapter and LeagueProvider (plus a provider package such as league/oauth2-google).",
+        "ext-redis": "For Redis-backed login throttling via RedisThrottleStorage (Predis\\Client also works)."
     }
 }
