@@ -124,7 +124,7 @@ class LdapAdapter extends AbstractAdapter
      * if verification failed.
      *
      */
-    public function login(array $input)
+    public function login(array $input): array
     {
         $this->checkInput($input);
         $username = $input['username'];
@@ -180,7 +180,7 @@ class LdapAdapter extends AbstractAdapter
      * @throws Exception\BindFailed when the username/password fails.
      *
      */
-    protected function bind($conn, $username, $password)
+    protected function bind($conn, $username, $password): void
     {
         $username = $this->escape($username);
         $bind_rdn = sprintf($this->dnformat, $username);
@@ -219,7 +219,7 @@ class LdapAdapter extends AbstractAdapter
      * entry.
      *
      */
-    protected function bindSearch($conn, $username, $password)
+    protected function bindSearch($conn, $username, $password): array
     {
         // bind as the service account so we can search the directory
         $bound = $this->ldapBind(
@@ -308,7 +308,7 @@ class LdapAdapter extends AbstractAdapter
      * @return bool True if the bind succeeded, false otherwise.
      *
      */
-    protected function ldapBind($conn, $dn, $password)
+    protected function ldapBind($conn, $dn, $password): bool
     {
         set_error_handler(static function () {
             // returning true marks the warning as handled, keeping the
@@ -332,7 +332,7 @@ class LdapAdapter extends AbstractAdapter
      * @return string
      *
      */
-    protected function error($conn)
+    protected function error($conn): string
     {
         return $this->phpfunc->ldap_errno($conn)
              . ': '
@@ -350,7 +350,7 @@ class LdapAdapter extends AbstractAdapter
      * @return array
      *
      */
-    protected function entryData(array $entry)
+    protected function entryData(array $entry): array
     {
         $data = array();
         for ($i = 0; $i < $entry['count']; $i++) {
@@ -376,7 +376,7 @@ class LdapAdapter extends AbstractAdapter
      * @return string The escaped string.
      *
      */
-    protected function escape($str)
+    protected function escape($str): string
     {
         return strtr($str, array(
             '\\' => '\\\\',
@@ -404,7 +404,7 @@ class LdapAdapter extends AbstractAdapter
      * @return string The escaped string.
      *
      */
-    protected function escapeFilter($str)
+    protected function escapeFilter($str): string
     {
         return strtr($str, array(
             '\\'   => '\\5c',

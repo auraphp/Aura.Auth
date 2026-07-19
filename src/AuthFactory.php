@@ -94,7 +94,7 @@ class AuthFactory
      * @return Auth
      *
      */
-    public function newInstance()
+    public function newInstance(): Auth
     {
         return new Auth($this->segment);
     }
@@ -111,7 +111,7 @@ class AuthFactory
     public function newLoginService(
         ?AdapterInterface $adapter = null,
         ?RememberService $remember_service = null
-    ) {
+    ): Service\LoginService {
         return new Service\LoginService(
             $this->fixAdapter($adapter),
             $this->session,
@@ -131,7 +131,7 @@ class AuthFactory
     public function newLogoutService(
         ?AdapterInterface $adapter = null,
         ?RememberService $remember_service = null
-    ) {
+    ): Service\LogoutService {
         return new Service\LogoutService(
             $this->fixAdapter($adapter),
             $this->session,
@@ -158,7 +158,7 @@ class AuthFactory
         $idle_ttl = 3600,               // 1 hour
         $expire_ttl = 86400,            // 24 hours
         ?RememberService $remember_service = null
-    ) {
+    ): Service\ResumeService {
 
         $adapter = $this->fixAdapter($adapter);
 
@@ -205,7 +205,7 @@ class AuthFactory
     public function newRememberService(
         RememberStorageInterface $storage,
         array $options = array()
-    ) {
+    ): RememberService {
         $phpfunc = new Phpfunc;
         $name = isset($options['name']) ? $options['name'] : 'remember';
         $ttl = isset($options['ttl']) ? $options['ttl'] : 2592000; // 30 days
@@ -231,7 +231,7 @@ class AuthFactory
      * @return Remember\PdoRememberStorage
      *
      */
-    public function newPdoRememberStorage(PDO $pdo, $table = 'aura_auth_remember')
+    public function newPdoRememberStorage(PDO $pdo, $table = 'aura_auth_remember'): Remember\PdoRememberStorage
     {
         return new Remember\PdoRememberStorage($pdo, $table);
     }
@@ -248,7 +248,7 @@ class AuthFactory
      * @return Adapter\OAuth2Adapter
      *
      */
-    public function newOAuth2Adapter(ProviderInterface $provider, array $options = [])
+    public function newOAuth2Adapter(ProviderInterface $provider, array $options = []): Adapter\OAuth2Adapter
     {
         return new Adapter\OAuth2Adapter($provider, $options);
     }
@@ -266,7 +266,7 @@ class AuthFactory
      * @return OAuth\AuthorizationCodeFlow
      *
      */
-    public function newOAuth2Flow(ProviderInterface $provider, array $options = [])
+    public function newOAuth2Flow(ProviderInterface $provider, array $options = []): OAuth\AuthorizationCodeFlow
     {
         return new OAuth\AuthorizationCodeFlow($provider, $this->segment, $options);
     }
@@ -281,7 +281,7 @@ class AuthFactory
      * @return AdapterInterface
      *
      */
-    protected function fixAdapter(?AdapterInterface $adapter = null)
+    protected function fixAdapter(?AdapterInterface $adapter = null): AdapterInterface
     {
         if ($adapter === null) {
             $adapter = new Adapter\NullAdapter;
@@ -314,7 +314,7 @@ class AuthFactory
         array $cols,
         $from,
         $where = null
-    ) {
+    ): Adapter\PdoAdapter {
         if (is_object($verifier_spec)) {
             $verifier = $verifier_spec;
         } else {
@@ -339,7 +339,7 @@ class AuthFactory
      * @return Adapter\HtpasswdAdapter
      *
      */
-    public function newHtpasswdAdapter($file)
+    public function newHtpasswdAdapter($file): Adapter\HtpasswdAdapter
     {
         $verifier = new Verifier\HtpasswdVerifier;
         return new Adapter\HtpasswdAdapter(
@@ -368,7 +368,7 @@ class AuthFactory
         $options = 0,
         $retries = 1,
         ?array $params = null
-    ) {
+    ): Adapter\ImapAdapter {
         return new Adapter\ImapAdapter(
             new Phpfunc,
             $mailbox,
@@ -402,7 +402,7 @@ class AuthFactory
         $dnformat,
         array $options = array(),
         array $search = array()
-    ) {
+    ): Adapter\LdapAdapter {
         return new Adapter\LdapAdapter(
             new Phpfunc,
             $server,

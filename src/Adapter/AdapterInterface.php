@@ -29,7 +29,7 @@ interface AdapterInterface
      * @return array An array of login data on success.
      *
      */
-    public function login(array $input);
+    public function login(array $input): array;
 
     /**
      *
@@ -44,7 +44,7 @@ interface AdapterInterface
      * @see Status
      *
      */
-    public function logout(Auth $auth, $status = Status::ANON);
+    public function logout(Auth $auth, $status = Status::ANON): void;
 
     /**
      *
@@ -55,5 +55,5 @@ interface AdapterInterface
      * @return null
      *
      */
-    public function resume(Auth $auth);
+    public function resume(Auth $auth): void;
 }

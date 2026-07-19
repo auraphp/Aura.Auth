@@ -83,7 +83,7 @@ class LogoutService
      * @return null
      *
      */
-    public function logout(Auth $auth, $status = Status::ANON)
+    public function logout(Auth $auth, $status = Status::ANON): void
     {
         $this->adapter->logout($auth, $status);
         $this->forceLogout($auth, $status);
@@ -100,7 +100,7 @@ class LogoutService
      * @return string The new authentication status.
      *
      */
-    public function forceLogout(Auth $auth, $status = Status::ANON)
+    public function forceLogout(Auth $auth, $status = Status::ANON): string
     {
         if ($this->remember_service) {
             $this->remember_service->forget($auth);

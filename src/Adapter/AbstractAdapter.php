@@ -30,7 +30,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return array An array of login data on success.
      *
      */
-    abstract public function login(array $input);
+    abstract public function login(array $input): array;
 
     /**
      *
@@ -45,7 +45,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @see Status
      *
      */
-    public function logout(Auth $auth, $status = Status::ANON)
+    public function logout(Auth $auth, $status = Status::ANON): void
     {
         // do nothing
     }
@@ -59,7 +59,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return null
      *
      */
-    public function resume(Auth $auth)
+    public function resume(Auth $auth): void
     {
         // do nothing
     }
@@ -70,10 +70,10 @@ abstract class AbstractAdapter implements AdapterInterface
      *
      * @param array $input
      *
-     * @return bool
+     * @return void
      *
      */
-    protected function checkInput($input)
+    protected function checkInput($input): void
     {
         if (empty($input['username'])) {
             throw new Exception\UsernameMissing;

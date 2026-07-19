@@ -31,7 +31,7 @@ class Phpfunc
      * @return mixed
      *
      */
-    public function __call($method, $params)
+    public function __call($method, $params): mixed
     {
         return call_user_func_array($method, $params);
     }

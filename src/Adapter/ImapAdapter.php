@@ -107,7 +107,7 @@ class ImapAdapter extends AbstractAdapter
      * @throws Exception\ConnectionFailed when the IMAP connection fails.
      *
      */
-    public function login(array $input)
+    public function login(array $input): array
     {
         $this->checkInput($input);
         $username = $input['username'];

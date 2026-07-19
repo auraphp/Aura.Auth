@@ -109,7 +109,7 @@ class ResumeService
      * @return null
      *
      */
-    public function resume(Auth $auth)
+    public function resume(Auth $auth): void
     {
         $this->session->resume();
         if (! $this->timedOut($auth)) {
@@ -132,7 +132,7 @@ class ResumeService
      * @return bool
      *
      */
-    protected function timedOut(Auth $auth)
+    protected function timedOut(Auth $auth): bool
     {
         if ($auth->isAnon()) {
             return false;
