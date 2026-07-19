@@ -9,9 +9,11 @@
 
 ## Remember Me — Follow-ups
 
-- Remember-Me stores a snapshot of user data in the token and replays it on
-  resume. Add an optional user-loader seam so resume can re-fetch fresh user
-  details from the source (picks up admin-side changes to roles/email/etc.). Cf.
+- Remember-Me stores a snapshot of user data server-side in the token storage
+  row (the cookie carries only the `selector:validator`) and replays that
+  snapshot on resume. Add an optional user-loader seam so resume can re-fetch
+  fresh user details from the source (picks up admin-side changes to
+  roles/email/etc.). Cf.
   <https://github.com/craigrodway/LoginPersist/blob/master/LoginPersist.module>
   and other implementations for ideas.
 
