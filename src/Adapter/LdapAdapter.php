@@ -185,9 +185,7 @@ class LdapAdapter extends AbstractAdapter
         $username = $this->escape($username);
         $bind_rdn = sprintf($this->dnformat, $username);
 
-        // suppress the PHP warning ldap_bind() emits on a failed bind; the
-        // failure is reported via the BindFailed exception below.
-        $bound = @$this->phpfunc->ldap_bind($conn, $bind_rdn, $password);
+        $bound = $this->ldapBind($conn, $bind_rdn, $password);
         if (! $bound) {
             $error = $this->error($conn);
             $this->phpfunc->ldap_unbind($conn);
@@ -222,7 +220,7 @@ class LdapAdapter extends AbstractAdapter
     protected function bindSearch($conn, $username, $password)
     {
         // bind as the service account so we can search the directory
-        $bound = @$this->phpfunc->ldap_bind(
+        $bound = $this->ldapBind(
             $conn,
             $this->search['binddn'],
             $this->search['bindpw']
@@ -264,7 +262,7 @@ class LdapAdapter extends AbstractAdapter
 
         // rebind as the discovered user to verify the password
         $userdn = $entries[0]['dn'];
-        $bound = @$this->phpfunc->ldap_bind($conn, $userdn, $password);
+        $bound = $this->ldapBind($conn, $userdn, $password);
         if (! $bound) {
             $error = $this->error($conn);
             $this->phpfunc->ldap_unbind($conn);
@@ -273,6 +271,42 @@ class LdapAdapter extends AbstractAdapter
 
         $this->phpfunc->ldap_unbind($conn);
         return $this->entryData($entries[0]);
+    }
+
+    /**
+     *
+     * Binds to the LDAP server, returning success as a boolean instead of
+     * letting ldap_bind() emit a PHP warning on failure.
+     *
+     * A failed bind is an expected outcome (wrong password, missing user), and
+     * we already report it to the caller through the BindFailed exception, so
+     * the raw warning is redundant noise. Rather than reach for the `@`
+     * error-suppression operator -- which hides *every* error for the call --
+     * we install an error handler scoped to just this bind and restore it
+     * immediately afterwards.
+     *
+     * @param resource $conn The LDAP connection.
+     *
+     * @param string $dn The bind DN.
+     *
+     * @param string $password The bind password.
+     *
+     * @return bool True if the bind succeeded, false otherwise.
+     *
+     */
+    protected function ldapBind($conn, $dn, $password)
+    {
+        set_error_handler(static function () {
+            // returning true marks the warning as handled, keeping the
+            // failed-bind message out of the error log
+            return true;
+        });
+
+        try {
+            return (bool) $this->phpfunc->ldap_bind($conn, $dn, $password);
+        } finally {
+            restore_error_handler();
+        }
     }
 
     /**
