@@ -9,6 +9,7 @@
 namespace Aura\Auth\Remember;
 
 use Aura\Auth\Auth;
+use Aura\Auth\Token\SplitToken;
 use Aura\Auth\Status;
 use Aura\Session_Interface\SessionInterface;
 
@@ -50,7 +51,7 @@ class RememberService
      *
      * The split-token helper.
      *
-     * @var Token
+     * @var SplitToken
      *
      */
     protected $token;
@@ -101,7 +102,7 @@ class RememberService
      *
      * @param SessionInterface $session A session manager.
      *
-     * @param Token $token The split-token helper.
+     * @param SplitToken $token The split-token helper.
      *
      * @param Cookie $cookie The cookie reader/writer.
      *
@@ -117,7 +118,7 @@ class RememberService
     public function __construct(
         RememberStorageInterface $storage,
         SessionInterface $session,
-        Token $token,
+        SplitToken $token,
         Cookie $cookie,
         $name = 'remember',
         $ttl = 2592000,
@@ -165,7 +166,7 @@ class RememberService
 
         $this->cookie->set(
             $this->name,
-            $this->token->makeCookieValue($selector, $validator),
+            $this->token->makeValue($selector, $validator),
             $expires
         );
 
@@ -206,7 +207,7 @@ class RememberService
         }
 
         // A cookie was present but is malformed; clear it.
-        $parsed = $this->token->parseCookieValue($value);
+        $parsed = $this->token->parseValue($value);
         if (! $parsed) {
             $this->cookie->delete($this->name);
             return false;
@@ -258,7 +259,7 @@ class RememberService
         );
         $this->cookie->set(
             $this->name,
-            $this->token->makeCookieValue($parsed['selector'], $validator),
+            $this->token->makeValue($parsed['selector'], $validator),
             $expires
         );
 
@@ -286,7 +287,7 @@ class RememberService
      */
     public function forget(?Auth $auth = null): void
     {
-        $parsed = $this->token->parseCookieValue(
+        $parsed = $this->token->parseValue(
             $this->cookie->get($this->name)
         );
         if ($parsed) {

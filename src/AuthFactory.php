@@ -24,6 +24,9 @@ use Aura\Auth\Throttle;
 use Aura\Auth\Throttle\ThrottleStorageInterface;
 use Aura\Auth\Throttle\ThrottleService;
 use Aura\Auth\Throttle\RedisClientInterface;
+use Aura\Auth\Token;
+use Aura\Auth\Token\TokenService;
+use Aura\Auth\Token\TokenStorageInterface;
 use PDO;
 
 /**
@@ -219,7 +222,7 @@ class AuthFactory
         return new Remember\RememberService(
             $storage,
             $this->session,
-            new Remember\Token($phpfunc),
+            new Token\SplitToken($phpfunc),
             new Remember\Cookie($phpfunc, $this->cookie, $options),
             $name,
             $ttl,
@@ -327,6 +330,110 @@ class AuthFactory
             $client = new Throttle\NativeRedisClient($client);
         }
         return new Throttle\RedisThrottleStorage($client, $prefix, $window);
+    }
+
+    /**
+     *
+     * Returns a new authentication tracker for a stateless request.
+     *
+     * Unlike newInstance(), this is backed by an in-memory segment rather than
+     * a session one, so nothing is written to $_SESSION. Use it for requests
+     * authenticated from a header; use newInstance() for the session flows.
+     *
+     * @return Auth
+     *
+     */
+    public function newApiInstance(): Auth
+    {
+        return new Auth(new Session\ArraySegment);
+    }
+
+    /**
+     *
+     * Returns a new API token service.
+     *
+     * @param TokenStorageInterface $storage Server-side token storage.
+     *
+     * @param array $options Optional key: `ttl`, the default token lifetime in
+     * seconds (default 30 days).
+     *
+     * @return TokenService
+     *
+     */
+    public function newTokenService(
+        TokenStorageInterface $storage,
+        array $options = array()
+    ): TokenService {
+        $ttl = isset($options['ttl']) ? $options['ttl'] : 2592000;
+
+        return new Token\TokenService(
+            $storage,
+            new Token\SplitToken(new Phpfunc),
+            $ttl
+        );
+    }
+
+    /**
+     *
+     * Returns a new PDO-backed API token storage.
+     *
+     * @param PDO $pdo A PDO connection.
+     *
+     * @param string $table The table holding the tokens.
+     *
+     * @param bool $track_last_used Whether to record when each token was last
+     * presented. Off by default: it costs an UPDATE on every authenticated
+     * request. The column exists either way, so turning this on later needs no
+     * migration.
+     *
+     * @return Token\PdoTokenStorage
+     *
+     */
+    public function newPdoTokenStorage(
+        PDO $pdo,
+        $table = 'aura_auth_token',
+        $track_last_used = false
+    ): Token\PdoTokenStorage {
+        return new Token\PdoTokenStorage($pdo, $table, $track_last_used);
+    }
+
+    /**
+     *
+     * Returns a new header-token adapter.
+     *
+     * @param TokenService $token_service The token verification service.
+     *
+     * @param array $server A copy of $_SERVER.
+     *
+     * @param array $options Optional keys: `header`, the $_SERVER key holding
+     * the token (default `HTTP_AUTHORIZATION`); and `prefix`, a scheme prefix
+     * to strip from it (default `Bearer `).
+     *
+     * @return Adapter\HeaderAdapter
+     *
+     */
+    public function newHeaderAdapter(
+        TokenService $token_service,
+        array $server,
+        array $options = array()
+    ): Adapter\HeaderAdapter {
+        return new Adapter\HeaderAdapter($token_service, $server, $options);
+    }
+
+    /**
+     *
+     * Returns a new stateless resume service.
+     *
+     * @param AdapterInterface $adapter An adapter that authenticates from the
+     * request itself, such as an Adapter\HeaderAdapter.
+     *
+     * @return Service\ApiResumeService
+     *
+     */
+    public function newApiResumeService(
+        AdapterInterface $adapter
+    ): Service\ApiResumeService {
+        return new Service\ApiResumeService($adapter);
     }
 
     /**

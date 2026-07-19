@@ -1,15 +1,15 @@
 <?php
-namespace Aura\Auth\Remember;
+namespace Aura\Auth\Token;
 
 use Aura\Auth\Phpfunc;
 
-class TokenTest extends \PHPUnit\Framework\TestCase
+class SplitTokenTest extends \PHPUnit\Framework\TestCase
 {
     protected $token;
 
     protected function setUp() : void
     {
-        $this->token = new Token(new Phpfunc);
+        $this->token = new SplitToken(new Phpfunc);
     }
 
     public function testNewSelectorAndValidatorAreRandomHex()
@@ -19,22 +19,22 @@ class TokenTest extends \PHPUnit\Framework\TestCase
         $this->assertNotSame($this->token->newSelector(), $this->token->newSelector());
     }
 
-    public function testCookieValueRoundTrip()
+    public function testValueRoundTrip()
     {
-        $value = $this->token->makeCookieValue('sel', 'val');
+        $value = $this->token->makeValue('sel', 'val');
         $this->assertSame('sel:val', $value);
 
-        $parsed = $this->token->parseCookieValue($value);
+        $parsed = $this->token->parseValue($value);
         $this->assertSame('sel', $parsed['selector']);
         $this->assertSame('val', $parsed['validator']);
     }
 
     public function testParseRejectsMalformedValues()
     {
-        $this->assertNull($this->token->parseCookieValue(null));
-        $this->assertNull($this->token->parseCookieValue('nocolon'));
-        $this->assertNull($this->token->parseCookieValue(':novalidator'));
-        $this->assertNull($this->token->parseCookieValue('noselector:'));
+        $this->assertNull($this->token->parseValue(null));
+        $this->assertNull($this->token->parseValue('nocolon'));
+        $this->assertNull($this->token->parseValue(':novalidator'));
+        $this->assertNull($this->token->parseValue('noselector:'));
     }
 
     public function testVerify()
