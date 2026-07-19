@@ -150,4 +150,84 @@ class AuthFactoryTest extends \PHPUnit\Framework\TestCase
         );
         $this->assertInstanceOf('Aura\Auth\Adapter\ThrottleAdapter', $adapter);
     }
+
+    public function testNewApiInstanceUsesAnInMemorySegment()
+    {
+        $auth = $this->factory->newApiInstance();
+        $this->assertInstanceOf('Aura\Auth\Auth', $auth);
+
+        // it must round-trip with no session in play
+        $this->assertFalse(isset($_SESSION));
+        $auth->setUserName('boshag');
+        $this->assertSame('boshag', $auth->getUserName());
+    }
+
+    public function testNewTokenService()
+    {
+        $service = $this->factory->newTokenService(
+            new \Aura\Auth\Token\FakeTokenStorage()
+        );
+        $this->assertInstanceOf('Aura\Auth\Token\TokenService', $service);
+    }
+
+    public function testNewTokenServiceWithTtlOption()
+    {
+        $storage = new \Aura\Auth\Token\FakeTokenStorage();
+        $service = $this->factory->newTokenService($storage, array('ttl' => 60));
+
+        $before = time();
+        $service->issue('boshag');
+
+        $row = current($storage->rows);
+        $this->assertGreaterThanOrEqual($before + 60, $row['expires']);
+        $this->assertLessThanOrEqual(time() + 60, $row['expires']);
+    }
+
+    public function testNewPdoTokenStorage()
+    {
+        $storage = $this->factory->newPdoTokenStorage(new PDO('sqlite::memory:'));
+        $this->assertInstanceOf('Aura\Auth\Token\PdoTokenStorage', $storage);
+    }
+
+    public function testNewHeaderAdapter()
+    {
+        $service = $this->factory->newTokenService(
+            new \Aura\Auth\Token\FakeTokenStorage()
+        );
+        $adapter = $this->factory->newHeaderAdapter($service, array());
+        $this->assertInstanceOf('Aura\Auth\Adapter\HeaderAdapter', $adapter);
+    }
+
+    public function testNewApiResumeService()
+    {
+        $service = $this->factory->newTokenService(
+            new \Aura\Auth\Token\FakeTokenStorage()
+        );
+        $adapter = $this->factory->newHeaderAdapter($service, array());
+
+        $this->assertInstanceOf(
+            'Aura\Auth\Service\ApiResumeService',
+            $this->factory->newApiResumeService($adapter)
+        );
+    }
+
+    public function testFactoryWiresAnEndToEndStatelessRequest()
+    {
+        $storage = new \Aura\Auth\Token\FakeTokenStorage();
+        $service = $this->factory->newTokenService($storage);
+        $value = $service->issue('boshag', array('foo' => 'bar'));
+
+        $api = $this->factory->newApiResumeService(
+            $this->factory->newHeaderAdapter(
+                $service,
+                array('HTTP_AUTHORIZATION' => 'Bearer ' . $value)
+            )
+        );
+
+        $auth = $this->factory->newApiInstance();
+        $this->assertTrue($api->resume($auth));
+        $this->assertSame('boshag', $auth->getUserName());
+        $this->assertSame(array('foo' => 'bar'), $auth->getUserData());
+        $this->assertFalse(isset($_SESSION));
+    }
 }
