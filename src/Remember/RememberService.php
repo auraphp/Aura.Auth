@@ -109,7 +109,7 @@ class RememberService
      *
      * @param int $ttl The token lifetime in seconds (default 30 days).
      *
-     * @param callable $user_loader An optional `fn(string $username): ?array`
+     * @param callable|null $user_loader An optional `fn(string $username): ?array`
      * to re-fetch fresh user data on resume; null (the default) replays the
      * stored snapshot instead.
      *

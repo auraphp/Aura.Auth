@@ -148,7 +148,7 @@ $remember_service = $auth_factory->newRememberService($storage, array(
 ```
 
 The loader's return value is used in place of the stored snapshot; the remembered
-user name is preserved as the identity. Returning `null` treats the user as gone:
+username is preserved as the identity. Returning `null` treats the user as gone:
 the token is deleted from storage, the cookie is cleared, and `resume()` returns
 `false` (exactly like an expired or tampered token).
 
