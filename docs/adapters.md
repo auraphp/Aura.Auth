@@ -104,6 +104,42 @@ $ldap_adapter = $auth_factory->newLdapAdapter(
 
 > N.b.: The username will be escaped and then passed to the DN format string via [sprintf()](http://php.net/sprintf). The completed DN will be used for binding to the server after connection.
 
+#### Bind, Search, Rebind
+
+The direct bind above only works when every user's DN follows the same
+`$dnformat` pattern. If your users live across multiple sub-trees (OUs), or you
+want to read user attributes at login time, pass a fourth `$search` argument to
+use the "bind, search, rebind" pattern: the adapter first binds with a service
+account, searches for the user to discover their real DN (and attributes), then
+rebinds as that DN to verify the password.
+
+```php
+<?php
+$ldap_adapter = $auth_factory->newLdapAdapter(
+    'ldaps://ldap.example.com:636',
+    'uid=%s,ou=users,dc=example,dc=org', // ignored when $search is given
+    array(
+        LDAP_OPT_PROTOCOL_VERSION => 3,
+        LDAP_OPT_REFERRALS => 0,
+    ),
+    array(
+        'binddn'     => 'cn=service,dc=example,dc=org', // service account DN
+        'bindpw'     => 'service-account-password',
+        'basedn'     => 'dc=example,dc=org',            // where to search
+        'filter'     => '(uid=%s)',                     // %s = escaped username
+        'attributes' => array('cn', 'mail'),            // optional; default all
+    )
+);
+?>
+```
+
+On success the login returns the username together with the requested
+attributes (single-valued attributes as scalars, multi-valued as arrays), so
+they are available on the authenticated _Auth_ user data. A search that matches
+no entry throws `Aura\Auth\Exception\UsernameNotFound`; a search that matches
+more than one throws `Aura\Auth\Exception\MultipleMatches`; a failed service or
+user bind throws `Aura\Auth\Exception\BindFailed`.
+
 ### Service Integration
 
 You can then pass the _Adapter_ to each _Service_ factory method like so:

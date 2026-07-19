@@ -1,0 +1,49 @@
+# Seed data for the LDAP integration test harness.
+#
+# Loaded on top of the bitnami/openldap base tree (dc=example,dc=org, with an
+# admin account cn=admin,dc=example,dc=org). We add two separate OUs so the
+# tests can exercise users living at different points in the tree -- the
+# multi-level user tree case from issue #45.
+
+# Read-only service account used for the bind-search-rebind flow: the adapter
+# binds as this DN first, searches for the user, then rebinds as the user.
+dn: cn=service,dc=example,dc=org
+objectClass: organizationalRole
+objectClass: simpleSecurityObject
+cn: service
+description: Read-only service account for bind-search-rebind
+userPassword: servicepassword
+
+dn: ou=people,dc=example,dc=org
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=contractors,dc=example,dc=org
+objectClass: organizationalUnit
+ou: contractors
+
+# A regular employee under ou=people
+dn: uid=alice,ou=people,dc=example,dc=org
+objectClass: inetOrgPerson
+objectClass: posixAccount
+cn: Alice Employee
+sn: Employee
+uid: alice
+uidNumber: 1001
+gidNumber: 1001
+homeDirectory: /home/alice
+mail: alice@example.org
+userPassword: alicepassword
+
+# A contractor under a different OU, to prove the tree is not flat
+dn: uid=bob,ou=contractors,dc=example,dc=org
+objectClass: inetOrgPerson
+objectClass: posixAccount
+cn: Bob Contractor
+sn: Contractor
+uid: bob
+uidNumber: 1002
+gidNumber: 1002
+homeDirectory: /home/bob
+mail: bob@example.org
+userPassword: bobpassword

@@ -33,6 +33,30 @@ $di->params['Aura\Auth\Adapter\LdapAdapter'] = array(
 ?>
 ```
 
+To use the "bind, search, rebind" pattern (see [Adapters](adapters.md)), add the
+optional `options` and `search` params. When `search` is given, `dnformat` is
+ignored:
+
+```php
+<?php
+$di->params['Aura\Auth\Adapter\LdapAdapter'] = array(
+    'server' => 'ldaps://ldap.example.com:636',
+    'dnformat' => 'uid=%s,dc=example,dc=org', // ignored when 'search' is set
+    'options' => array(
+        LDAP_OPT_PROTOCOL_VERSION => 3,
+        LDAP_OPT_REFERRALS => 0,
+    ),
+    'search' => array(
+        'binddn' => 'cn=service,dc=example,dc=org',
+        'bindpw' => 'service-account-password',
+        'basedn' => 'dc=example,dc=org',
+        'filter' => '(uid=%s)',
+        'attributes' => array('cn', 'mail'),
+    ),
+);
+?>
+```
+
 ## Aura\Auth\Adapter\PdoAdapter
 
 ```php

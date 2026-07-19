@@ -389,19 +389,26 @@ class AuthFactory
      *
      * @param array $options Use these connection options.
      *
+     * @param array $search Optional "bind, search, rebind" configuration
+     * (keys: `binddn`, `bindpw`, `basedn`, `filter`, and optionally
+     * `attributes`). When given, the adapter binds with the service account
+     * and searches for the user instead of binding directly with `$dnformat`.
+     *
      * @return Adapter\LdapAdapter
      *
      */
     public function newLdapAdapter(
         $server,
         $dnformat,
-        array $options = array()
+        array $options = array(),
+        array $search = array()
     ) {
         return new Adapter\LdapAdapter(
             new Phpfunc,
             $server,
             $dnformat,
-            $options
+            $options,
+            $search
         );
     }
 }

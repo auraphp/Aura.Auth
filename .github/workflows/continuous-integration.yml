@@ -36,3 +36,167 @@ jobs:
 
       - name: "Run tests with phpunit/phpunit"
         run: "vendor/bin/phpunit"
+
+  code-coverage:
+    name: "Code Coverage"
+    runs-on: "ubuntu-latest"
+    permissions:
+      contents: read
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+        with:
+          persist-credentials: false
+          # ocular's tokenless upload resolves the commit's ancestry from git,
+          # so it needs the full history rather than a shallow clone.
+          fetch-depth: 0
+
+      - name: "Install PHP with coverage driver"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "pcov"
+          ini-values: "memory_limit=-1"
+          php-version: "8.4"
+
+      - name: "Install dependencies with composer"
+        uses: "ramsey/composer-install@v3"
+
+      - name: "Generate clover coverage"
+        run: "vendor/bin/phpunit --coverage-clover=coverage.clover"
+
+      # ocular.phar bundles Guzzle 3, whose is_resource() cURL-handle checks
+      # break on PHP 8 (handles are objects there), failing with "Invalid handle
+      # provided". Switch to PHP 7.4 just to run the upload; the clover was
+      # already generated above on PHP 8.4.
+      - name: "Switch to PHP 7.4 for the ocular upload"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "none"
+          php-version: "7.4"
+
+      - name: "Upload coverage to Scrutinizer"
+        run: |
+          # scrutinizer-ci.com is behind Cloudflare, which returns 403 to the
+          # default Wget/curl user-agent; send a browser UA so the download is
+          # allowed. (no -q, so any failure still reports its reason.)
+          wget --user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36" \
+            -O ocular.phar https://scrutinizer-ci.com/ocular.phar
+          php ocular.phar code-coverage:upload --format=php-clover coverage.clover
+
+  ldap-integration:
+    name: "LDAP Integration Tests"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+        with:
+          persist-credentials: false
+
+      - name: "Install PHP with the ldap extension"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "none"
+          ini-values: "memory_limit=-1"
+          php-version: "8.4"
+          extensions: "ldap"
+
+      - name: "Install dependencies with composer"
+        uses: "ramsey/composer-install@v3"
+
+      - name: "Install and configure OpenLDAP (slapd)"
+        run: |
+          set -x
+          # Preseed debconf so slapd is configured non-interactively with a
+          # known suffix (dc=example,dc=org). purge_database recreates the DB
+          # and its base entry from scratch on every run.
+          sudo debconf-set-selections <<'EOF'
+          slapd slapd/no_configuration boolean false
+          slapd slapd/domain string example.org
+          slapd shared/organization string Example Inc.
+          slapd slapd/password1 password adminpassword
+          slapd slapd/password2 password adminpassword
+          slapd slapd/internal/adminpw password adminpassword
+          slapd slapd/internal/generated_adminpw password adminpassword
+          slapd slapd/backend select MDB
+          slapd slapd/purge_database boolean true
+          slapd slapd/move_old_database boolean true
+          EOF
+          sudo apt-get update
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y slapd ldap-utils
+          sudo dpkg-reconfigure -f noninteractive slapd
+          sudo service slapd restart
+
+          # Deterministically set the admin password directly on cn=config via
+          # SASL EXTERNAL over the local socket (root is authorised there),
+          # rather than trusting debconf's password handling. This guarantees
+          # the cn=admin,dc=example,dc=org bind works regardless of how the
+          # package chose to (not) apply the preseeded password.
+          HASH="$(sudo slappasswd -s adminpassword)"
+          DB_DN="$(sudo ldapsearch -LLL -Y EXTERNAL -H ldapi:/// \
+            -b cn=config '(olcSuffix=dc=example,dc=org)' dn 2>/dev/null \
+            | sed -n 's/^dn: //p')"
+          echo "mdb database config entry: '$DB_DN'"
+          if [ -z "$DB_DN" ]; then
+            echo "::error::no mdb database found for suffix dc=example,dc=org"
+            sudo slapcat -n0 || true
+            exit 1
+          fi
+          sudo ldapmodify -Y EXTERNAL -H ldapi:/// <<EOF
+          dn: $DB_DN
+          changetype: modify
+          replace: olcRootDN
+          olcRootDN: cn=admin,dc=example,dc=org
+          -
+          replace: olcRootPW
+          olcRootPW: $HASH
+          EOF
+          sudo service slapd restart
+
+      - name: "Load the seed data"
+        run: |
+          up=0
+          for i in $(seq 1 30); do
+            # Anonymous root-DSE probe: succeeds as soon as slapd answers,
+            # independent of admin credentials, so we can tell "server down"
+            # apart from "wrong credentials".
+            if ldapsearch -x -H ldap://localhost:389 -b "" -s base >/dev/null 2>&1; then
+              up=1
+              echo "slapd is answering."
+              break
+            fi
+            echo "Waiting for slapd ($i)..."
+            sleep 2
+          done
+          if [ "$up" -ne 1 ]; then
+            echo "::error::slapd never came up"; exit 1
+          fi
+          # Prove the admin bind and configured suffix before seeding.
+          ldapsearch -x -H ldap://localhost:389 \
+            -D "cn=admin,dc=example,dc=org" -w adminpassword \
+            -b "dc=example,dc=org" -s base dn
+          ldapadd -x -H ldap://localhost:389 \
+            -D "cn=admin,dc=example,dc=org" -w adminpassword \
+            -f tests/integration/ldap/seed.ldif
+
+      - name: "Diagnostics (LDAP state)"
+        if: always()
+        run: |
+          echo "===== service status ====="
+          sudo service slapd status || true
+          echo "===== listening sockets (389) ====="
+          sudo ss -tlnp | grep -E ':389|slapd' || echo "nothing on :389"
+          echo "===== cn=config (slapcat -n0) ====="
+          sudo slapcat -n0 2>/dev/null | grep -Ei 'dn:|olcSuffix|olcRootDN|olcRootPW|olcDatabase' || true
+          echo "===== data DB (slapcat -n1) ====="
+          sudo slapcat -n1 2>/dev/null || echo "no data DB / empty"
+          echo "===== root DSE (namingContexts) ====="
+          ldapsearch -x -H ldap://localhost:389 -b "" -s base namingContexts subschemaSubentry || true
+          echo "===== anonymous subtree search under suffix ====="
+          ldapsearch -x -H ldap://localhost:389 -b "dc=example,dc=org" dn || true
+
+      - name: "Run the LDAP integration tests"
+        env:
+          LDAP_TEST_URI: "ldap://localhost:389"
+        run: "vendor/bin/phpunit --group ldap"
