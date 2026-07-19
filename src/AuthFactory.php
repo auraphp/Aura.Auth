@@ -20,6 +20,10 @@ use Aura\Auth\Remember\RememberService;
 use Aura\Auth\Remember\RememberStorageInterface;
 use Aura\Auth\OAuth;
 use Aura\Auth\OAuth\ProviderInterface;
+use Aura\Auth\Throttle;
+use Aura\Auth\Throttle\ThrottleStorageInterface;
+use Aura\Auth\Throttle\ThrottleService;
+use Aura\Auth\Throttle\RedisClientInterface;
 use PDO;
 
 /**
@@ -237,6 +241,92 @@ class AuthFactory
     public function newPdoRememberStorage(PDO $pdo, $table = 'aura_auth_remember'): Remember\PdoRememberStorage
     {
         return new Remember\PdoRememberStorage($pdo, $table);
+    }
+
+    /**
+     *
+     * Returns a new login-throttling policy service.
+     *
+     * @param ThrottleStorageInterface $storage The failure-counter storage (for
+     * example, from newPdoThrottleStorage() or newRedisThrottleStorage()).
+     *
+     * @param array $options Policy options: `max_attempts` (failures allowed
+     * before backoff, default 5) and `cap` (maximum backoff in seconds, default
+     * 15 minutes).
+     *
+     * @return ThrottleService
+     *
+     */
+    public function newThrottleService(
+        ThrottleStorageInterface $storage,
+        array $options = array()
+    ): ThrottleService {
+        return new Throttle\ThrottleService($storage, $options);
+    }
+
+    /**
+     *
+     * Wraps an adapter with brute-force login throttling.
+     *
+     * @param AdapterInterface $adapter The adapter to wrap.
+     *
+     * @param ThrottleService $throttle The throttling policy.
+     *
+     * @return Adapter\ThrottleAdapter
+     *
+     */
+    public function newThrottleAdapter(
+        AdapterInterface $adapter,
+        ThrottleService $throttle
+    ): Adapter\ThrottleAdapter {
+        return new Adapter\ThrottleAdapter($adapter, $throttle);
+    }
+
+    /**
+     *
+     * Returns a new PDO-backed throttle storage.
+     *
+     * @param PDO $pdo A PDO connection.
+     *
+     * @param string $table The table holding the failure rows.
+     *
+     * @param int $window How long a failure is remembered, in seconds.
+     *
+     * @return Throttle\PdoThrottleStorage
+     *
+     */
+    public function newPdoThrottleStorage(
+        PDO $pdo,
+        $table = 'aura_auth_throttle',
+        $window = 900
+    ): Throttle\PdoThrottleStorage {
+        return new Throttle\PdoThrottleStorage($pdo, $table, $window);
+    }
+
+    /**
+     *
+     * Returns a new Redis-backed throttle storage.
+     *
+     * @param RedisClientInterface|object $client A RedisClientInterface, or a
+     * raw phpredis `\Redis` / `Predis\Client` which is wrapped in a
+     * NativeRedisClient automatically.
+     *
+     * @param string $prefix A key prefix namespacing throttle data.
+     *
+     * @param int $window How long a failure is remembered, in seconds.
+     *
+     * @return Throttle\RedisThrottleStorage
+     *
+     */
+    public function newRedisThrottleStorage(
+        $client,
+        $prefix = 'aura_auth_throttle:',
+        $window = 900
+    ): Throttle\RedisThrottleStorage {
+        if (! $client instanceof RedisClientInterface) {
+            $client = new Throttle\NativeRedisClient($client);
+        }
+        return new Throttle\RedisThrottleStorage($client, $prefix, $window);
     }
 
     /**

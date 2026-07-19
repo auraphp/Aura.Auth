@@ -175,3 +175,4 @@ discards the token.
 
 > N.b.: Rate-limiting of login attempts is a related but separate concern that
 > applies to normal credential logins as well; it is not part of this feature.
+> See [Login Throttling](throttling.md).
