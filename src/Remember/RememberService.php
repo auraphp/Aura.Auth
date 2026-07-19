@@ -17,6 +17,12 @@ use Aura\Session_Interface\SessionInterface;
  * "Remember me" handler using the split-token (selector : validator) scheme
  * with server-side storage and per-use token rotation.
  *
+ * By default, resume() restores the user data snapshot captured in storage when
+ * the token was issued. An optional user-loader callable may be supplied to
+ * instead re-fetch fresh user data from the application's source of truth on
+ * every resume, so that admin-side changes (roles, email, a disabled account)
+ * take effect without waiting for a full credential login.
+ *
  * @package Aura.Auth
  *
  */
@@ -78,6 +84,17 @@ class RememberService
 
     /**
      *
+     * An optional `fn(string $username): ?array` used on resume to re-fetch
+     * fresh user data from the source of truth. Returning null signals that the
+     * user no longer exists (or is disabled), which revokes the token.
+     *
+     * @var callable|null
+     *
+     */
+    protected $user_loader;
+
+    /**
+     *
      * Constructor.
      *
      * @param RememberStorageInterface $storage Server-side token storage.
@@ -92,6 +109,10 @@ class RememberService
      *
      * @param int $ttl The token lifetime in seconds (default 30 days).
      *
+     * @param callable|null $user_loader An optional `fn(string $username): ?array`
+     * to re-fetch fresh user data on resume; null (the default) replays the
+     * stored snapshot instead.
+     *
      */
     public function __construct(
         RememberStorageInterface $storage,
@@ -99,7 +120,8 @@ class RememberService
         Token $token,
         Cookie $cookie,
         $name = 'remember',
-        $ttl = 2592000
+        $ttl = 2592000,
+        ?callable $user_loader = null
     ) {
         $this->storage = $storage;
         $this->session = $session;
@@ -107,6 +129,7 @@ class RememberService
         $this->cookie = $cookie;
         $this->name = $name;
         $this->ttl = $ttl;
+        $this->user_loader = $user_loader;
     }
 
     /**
@@ -156,6 +179,10 @@ class RememberService
      *
      * Only acts when the user is currently anonymous.
      *
+     * If a user loader was supplied, the restored user data is re-fetched from
+     * the source of truth; a null return from the loader revokes the token and
+     * leaves the user anonymous.
+     *
      * @param Auth $auth The authentication tracker.
      *
      * @param int $ttl Optional token lifetime override for the rotated token.
@@ -200,6 +227,21 @@ class RememberService
             return false;
         }
 
+        // Resolve the user data to restore. By default this is the snapshot
+        // captured when the token was issued; with a user loader it is re-read
+        // from the source of truth so admin-side changes take effect. A null
+        // return means the user is gone or disabled, so revoke the token rather
+        // than re-establish a session for them.
+        $userdata = $row['userdata'];
+        if ($this->user_loader !== null) {
+            $userdata = ($this->user_loader)($row['username']);
+            if ($userdata === null) {
+                $this->storage->deleteBySelector($parsed['selector']);
+                $this->cookie->delete($this->name);
+                return false;
+            }
+        }
+
         $started = $this->session->resume() || $this->session->start();
         if (! $started) {
             return false;
@@ -225,7 +267,7 @@ class RememberService
             time(),
             time(),
             $row['username'],
-            $row['userdata']
+            $userdata
         );
 
         return true;
