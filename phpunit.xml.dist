@@ -4,6 +4,11 @@
             <directory>./tests</directory>
         </testsuite>
     </testsuites>
+    <source>
+        <include>
+            <directory>./src</directory>
+        </include>
+    </source>
     <php>
         <ini name="session.gc_maxlifetime" value="86400"/>
     </php>

@@ -220,6 +220,45 @@ class LdapAdapterTest extends \PHPUnit\Framework\TestCase
         ));
     }
 
+    public function testLogin_searchOperationFailed()
+    {
+        $this->phpfunc->method('ldap_connect')->willReturn(true);
+        $this->phpfunc->method('ldap_bind')->willReturn(true);
+        // an operational failure: ldap_search itself returns false
+        $this->phpfunc->expects($this->once())
+            ->method('ldap_search')
+            ->willReturn(false);
+        $this->phpfunc->expects($this->never())
+            ->method('ldap_get_entries');
+        $this->phpfunc->method('ldap_errno')->willReturn(1);
+        $this->phpfunc->method('ldap_error')->willReturn('Operations error');
+
+        $this->expectException('Aura\Auth\Exception\SearchFailed');
+        $this->newSearchAdapter()->login(array(
+            'username' => 'alice',
+            'password' => 'secretpassword'
+        ));
+    }
+
+    public function testLogin_searchGetEntriesFailed()
+    {
+        $this->phpfunc->method('ldap_connect')->willReturn(true);
+        $this->phpfunc->method('ldap_bind')->willReturn(true);
+        $this->phpfunc->method('ldap_search')->willReturn('result-resource');
+        // the search ran, but fetching the entries failed
+        $this->phpfunc->expects($this->once())
+            ->method('ldap_get_entries')
+            ->willReturn(false);
+        $this->phpfunc->method('ldap_errno')->willReturn(1);
+        $this->phpfunc->method('ldap_error')->willReturn('Operations error');
+
+        $this->expectException('Aura\Auth\Exception\SearchFailed');
+        $this->newSearchAdapter()->login(array(
+            'username' => 'alice',
+            'password' => 'secretpassword'
+        ));
+    }
+
     public function testLogin_searchMultipleMatches()
     {
         $this->phpfunc->method('ldap_connect')->willReturn(true);

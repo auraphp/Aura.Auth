@@ -1,5 +1,7 @@
 # Service Idioms
 
+> N.b.: For clarity, the examples below build the _Auth_ and service objects by hand. In practice you will usually create each object once and share it throughout your application — for example with a dependency injection container such as [Aura.Di](https://github.com/auraphp/Aura.Di). See [DI Configuration](di-configuration.md).
+
 ## Resuming A Session
 
 This is an example of the code needed to resume a pre-existing session. Note that the `echo` statements are intended to explain the different resulting states of the `resume()` call, and may be replaced by whatever logic you feel is appropriate. For example, you may wish to redirect to a login page when a session has idled or expired.
@@ -30,8 +32,6 @@ switch (true) {
 }
 ?>
 ```
-
-> N.b.: Instead of creating the  _Auth_ and _ResumeService_ objects by hand, you may wish to use a dependency injection container such as [Aura.Di](https://github.com/auraphp/Aura.Di) to retain them for shared use throughout your application.
 
 ## Logging In
 
@@ -95,6 +95,14 @@ try {
     $log->info($e->getMessage());
     throw new InvalidLoginException();
 
+} catch (\Aura\Auth\Exception\SearchFailed $e) {
+
+    $log->notice("The LDAP search for the user failed.");
+    $log->info("This is an operational error (e.g. a bad base DN or a server");
+    $log->info("problem), not a wrong username or password.");
+    $log->info($e->getMessage());
+    throw new InvalidLoginException();
+
 } catch (InvalidLoginException $e) {
 
     echo "Invalid login details. Please try again.";
@@ -102,8 +110,6 @@ try {
 }
 ?>
 ```
-
-> N.b.: Instead of creating the  _Auth_ and _LoginService_ objects by hand, you may wish to use a dependency injection container such as [Aura.Di](https://github.com/auraphp/Aura.Di) to retain them for shared use throughout your application.
 
 Alternatively, you may wish to use credentials from the HTTP `Authorization: Basic` headers instead of using `$_POST` or other form-related inputs.  On Apache `mod_php` you might use the auto-populated `$_SERVER['PHP_AUTH_*']` values:
 
@@ -173,8 +179,6 @@ if ($auth->isAnon()) {
 }
 ?>
 ```
-
-> N.b.: Instead of creating the  _Auth_ and _LogoutService_ objects by hand, you may wish to use a dependency injection container such as [Aura.Di](https://github.com/auraphp/Aura.Di) to retain them for shared use throughout your application.
 
 ## Custom Services
 

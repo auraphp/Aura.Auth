@@ -211,6 +211,8 @@ class LdapAdapter extends AbstractAdapter
      * @throws Exception\BindFailed when the service-account bind or the user
      * rebind fails.
      *
+     * @throws Exception\SearchFailed when the search operation itself fails.
+     *
      * @throws Exception\UsernameNotFound when the search returns no entry.
      *
      * @throws Exception\MultipleMatches when the search returns more than one
@@ -246,10 +248,22 @@ class LdapAdapter extends AbstractAdapter
             $attributes
         );
 
-        $entries = $result
-            ? $this->phpfunc->ldap_get_entries($conn, $result)
-            : array('count' => 0);
+        // a false result is an operational failure (bad base DN, server error,
+        // etc.), not a valid "no such user" outcome
+        if ($result === false) {
+            $error = $this->error($conn);
+            $this->phpfunc->ldap_unbind($conn);
+            throw new Exception\SearchFailed($error);
+        }
 
+        $entries = $this->phpfunc->ldap_get_entries($conn, $result);
+        if ($entries === false) {
+            $error = $this->error($conn);
+            $this->phpfunc->ldap_unbind($conn);
+            throw new Exception\SearchFailed($error);
+        }
+
+        // a successful search that matched nothing is a genuine "not found"
         if ($entries['count'] < 1) {
             $this->phpfunc->ldap_unbind($conn);
             throw new Exception\UsernameNotFound($username);

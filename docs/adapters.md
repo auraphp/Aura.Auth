@@ -108,7 +108,7 @@ $ldap_adapter = $auth_factory->newLdapAdapter(
 
 The direct bind above only works when every user's DN follows the same
 `$dnformat` pattern. If your users live across multiple sub-trees (OUs), or you
-want to read user attributes at login time, pass a fifth `$search` argument to
+want to read user attributes at login time, pass a fourth `$search` argument to
 use the "bind, search, rebind" pattern: the adapter first binds with a service
 account, searches for the user to discover their real DN (and attributes), then
 rebinds as that DN to verify the password.
