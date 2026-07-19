@@ -1,6 +1,7 @@
 <?php
 namespace Aura\Auth\Token;
 
+use Aura\Auth\Exception\TokenExpired;
 use Aura\Auth\Phpfunc;
 
 class TokenServiceTest extends \PHPUnit\Framework\TestCase
@@ -107,15 +108,34 @@ class TokenServiceTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testVerifyRejectsExpiredToken()
+    public function testVerifyThrowsOnExpiredToken()
     {
         $value = $this->service->issue('boshag');
         $parsed = (new SplitToken(new Phpfunc))->parseValue($value);
 
         // backdate the stored expiry rather than injecting a clock
+        $expired_at = time() - 1;
+        $this->storage->rows[$parsed['selector']]['expires'] = $expired_at;
+
+        try {
+            $this->service->verify($value);
+            $this->fail('Expected TokenExpired to be thrown.');
+        } catch (TokenExpired $e) {
+            $this->assertSame($expired_at, $e->getExpires());
+        }
+    }
+
+    public function testExpiredTokenWithBadValidatorReturnsNullRatherThanThrowing()
+    {
+        // the validator is matched before the expiry is looked at, so an
+        // attacker holding only a selector cannot learn that it exists
+        $value = $this->service->issue('boshag');
+        $parsed = (new SplitToken(new Phpfunc))->parseValue($value);
         $this->storage->rows[$parsed['selector']]['expires'] = time() - 1;
 
-        $this->assertNull($this->service->verify($value));
+        $this->assertNull(
+            $this->service->verify($parsed['selector'] . ':tampered')
+        );
     }
 
     public function testFailedVerifyDoesNotDeleteTheToken()
@@ -169,6 +189,16 @@ class TokenServiceTest extends \PHPUnit\Framework\TestCase
     public function testRevokeUnknownTokenReturnsFalse()
     {
         $this->assertFalse($this->service->revoke('nosuch:validator'));
+    }
+
+    public function testRevokeWorksOnAnExpiredToken()
+    {
+        $value = $this->service->issue('boshag');
+        $parsed = (new SplitToken(new Phpfunc))->parseValue($value);
+        $this->storage->rows[$parsed['selector']]['expires'] = time() - 1;
+
+        $this->assertTrue($this->service->revoke($value));
+        $this->assertNull($this->storage->findBySelector($parsed['selector']));
     }
 
     public function testRevokeBySelector()

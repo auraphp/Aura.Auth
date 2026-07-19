@@ -8,6 +8,8 @@
  */
 namespace Aura\Auth\Token;
 
+use Aura\Auth\Exception\TokenExpired;
+
 /**
  *
  * Issues and verifies opaque API tokens using the split-token
@@ -122,9 +124,17 @@ class TokenService
      *
      * Verifies a plaintext token and returns its stored row.
      *
-     * Returns null for every kind of failure — malformed value, unknown
-     * selector, expired token, or a validator that does not match — so that a
-     * caller cannot distinguish them.
+     * Returns null for a malformed value, an unknown selector, or a validator
+     * that does not match. Unknown and mismatched in particular are made
+     * indistinguishable on purpose: telling them apart would reveal whether a
+     * given selector exists, and selectors travel in the clear as half of the
+     * token value.
+     *
+     * An expired token is the one failure reported distinctly, by throwing
+     * {@see \Aura\Auth\Exception\TokenExpired}. That is safe because the
+     * validator is matched first, so only a caller already holding the genuine
+     * token can reach it — and it lets an API answer "your token expired,
+     * please issue a new one" instead of a flat refusal.
      *
      * A failed verification deliberately does NOT delete the stored token. The
      * selector travels in the clear as half of the token value, so deleting on
@@ -137,6 +147,8 @@ class TokenService
      * @param string $value The plaintext `selector:validator` token value.
      *
      * @return array|null The stored token row, or null if verification failed.
+     *
+     * @throws TokenExpired when the token is genuine but past its expiry.
      *
      */
     public function verify($value): ?array
@@ -151,12 +163,16 @@ class TokenService
             return null;
         }
 
-        if ($row['expires'] < time()) {
+        // Match the validator BEFORE looking at the expiry. Reaching the
+        // expiry check therefore proves the caller holds the real token, which
+        // is what makes it safe to report expiry distinctly below. Checking
+        // expiry first would let an unknown-vs-existing selector be told apart.
+        if (! $this->token->verify($row['hashed_validator'], $parsed['validator'])) {
             return null;
         }
 
-        if (! $this->token->verify($row['hashed_validator'], $parsed['validator'])) {
-            return null;
+        if ($row['expires'] < time()) {
+            throw TokenExpired::at((int) $row['expires']);
         }
 
         // no-op unless the storage was built with last-use tracking on
@@ -170,7 +186,8 @@ class TokenService
      * Revokes a token, given its plaintext value.
      *
      * The token is verified before being deleted, so that holding a selector
-     * alone is not enough to revoke somebody else's token.
+     * alone is not enough to revoke somebody else's token. An already-expired
+     * token can still be revoked, since its validator matched.
      *
      * @param string $value The plaintext `selector:validator` token value.
      *
@@ -179,7 +196,16 @@ class TokenService
      */
     public function revoke($value): bool
     {
-        if (! $this->verify($value)) {
+        try {
+            $verified = (bool) $this->verify($value);
+        } catch (TokenExpired $e) {
+            // An expired token is still genuine — the validator matched — so
+            // let it be revoked rather than making expiry a reason it cannot
+            // be cleaned up.
+            $verified = true;
+        }
+
+        if (! $verified) {
             return false;
         }
 
