@@ -10,6 +10,9 @@ class FakeTokenStorage implements TokenStorageInterface
 {
     public $rows = array();
 
+    /** Selectors passed to touch(), so tests can assert on redundant writes. */
+    public $touched = array();
+
     public function create(
         $selector,
         $hashed_validator,
@@ -40,6 +43,8 @@ class FakeTokenStorage implements TokenStorageInterface
 
     public function touch($selector, $now): void
     {
+        $this->touched[] = $selector;
+
         if (isset($this->rows[$selector])) {
             $this->rows[$selector]['last_used_at'] = (int) $now;
         }

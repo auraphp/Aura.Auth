@@ -153,6 +153,43 @@ class TokenService
      */
     public function verify($value): ?array
     {
+        // The validator is matched BEFORE the expiry is looked at. Reaching
+        // the expiry check therefore proves the caller holds the real token,
+        // which is what makes it safe to report expiry distinctly. Checking
+        // expiry first would let an unknown-vs-existing selector be told apart.
+        $row = $this->findGenuine($value);
+        if (! $row) {
+            return null;
+        }
+
+        if ($row['expires'] < time()) {
+            throw TokenExpired::at((int) $row['expires']);
+        }
+
+        // no-op unless the storage was built with last-use tracking on
+        $this->storage->touch($row['selector'], time());
+
+        return $row;
+    }
+
+    /**
+     *
+     * Finds the stored row for a token whose validator matches.
+     *
+     * This is the single place the secret is compared, shared by verify() and
+     * revoke() so that the two cannot drift apart on it. It deliberately says
+     * nothing about expiry: callers decide what an expired-but-genuine token
+     * means to them.
+     *
+     * @param string $value The plaintext `selector:validator` token value.
+     *
+     * @return array|null The stored row, or null if the value is malformed,
+     * the selector is unknown, or the validator does not match. These are not
+     * distinguished, so that a caller cannot learn whether a selector exists.
+     *
+     */
+    protected function findGenuine($value): ?array
+    {
         $parsed = $this->token->parseValue($value);
         if (! $parsed) {
             return null;
@@ -163,20 +200,9 @@ class TokenService
             return null;
         }
 
-        // Match the validator BEFORE looking at the expiry. Reaching the
-        // expiry check therefore proves the caller holds the real token, which
-        // is what makes it safe to report expiry distinctly below. Checking
-        // expiry first would let an unknown-vs-existing selector be told apart.
         if (! $this->token->verify($row['hashed_validator'], $parsed['validator'])) {
             return null;
         }
-
-        if ($row['expires'] < time()) {
-            throw TokenExpired::at((int) $row['expires']);
-        }
-
-        // no-op unless the storage was built with last-use tracking on
-        $this->storage->touch($parsed['selector'], time());
 
         return $row;
     }
@@ -196,21 +222,15 @@ class TokenService
      */
     public function revoke($value): bool
     {
-        try {
-            $verified = (bool) $this->verify($value);
-        } catch (TokenExpired $e) {
-            // An expired token is still genuine — the validator matched — so
-            // let it be revoked rather than making expiry a reason it cannot
-            // be cleaned up.
-            $verified = true;
-        }
-
-        if (! $verified) {
+        // Expiry is not consulted: an expired token is still genuine, and
+        // expiry should not be the reason it cannot be cleaned up. Nor is the
+        // row touched — it is about to be deleted.
+        $row = $this->findGenuine($value);
+        if (! $row) {
             return false;
         }
 
-        $parsed = $this->token->parseValue($value);
-        $this->storage->deleteBySelector($parsed['selector']);
+        $this->storage->deleteBySelector($row['selector']);
         return true;
     }
 

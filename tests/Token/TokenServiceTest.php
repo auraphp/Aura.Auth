@@ -191,6 +191,17 @@ class TokenServiceTest extends \PHPUnit\Framework\TestCase
         $this->assertFalse($this->service->revoke('nosuch:validator'));
     }
 
+    public function testRevokeDoesNotTouchTheRowItIsAboutToDelete()
+    {
+        $value = $this->service->issue('boshag');
+        $parsed = (new SplitToken(new Phpfunc))->parseValue($value);
+
+        $this->service->revoke($value);
+
+        // nothing should have been written to a row on its way out
+        $this->assertSame(array(), $this->storage->touched);
+    }
+
     public function testRevokeWorksOnAnExpiredToken()
     {
         $value = $this->service->issue('boshag');
