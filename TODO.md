@@ -1,23 +1,5 @@
 # TODO
 
-## Return Types (repo-wide)
-
-Add native return type declarations across the rest of `src/` for consistency.
-The new `Remember/*` classes and the `Session/*` classes are already typed; the
-remainder are not: `Auth`, `AuthFactory`, all `Service/*` (`LoginService`,
-`LogoutService`, `ResumeService`), the `Adapter/*` hierarchy, `Verifier/*`,
-`Timer`, and `Phpfunc`.
-
-Notes for the pass:
-
-- The `AdapterInterface` / `AbstractAdapter` pair and every adapter subclass must
-  change together to stay signature-compatible.
-- Some methods return unions (e.g. `LoginService::forceLogin()` returns
-  `string|false`); type them accordingly.
-- Run the full suite afterward.
-
-Deferred: to be done as a separate change after the remember-me merge.
-
 ## OAuth 2.0 — Follow-ups
 
 - Ship provider-specific presets (field maps for common providers) so even the
@@ -27,8 +9,9 @@ Deferred: to be done as a separate change after the remember-me merge.
 
 ## Remember Me — Follow-ups
 
-- On resume, optionally reload user details from the DB in case of admin changes
-  to the user. Cf.
+- Remember-Me stores a snapshot of user data in the token and replays it on
+  resume. Add an optional user-loader seam so resume can re-fetch fresh user
+  details from the source (picks up admin-side changes to roles/email/etc.). Cf.
   <https://github.com/craigrodway/LoginPersist/blob/master/LoginPersist.module>
   and other implementations for ideas.
 

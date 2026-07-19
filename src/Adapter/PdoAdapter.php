@@ -108,7 +108,7 @@ class PdoAdapter extends AbstractAdapter
      * @throws Exception\PasswordColumnNotSpecified
      *
      */
-    protected function setCols($cols): void
+    protected function setCols(array $cols): void
     {
         if (! isset($cols[0]) || trim($cols[0] == '')) {
             throw new Exception\UsernameColumnNotSpecified;

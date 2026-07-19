@@ -73,7 +73,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return void
      *
      */
-    protected function checkInput($input): void
+    protected function checkInput(array $input): void
     {
         if (empty($input['username'])) {
             throw new Exception\UsernameMissing;
