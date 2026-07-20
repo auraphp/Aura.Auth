@@ -13,8 +13,19 @@ Build an HttpDigestVerifier based on <http://php.net/manual/en/features.http-aut
 
 ## Security
 
-Track IP numbers through _ResumeService_? This may break with proxies.
+Track IP numbers through _ResumeService_? Deferred: breaks behind proxies, and
+the trusted-proxy/`X-Forwarded-For` configuration it would need is the same
+rabbit hole we avoided by keying login throttling on username alone.
 
 ## Throttling
 
-Track activity/page loads?  I.e., number of times we had to "resume" the session. This would be for throttling the page loads.
+Login-attempt throttling is done — see `src/Throttle/`, `Adapter/ThrottleAdapter`
+and `docs/throttling.md`.
+
+Throttling page loads by counting session "resumes" was considered and rejected:
+it only sees requests that carry a session cookie, so an attacker bypasses it by
+dropping the cookie, while legitimate logged-in users pay a storage read+write on
+every request. Request rate limiting belongs upstream (nginx `limit_req`, a CDN,
+or PSR-15 middleware), before the session is even started. If the underlying need
+is spotting an account resuming abnormally often, that is anomaly detection for
+the application to own, not throttling.
