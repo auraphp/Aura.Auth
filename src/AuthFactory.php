@@ -24,6 +24,7 @@ use Aura\Auth\Throttle;
 use Aura\Auth\Throttle\ThrottleStorageInterface;
 use Aura\Auth\Throttle\ThrottleService;
 use Aura\Auth\Throttle\RedisClientInterface;
+use Aura\Auth\Rehash;
 use Aura\Auth\Token;
 use Aura\Auth\Token\TokenService;
 use Aura\Auth\Token\TokenStorageInterface;
@@ -244,6 +245,47 @@ class AuthFactory
     public function newPdoRememberStorage(PDO $pdo, $table = 'aura_auth_remember'): Remember\PdoRememberStorage
     {
         return new Remember\PdoRememberStorage($pdo, $table);
+    }
+
+    /**
+     *
+     * Returns a new PDO-backed rehash writer, to pass to an adapter's
+     * `setRehashStorage()` so that outdated password hashes are replaced
+     * automatically on successful login.
+     *
+     * @param PDO $pdo A writable PDO connection.
+     *
+     * @param string $table The table holding the accounts.
+     *
+     * @param string $username_col The username column.
+     *
+     * @param string $password_col The password column to overwrite.
+     *
+     * @param string|int $algo The algorithm to hash with -- the one being
+     * migrated *to*, which need not be the one the verifier reads.
+     *
+     * @param array $options Options for the algorithm; pass the same ones the
+     * verifier was given.
+     *
+     * @return Rehash\PdoRehashStorage
+     *
+     */
+    public function newPdoRehashStorage(
+        PDO $pdo,
+        $table = 'accounts',
+        $username_col = 'username',
+        $password_col = 'password',
+        $algo = PASSWORD_BCRYPT,
+        array $options = array()
+    ): Rehash\PdoRehashStorage {
+        return new Rehash\PdoRehashStorage(
+            $pdo,
+            $table,
+            $username_col,
+            $password_col,
+            $algo,
+            $options
+        );
     }
 
     /**

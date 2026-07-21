@@ -69,7 +69,7 @@ class HtpasswdVerifier implements VerifierInterface
     {
         $hex = sha1($plaintext, true);
         $computed_hash = '{SHA}' . base64_encode($hex);
-        return $computed_hash === $hashvalue;
+        return hash_equals($hashvalue, $computed_hash);
     }
 
     /**
@@ -91,7 +91,7 @@ class HtpasswdVerifier implements VerifierInterface
         $p = $this->computeP($binary);
         $computed_hash = '$apr1$' . $salt . '$' . $p
                        . $this->convert64(ord($binary[11]), 3);
-        return $computed_hash === $hashvalue;
+        return hash_equals($hashvalue, $computed_hash);
     }
 
     /**
@@ -228,6 +228,6 @@ class HtpasswdVerifier implements VerifierInterface
         }
 
         $computed_hash = crypt($plaintext, $hashvalue);
-        return $computed_hash === $hashvalue;
+        return hash_equals($hashvalue, $computed_hash);
     }
 }

@@ -115,6 +115,15 @@ class AuthFactoryTest extends \PHPUnit\Framework\TestCase
         $this->assertInstanceOf('Aura\Auth\Throttle\PdoThrottleStorage', $storage);
     }
 
+    public function testNewPdoRehashStorage()
+    {
+        if (false === extension_loaded('pdo_sqlite')) {
+            $this->markTestSkipped("Cannot test without the pdo_sqlite extension.");
+        }
+        $storage = $this->factory->newPdoRehashStorage(new PDO('sqlite::memory:'));
+        $this->assertInstanceOf('Aura\Auth\Rehash\PdoRehashStorage', $storage);
+    }
+
     public function testNewRedisThrottleStorage_wrapsRawClient()
     {
         $storage = $this->factory->newRedisThrottleStorage(

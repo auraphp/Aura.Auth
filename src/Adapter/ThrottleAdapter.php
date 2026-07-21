@@ -110,4 +110,25 @@ class ThrottleAdapter implements AdapterInterface
     {
         $this->adapter->resume($auth);
     }
+
+    /**
+     *
+     * Passes through the wrapped adapter's rehash report, so that wrapping an
+     * adapter for throttling does not quietly stop password migration.
+     *
+     * needsRehash() is not part of AdapterInterface -- adding it there would
+     * break existing implementations -- so the wrapped adapter may not have
+     * it; false in that case, meaning "nothing to report".
+     *
+     * @return bool
+     *
+     */
+    public function needsRehash(): bool
+    {
+        if (! method_exists($this->adapter, 'needsRehash')) {
+            return false;
+        }
+
+        return $this->adapter->needsRehash();
+    }
 }

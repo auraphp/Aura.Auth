@@ -8,6 +8,8 @@
         "remember-me.md",
         "api-tokens.md",
         "throttling.md",
+        "security.md",
+        "schemas.md",
         "sessions.md",
         "di-configuration.md",
         "upgrade.md"
