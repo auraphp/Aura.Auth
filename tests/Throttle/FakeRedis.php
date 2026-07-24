@@ -12,8 +12,32 @@ class FakeRedis
 
     public $expires = array();
 
+    /**
+     * Command names that should answer false, standing in for the replies
+     * phpredis returns by value rather than by exception (WRONGTYPE and the
+     * like).
+     */
+    public $fail = array();
+
+    /** Mirrors phpredis::getLastError(). */
+    public $last_error;
+
+    public function getLastError()
+    {
+        return $this->last_error;
+    }
+
+    protected function fails($command)
+    {
+        return in_array($command, $this->fail, true);
+    }
+
     public function hincrby($key, $field, $increment)
     {
+        if ($this->fails('hincrby')) {
+            return false;
+        }
+
         $current = isset($this->hashes[$key][$field])
             ? (int) $this->hashes[$key][$field]
             : 0;
@@ -24,6 +48,10 @@ class FakeRedis
 
     public function hset($key, $field, $value)
     {
+        if ($this->fails('hset')) {
+            return false;
+        }
+
         $existed = isset($this->hashes[$key][$field]);
         $this->hashes[$key][$field] = (string) $value;
         return $existed ? 0 : 1;
@@ -31,12 +59,21 @@ class FakeRedis
 
     public function expire($key, $ttl)
     {
+        // Redis answers false for a key that does not exist.
+        if ($this->fails('expire')) {
+            return false;
+        }
+
         $this->expires[$key] = (int) $ttl;
         return true;
     }
 
     public function hgetall($key)
     {
+        if ($this->fails('hgetall')) {
+            return false;
+        }
+
         return isset($this->hashes[$key]) ? $this->hashes[$key] : array();
     }
 

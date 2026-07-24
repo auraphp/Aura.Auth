@@ -72,9 +72,16 @@ interface RedisClientInterface
      * Returns all fields and values of a hash as an associative array of
      * strings, or an empty array when the key does not exist (Redis HGETALL).
      *
+     * An implementation that cannot read the key must throw rather than answer
+     * an empty array. The caller cannot tell the two apart, and reads the
+     * empty array as "this key has no recorded failures" -- so a backend that
+     * masks its own errors silently switches throttling off for that key.
+     *
      * @param string $key The key holding the hash.
      *
      * @return array The hash contents.
+     *
+     * @throws \Aura\Auth\Exception when the hash cannot be read.
      *
      */
     public function hashGetAll(string $key): array;
