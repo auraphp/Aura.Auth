@@ -24,7 +24,7 @@ class SpyVerifier implements VerifierInterface
 
     public function verify($plaintext, $hashvalue, array $extra = array()): bool
     {
-        $this->calls[] = array($plaintext, $hashvalue);
+        $this->calls[] = array($plaintext, $hashvalue, $extra);
 
         if ($this->inner) {
             return $this->inner->verify($plaintext, $hashvalue, $extra);
