@@ -1,6 +1,8 @@
 <?php
 namespace Aura\Auth\Adapter;
 
+use Aura\Auth\Verifier\DummyHashInterface;
+use Aura\Auth\Verifier\VerifierInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class AbstractAdapterTest extends \PHPUnit\Framework\TestCase
@@ -85,5 +87,93 @@ class AbstractAdapterTest extends \PHPUnit\Framework\TestCase
             'getDummyHash() does not match this PHP version default bcrypt cost;'
                 . ' add a constant for cost ' . $default_cost . ' and select it.'
         );
+    }
+
+    /**
+     * A verifier that can supply its own dummy knows better than the adapter
+     * does: the adapter's constants are bcrypt, which is the wrong cost in
+     * front of an htpasswd file or a legacy digest column.
+     */
+    public function testVerifyDummyPrefersTheVerifiersOwnDummyHash()
+    {
+        $verifier = new class implements VerifierInterface, DummyHashInterface {
+            public $verified_against;
+
+            public function verify($plaintext, $hashvalue, array $extra = array()): bool
+            {
+                $this->verified_against = $hashvalue;
+                return false;
+            }
+
+            public function getDummyHash(): string
+            {
+                return '{SHA}the-verifiers-own-dummy';
+            }
+        };
+
+        $this->newAdapter()->exposeVerifyDummy($verifier, 'some password');
+
+        $this->assertSame('{SHA}the-verifiers-own-dummy', $verifier->verified_against);
+    }
+
+    /**
+     * DummyHashInterface is optional, so a verifier predating it -- or any
+     * third-party one -- still gets the bcrypt constant it got before.
+     */
+    public function testVerifyDummyFallsBackForAVerifierWithoutADummyHash()
+    {
+        $verifier = new class implements VerifierInterface {
+            public $verified_against;
+
+            public function verify($plaintext, $hashvalue, array $extra = array()): bool
+            {
+                $this->verified_against = $hashvalue;
+                return false;
+            }
+        };
+
+        $adapter = $this->newAdapter();
+        $adapter->exposeVerifyDummy($verifier, 'some password');
+
+        $this->assertSame($adapter->exposeDummyHash(), $verifier->verified_against);
+    }
+
+    /**
+     * verifyDummy() runs only on a path that has already failed, and its
+     * result is discarded; a verifier that returned true for the dummy must
+     * still not authenticate anyone.
+     */
+    public function testVerifyDummyDiscardsItsResult()
+    {
+        $verifier = new class implements VerifierInterface {
+            public function verify($plaintext, $hashvalue, array $extra = array()): bool
+            {
+                return true;
+            }
+        };
+
+        $this->assertNull(
+            $this->newAdapter()->exposeVerifyDummy($verifier, 'some password')
+        );
+    }
+
+    protected function newAdapter()
+    {
+        return new class extends AbstractAdapter {
+            public function login(array $input): array
+            {
+                return array($input['username'], array());
+            }
+
+            public function exposeDummyHash(): string
+            {
+                return $this->getDummyHash();
+            }
+
+            public function exposeVerifyDummy(VerifierInterface $verifier, $password)
+            {
+                return $this->verifyDummy($verifier, $password);
+            }
+        };
     }
 }

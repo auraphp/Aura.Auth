@@ -13,6 +13,7 @@ use Aura\Auth\Status;
 use Aura\Auth\Auth;
 use Aura\Auth\Verifier\VerifierInterface;
 use Aura\Auth\Verifier\RehashInterface;
+use Aura\Auth\Verifier\DummyHashInterface;
 use Aura\Auth\Rehash\RehashStorageInterface;
 
 /**
@@ -260,9 +261,19 @@ abstract class AbstractAdapter implements AdapterInterface
 
     /**
      *
-     * Runs a throwaway verification against DUMMY_HASH so that a username
+     * Runs a throwaway verification against a dummy hash so that a username
      * with no matching account costs about as much as one with a wrong
      * password; without it, response time reveals which usernames exist.
+     *
+     * The dummy comes from the verifier when it implements
+     * DummyHashInterface, and from getDummyHash() otherwise. The verifier is
+     * preferred because it is the only party that knows which format it
+     * actually reads: a bcrypt dummy equalises the two paths only for a
+     * verifier that reads bcrypt. Against a legacy `hash()` digest or an
+     * `$apr1$`/`{SHA}` htpasswd entry -- both verified in microseconds -- it
+     * inverts the leak rather than closing it, making the unknown username the
+     * slow answer by a wider margin than the original bug. See
+     * docs/security.md.
      *
      * The result is deliberately discarded. This can never authenticate
      * anyone: callers use it only on a path that already failed, and must
@@ -277,14 +288,24 @@ abstract class AbstractAdapter implements AdapterInterface
      */
     protected function verifyDummy(VerifierInterface $verifier, $password): void
     {
-        $verifier->verify($password, $this->getDummyHash());
+        $hashvalue = $verifier instanceof DummyHashInterface
+            ? $verifier->getDummyHash()
+            : $this->getDummyHash();
+
+        $verifier->verify($password, $hashvalue);
     }
 
     /**
      *
-     * Returns the dummy hash to verify against, matching the bcrypt cost that
-     * this PHP version produces by default: PHP 8.4 raised the default for
-     * PASSWORD_BCRYPT from 10 to 12.
+     * Returns the fallback dummy hash to verify against, matching the bcrypt
+     * cost that this PHP version produces by default: PHP 8.4 raised the
+     * default for PASSWORD_BCRYPT from 10 to 12.
+     *
+     * This is consulted only when the verifier does not implement
+     * DummyHashInterface. Both stock verifiers do, so overriding this affects
+     * a custom verifier only; to pin the cost with PasswordVerifier, pass the
+     * cost to the verifier itself -- `new PasswordVerifier(PASSWORD_BCRYPT,
+     * array('cost' => 13))` -- and its dummy follows automatically.
      *
      * The version is only a proxy for what actually matters, which is the
      * cost of the hashes already in storage. Accounts created under an older

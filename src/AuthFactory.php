@@ -578,12 +578,17 @@ class AuthFactory
      *
      * @param string $file Path to the htpasswd file.
      *
+     * @param string $dummy_format Which format the file mostly holds -- `apr1`
+     * (the default), `bcrypt`, `sha`, or `des`. It affects only the dummy hash
+     * that keeps an unknown username from answering faster than a wrong
+     * password; verification still dispatches per entry. See docs/security.md.
+     *
      * @return Adapter\HtpasswdAdapter
      *
      */
-    public function newHtpasswdAdapter($file): Adapter\HtpasswdAdapter
+    public function newHtpasswdAdapter($file, $dummy_format = 'apr1'): Adapter\HtpasswdAdapter
     {
-        $verifier = new Verifier\HtpasswdVerifier;
+        $verifier = new Verifier\HtpasswdVerifier($dummy_format);
         return new Adapter\HtpasswdAdapter(
             $file,
             $verifier

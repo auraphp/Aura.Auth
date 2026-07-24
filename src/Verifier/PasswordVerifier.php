@@ -15,8 +15,18 @@ namespace Aura\Auth\Verifier;
  * @package Aura.Auth
  *
  */
-class PasswordVerifier implements VerifierInterface, RehashInterface
+class PasswordVerifier implements VerifierInterface, RehashInterface, DummyHashInterface
 {
+    /**
+     *
+     * A memoised throwaway hash in this verifier's own format, for the
+     * "no such username" path; see getDummyHash().
+     *
+     * @var string|null
+     *
+     */
+    protected $dummy_hash;
+
     /**
      *
      * The hashing algorithm to use.
@@ -102,6 +112,47 @@ class PasswordVerifier implements VerifierInterface, RehashInterface
         }
 
         return password_needs_rehash($hashvalue, $this->algo, $this->options);
+    }
+
+    /**
+     *
+     * Returns a throwaway hash in this verifier's own format, so that an
+     * adapter's "no such username" path costs what a real failed verification
+     * costs.
+     *
+     * It is built from the configured algorithm and options, which is what
+     * makes it match: a verifier set to argon2id produces an argon2id dummy, a
+     * bcrypt one at cost 13 produces a cost-13 dummy, and one set to a legacy
+     * `hash()` algorithm produces a plain digest that verifies as fast as the
+     * real ones do. The adapter's own bcrypt constants are only a fallback for
+     * verifiers that cannot answer this.
+     *
+     * The plaintext is random and never recorded, so nothing verifies against
+     * the result. It is memoised because generating a fresh one per call would
+     * double the cost of the failure path and reopen the difference from the
+     * other side.
+     *
+     * @return string
+     *
+     */
+    public function getDummyHash(): string
+    {
+        if ($this->dummy_hash !== null) {
+            return $this->dummy_hash;
+        }
+
+        $unknown = bin2hex(random_bytes(32));
+
+        if ($this->isLegacyAlgo()) {
+            // a plain digest, so verify() takes the same hash_equals() path at
+            // the same cost as a stored legacy hash would
+            $this->dummy_hash = hash($this->algo, $unknown);
+            return $this->dummy_hash;
+        }
+
+        $this->dummy_hash = password_hash($unknown, $this->algo, $this->options);
+
+        return $this->dummy_hash;
     }
 
     /**

@@ -30,19 +30,57 @@ against a dummy hash when no account matched, so both outcomes cost about the
 same before the same exception is thrown. This is not something an application
 can fix from the outside, because the difference is created inside `login()`.
 
-Two things are worth knowing about how it works.
+Three things are worth knowing about how it works.
 
 **It does not rely on the dummy hash being secret.** `AbstractAdapter` exposes
-the hashes as public constants and this documentation describes the mechanism
-exactly. An attacker who knows all of it still cannot make the two paths take
-different amounts of time — the signal is gone, not hidden.
+fallback hashes as public constants and this documentation describes the
+mechanism exactly. An attacker who knows all of it still cannot make the two
+paths take different amounts of time — the signal is gone, not hidden.
 
-**It matches PHP's default bcrypt cost**, which changed from 10 to 12 in PHP
-8.4; `getDummyHash()` selects a hash accordingly. That default is only a proxy
-for what actually matters, which is the cost of the hashes already in your
-storage. Accounts keep the cost they were created with until rehashed, so a site
-whose hashes predate a cost change — or one that sets cost explicitly — can
-override `getDummyHash()` to return one generated at the cost it really uses:
+**The dummy comes from the verifier, so it matches the format you store.** This
+is the part that is easy to get wrong. A bcrypt dummy equalises the two paths
+only when the stored hashes are also bcrypt. Put one in front of an htpasswd
+file holding `$apr1$` or `{SHA}` entries, or a column holding legacy `hash()`
+digests, and it does not close the gap — it *inverts* it, and widens it. Those
+formats verify in microseconds, so the unknown username becomes the slow answer
+by a far larger margin than the original bug:
+
+| stored format | wrong password | unknown username, bcrypt dummy |
+|---|---|---|
+| bcrypt, cost 12 | 259 ms | 265 ms |
+| `hash('sha256', …)` | 0.001 ms | 261 ms |
+| htpasswd `$apr1$` | 0.0002 ms | 261 ms |
+
+Only the verifier knows which format it reads, so the verifier supplies the
+dummy. Both stock verifiers implement `Verifier\DummyHashInterface`:
+`PasswordVerifier` builds one from its configured algorithm and options, and
+`HtpasswdVerifier` from the format named in its constructor. With the dummy
+format-matched, every row above comes back to a ratio of about 1.
+
+So the knob for pinning the cost is the **verifier**, not the adapter:
+
+```php
+<?php
+// the dummy follows automatically -- cost 13 in, cost 13 dummy out
+$verifier = new \Aura\Auth\Verifier\PasswordVerifier(
+    PASSWORD_BCRYPT,
+    array('cost' => 13)
+);
+
+// htpasswd -B writes bcrypt; the default here is apr1, what plain htpasswd writes
+$verifier = new \Aura\Auth\Verifier\HtpasswdVerifier('bcrypt');
+?>
+```
+
+`HtpasswdVerifier`'s format argument affects nothing but the dummy — `verify()`
+still dispatches per entry, so a file mixing formats still authenticates
+everyone. Set it to whatever the bulk of the file holds, since it is the cost of
+the *typical* entry that the unknown-username path has to match.
+
+`AbstractAdapter::getDummyHash()` remains as a fallback for verifiers that do
+not implement `DummyHashInterface`, and still selects by PHP's default bcrypt
+cost — 10 before PHP 8.4, 12 from 8.4 on. A custom verifier can either implement
+the interface or leave the adapter to override:
 
 ```php
 <?php
@@ -58,10 +96,12 @@ class MyPdoAdapter extends \Aura\Auth\Adapter\PdoAdapter
 ?>
 ```
 
-A replacement must be a *valid* bcrypt hash — `password_verify()` rejects a
-malformed one immediately without hashing, which silently restores the timing
-difference — and its plaintext must be unknown, so that it can never work as a
-password if the value is ever copied into a password column.
+**A dummy must be valid, and its plaintext unknown.** A malformed hash is
+rejected without any hashing work, which silently restores the timing
+difference; and a dummy whose plaintext someone knows becomes a working password
+the moment the value is copied into a password column. Generating it from
+`random_bytes()` and never recording the input satisfies both, which is what the
+stock verifiers do.
 
 If the costs do not match exactly, a proportional difference remains. Login
 throttling is what covers that residue: reading a small timing difference takes
