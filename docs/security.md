@@ -29,6 +29,8 @@ a two-hundred-fold difference, readable straight through internet jitter.
 against a dummy hash when no account matched, so both outcomes cost about the
 same before the same exception is thrown. This is not something an application
 can fix from the outside, because the difference is created inside `login()`.
+The network adapters are a separate case, covered in [Response Time on LDAP and
+IMAP](#response-time-on-ldap-and-imap-not-closed) below.
 
 Three things are worth knowing about how it works.
 
@@ -107,6 +109,49 @@ If the costs do not match exactly, a proportional difference remains. Login
 throttling is what covers that residue: reading a small timing difference takes
 many samples per username, and the backoff in
 [Login Throttling](throttling.md) makes collecting them impractical.
+
+### Response Time on LDAP and IMAP (not closed)
+
+Everything above belongs to the two adapters that verify a hash themselves,
+`PdoAdapter` and `HtpasswdAdapter`. `LdapAdapter` verifies nothing — the
+directory does — and one of its two modes still answers an unknown username
+faster than a wrong password.
+
+| mode | unknown username | wrong password |
+|---|---|---|
+| direct bind (no `search`) | one bind | one bind |
+| bind-search-rebind (`search` set) | search only | search, then a second bind |
+
+**Direct bind is uniform.** The username goes into the DN template and the
+adapter binds once; an unknown user and a wrong password both fail that same
+single bind, so the library does identical work either way.
+
+**Bind-search-rebind is not.** A search matching nothing throws
+`UsernameNotFound` straight away, while a search that matches costs another
+round trip — the rebind as the discovered user — before `BindFailed`. The gap is
+roughly one LDAP round trip.
+
+**It is deliberately not patched the way the hash adapters are,** because the
+obvious cure is plausibly worse than the disease. A throwaway bind against a
+deliberately nonexistent DN would send the submitted password to the directory
+and land a failed-bind record in its audit log on every unknown username.
+Directories commonly drive intruder detection and account lockout from exactly
+that signal, so manufacturing failed binds at attacker-controlled volume is a
+good way to cause an outage. It might not even work: a server that rejects an
+unknown DN before comparing credentials short-circuits, leaving you with the
+audit-log cost and the leak both.
+
+What to do about it, in order of preference. Use direct bind where your
+directory structure allows a DN template, since that mode has no gap. Otherwise
+rely on [Login Throttling](throttling.md): one LAN round trip is a far smaller
+and noisier signal than a bcrypt verification — milliseconds against hundreds of
+milliseconds, read through network jitter — so it takes many samples per
+username, and backoff is what makes collecting them impractical.
+
+`ImapAdapter` draws no distinction of its own: it makes a single `imap_open()`
+call and reports every failure as `ConnectionFailed`. Whether your IMAP server
+rejects an unknown mailbox faster than a bad password is the server's behaviour,
+and outside the library's reach.
 
 ### Error Messages (your responsibility)
 
