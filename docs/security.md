@@ -131,9 +131,11 @@ faster than a wrong password.
 | direct bind (no `search`) | one bind | one bind |
 | bind-search-rebind (`search` set) | search only | search, then a second bind |
 
-**Direct bind is uniform.** The username goes into the DN template and the
-adapter binds once; an unknown user and a wrong password both fail that same
-single bind, so the library does identical work either way.
+**Direct bind is uniform.** The username goes into the distinguished name (DN)
+template — an entry's full path in the directory tree, such as
+`uid=%s,ou=people,dc=example,dc=com` — and the adapter binds once; an unknown
+user and a wrong password both fail that same single bind, so the library does
+identical work either way.
 
 **Bind-search-rebind is not.** A search matching nothing throws
 `UsernameNotFound` straight away, while a search that matches costs another
