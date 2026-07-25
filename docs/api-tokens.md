@@ -64,7 +64,7 @@ CREATE INDEX aura_auth_token_username ON aura_auth_token (username);
 Then build the storage and service:
 
 ```php
-$auth_factory = new \Aura\Auth\AuthFactory($_COOKIE);
+$auth_factory = new \Aura\Auth\AuthFactory(array());
 
 $storage = $auth_factory->newPdoTokenStorage($pdo);
 $token_service = $auth_factory->newTokenService($storage);
@@ -72,6 +72,13 @@ $token_service = $auth_factory->newTokenService($storage);
 
 `newTokenService()` takes an options array with a `ttl` key — the default token
 lifetime in seconds, 30 days if unset.
+
+The empty array is not a placeholder. `AuthFactory` requires the cookies as its
+first argument, but only two things ever read them: resuming a session, and the
+remember-me cookie. Nothing on the token path touches either, so an API-only
+application has nothing to hand it. Pass `$_COOKIE` when the same factory also
+serves ordinary session logins — which is likely, since tokens are issued from
+one, as [Issuing A Token](#issuing-a-token) shows.
 
 ## Issuing A Token
 
