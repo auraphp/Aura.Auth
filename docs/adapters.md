@@ -175,9 +175,9 @@ To create an adapter for PDO connections to SQL tables, call the _AuthFactory_ `
 
 - a indication of how passwords are hashed in the database:
 
-    - if a `PASSWORD_*` constant from PHP 5.5 and up, it is treated as `password_hash()` algorithm for a _PasswordVerifier_ instance (this is the preferred method)
+    - if a `PASSWORD_*` constant, it is treated as a `password_hash()` algorithm for a _PasswordVerifier_ instance (this is the preferred method)
 
-    - if a string, it is treated as a `hash()` algorithm for a _HashVerifier_ instance
+    - if a string, it is treated as a `hash()` algorithm for a _PasswordVerifier_ instance; see the warning under the legacy example below
 
     - otherwise, it is expected to be an implementation of _VerifierInterface_
 
@@ -198,6 +198,178 @@ $from = 'accounts';
 $pdo_adapter = $auth_factory->newPdoAdapter($pdo, $hash, $cols, $from);
 ?>
 ```
+
+> **Do not use a string algorithm for new applications.** Passing `'md5'`, or
+> any other `hash()` algorithm name, compares a plain unsalted digest of the
+> password. There is no salt and no work factor, so the stored values fall to
+> rainbow tables and to hardware that computes billions of these digests per
+> second. This path exists so that a site with an existing legacy password
+> column can keep authenticating users while it migrates them, and for no other
+> reason.
+>
+> To migrate, verify with the legacy algorithm and rehash on each successful
+> login, as described under [Rehashing Stored Passwords](#rehashing-stored-passwords)
+> below. Once the column holds only `password_hash()` output, switch the
+> verifier to `new PasswordVerifier(PASSWORD_BCRYPT)`.
+
+### Rehashing Stored Passwords
+
+A stored hash can fall behind the policy you would apply today: it may use an
+algorithm you have moved off, a bcrypt cost you have since raised, or a plain
+`hash()` digest from before `password_hash()`. Existing hashes cannot be
+upgraded in bulk, because a hash cannot be converted without the password. The
+one moment the plaintext is available is a successful login.
+
+After a successful `login()`, ask the adapter whether the hash it verified
+against should be replaced:
+
+```php
+<?php
+use Aura\Auth\Exception as AuthException;
+
+$input = array(
+    'username' => $_POST['username'],
+    'password' => $_POST['password'],
+);
+
+try {
+    $login_service->login($auth, $input);
+} catch (AuthException $e) {
+    echo "Invalid username or password.";
+    return;
+}
+
+if ($pdo_adapter->needsRehash()) {
+    $sth = $pdo->prepare(
+        'UPDATE accounts SET password = :password WHERE username = :username'
+    );
+    $sth->execute(array(
+        'password' => password_hash($input['password'], PASSWORD_BCRYPT),
+        'username' => $auth->getUserName(),
+    ));
+}
+?>
+```
+
+Each user is upgraded the next time they log in, and the column drains of old
+hashes as the active accounts return.
+
+`needsRehash()` describes the login that just happened on that adapter
+instance, so read it immediately after `login()` returns. It is `false` after
+a failed login, and `false` when the verifier cannot report -- only verifiers
+implementing `Aura\Auth\Verifier\RehashInterface` can, which `PasswordVerifier`
+does.
+
+For a cost increase to be detected, the verifier has to know the cost you now
+use. Pass the same options you pass to `password_hash()`:
+
+```php
+<?php
+$verifier = new PasswordVerifier(PASSWORD_BCRYPT, array('cost' => 12));
+?>
+```
+
+Without the options, `needsRehash()` still reports a changed algorithm and
+always reports legacy `hash()` digests, but a cost-10 hash under a cost-12
+policy looks current. Note that `newPdoAdapter()` builds a
+`PasswordVerifier` with no options when handed a bare algorithm, so pass a
+constructed verifier when you want cost tracking.
+
+`ThrottleAdapter` passes `needsRehash()` through to the adapter it wraps, so
+throttling does not interrupt migration. A custom decorator of your own needs
+to forward it too, or migration will silently stop.
+
+#### Rehashing Automatically
+
+Checking `needsRehash()` by hand has one weakness: if the block is forgotten,
+or lives on only one of several login paths, nothing breaks and nothing warns.
+The migration simply never happens.
+
+To have the adapter do it, give it a writer — an implementation of
+`Aura\Auth\Rehash\RehashStorageInterface`. `PdoRehashStorage` covers a single
+accounts table:
+
+```php
+<?php
+$rehash_storage = $auth_factory->newPdoRehashStorage(
+    $pdo,               // must be writable; a read replica fails every rehash
+    'accounts',         // table
+    'username',         // username column
+    'password',         // password column to overwrite
+    PASSWORD_BCRYPT,    // algorithm to migrate *to*
+    array('cost' => 12) // options for *that* algorithm
+);
+
+$pdo_adapter->setRehashStorage($rehash_storage);
+?>
+```
+
+The options belong to the algorithm being written, so they are chosen for it and
+not copied from the verifier — a legacy verifier has none to copy, and a `cost`
+handed to argon2id is ignored. The one case where the two do have to line up is
+when both are the same algorithm: the verifier judges a hash outdated with
+`password_needs_rehash()` against its *own* options, so a writer set to a weaker
+cost leaves the replacement outdated too, and the row is rewritten on every
+login from then on.
+
+With that wired, a successful login whose stored hash is outdated replaces it
+before returning, and `needsRehash()` is then false because there is nothing
+left to do. Nothing else in the application changes.
+
+Note that the algorithm belongs to the *writer*, not the verifier. That is what
+lets a legacy column migrate: the verifier reads `'md5'`, the writer stores
+bcrypt, and each account moves across the first time its owner logs in.
+
+Accounts migrate one at a time, as their owners return, so the column holds
+both kinds of hash for as long as that takes — possibly forever, for accounts
+that never log in again. A `PasswordVerifier` configured with a legacy
+algorithm therefore reads **both**: it uses `password_verify()` when the stored
+value is `password_hash()` output and the legacy algorithm only when it is not.
+Migrated users keep working while the rest are still waiting their turn, and a
+migrated hash is not rewritten on every subsequent login.
+
+Once the column holds no legacy digests — check with something like
+`SELECT COUNT(*) FROM accounts WHERE password NOT LIKE '$2y$%'` — switch the
+verifier to `new PasswordVerifier(PASSWORD_BCRYPT, $options)` and the remaining
+stragglers will simply fail to authenticate rather than being migrated. Leaving
+the legacy verifier in place indefinitely is also safe, but it keeps the ability
+to accept an old digest alive for no reason.
+
+Anything less direct than one table — a password in a joined table, a composite
+key, an audit row to write alongside — wants your own implementation. The
+interface is a single method:
+
+```php
+<?php
+use Aura\Auth\Rehash\RehashStorageInterface;
+
+class MyRehashStorage implements RehashStorageInterface
+{
+    public function rehash($username, $plaintext): void
+    {
+        // called only after $plaintext verified successfully for $username
+    }
+}
+?>
+```
+
+**A failed rehash never fails the login.** Rehashing is housekeeping, and a
+locked table or a revoked grant should not stop a user with correct credentials
+from getting in. The adapter catches whatever the writer throws and exposes it:
+
+```php
+<?php
+$login_service->login($auth, $input);
+
+if ($error = $pdo_adapter->getRehashError()) {
+    $logger->error('password rehash failed: ' . $error->getMessage());
+}
+?>
+```
+
+Log it. A writer that rejects every rehash means the migration is going
+nowhere, and this is the only sign you will get. When a rehash fails,
+`needsRehash()` stays true, so a manual block still sees the outstanding work.
 
 Here is a modern, more complex example that uses bcrypt instead of md5, retrieves extra user information columns from joined tables, and filters for active accounts:
 

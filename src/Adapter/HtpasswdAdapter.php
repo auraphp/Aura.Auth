@@ -88,11 +88,23 @@ class HtpasswdAdapter extends AbstractAdapter
      */
     public function login(array $input): array
     {
+        $this->needs_rehash = false;
+        $this->rehash_error = null;
         $this->checkInput($input);
         $username = $input['username'];
         $password = $input['password'];
-        $hashvalue = $this->fetchHashedPassword($username);
+
+        try {
+            $hashvalue = $this->fetchHashedPassword($username);
+        } catch (Exception\UsernameNotFound $e) {
+            // keep the cost of an unknown username close to that of a known
+            // one, then fail exactly as before
+            $this->verifyDummy($this->verifier, $password);
+            throw $e;
+        }
+
         $this->verify($password, $hashvalue);
+        $this->applyRehash($username, $password);
         return array($username, array());
     }
 
@@ -158,5 +170,7 @@ class HtpasswdAdapter extends AbstractAdapter
         if (! $this->verifier->verify($password, $hashvalue)) {
             throw new Exception\PasswordIncorrect;
         }
+
+        $this->setNeedsRehash($this->verifier, $hashvalue);
     }
 }

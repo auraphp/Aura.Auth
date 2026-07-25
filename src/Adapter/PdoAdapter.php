@@ -143,10 +143,22 @@ class PdoAdapter extends AbstractAdapter
      */
     public function login(array $input): array
     {
+        $this->needs_rehash = false;
+        $this->rehash_error = null;
         $this->checkInput($input);
-        $data = $this->fetchRow($input);
+
+        try {
+            $data = $this->fetchRow($input);
+        } catch (Exception\UsernameNotFound $e) {
+            // keep the cost of an unknown username close to that of a known
+            // one, then fail exactly as before
+            $this->verifyDummy($this->verifier, $input['password']);
+            throw $e;
+        }
+
         $this->verify($input, $data);
         $name = $data['username'];
+        $this->applyRehash($name, $input['password']);
         unset($data['username']);
         unset($data['password']);
         return array($name, $data);
@@ -282,6 +294,8 @@ class PdoAdapter extends AbstractAdapter
         if (! $verified) {
             throw new Exception\PasswordIncorrect;
         }
+
+        $this->setNeedsRehash($this->verifier, $data['password'], $data);
 
         return true;
     }

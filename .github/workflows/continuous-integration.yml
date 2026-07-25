@@ -84,6 +84,107 @@ jobs:
             -O ocular.phar https://scrutinizer-ci.com/ocular.phar
           php ocular.phar code-coverage:upload --format=php-clover coverage.clover
 
+  pdo-integration:
+    name: "PDO Integration Tests (${{ matrix.database }})"
+    runs-on: "ubuntu-latest"
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - database: "MySQL"
+            extension: "pdo_mysql"
+            dsn: "mysql:host=127.0.0.1;port=3306;dbname=aura_auth_test"
+            username: "root"
+            password: "rootpassword"
+          - database: "PostgreSQL"
+            extension: "pdo_pgsql"
+            dsn: "pgsql:host=127.0.0.1;port=5432;dbname=aura_auth_test"
+            username: "postgres"
+            password: "postgrespassword"
+
+    services:
+      mysql:
+        image: "mysql:8.0"
+        env:
+          MYSQL_ROOT_PASSWORD: "rootpassword"
+          MYSQL_DATABASE: "aura_auth_test"
+        ports:
+          - "3306:3306"
+        # the job must not start querying before the server accepts
+        # connections; without this the first test hits a refused socket
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+      postgres:
+        image: "postgres:16"
+        env:
+          POSTGRES_PASSWORD: "postgrespassword"
+          POSTGRES_DB: "aura_auth_test"
+        ports:
+          - "5432:5432"
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: "Checkout"
+        uses: "actions/checkout@v4"
+        with:
+          persist-credentials: false
+
+      - name: "Install PHP with the ${{ matrix.extension }} extension"
+        uses: "shivammathur/setup-php@v2"
+        with:
+          coverage: "none"
+          ini-values: "memory_limit=-1"
+          php-version: "8.4"
+          extensions: "${{ matrix.extension }}"
+
+      - name: "Install dependencies with composer"
+        uses: "ramsey/composer-install@v3"
+
+      # The service health checks above cover the server process, but the
+      # database itself can still be a moment behind on first boot; connect
+      # through PDO exactly as the tests do before declaring it ready.
+      - name: "Wait for ${{ matrix.database }}"
+        env:
+          PDO_TEST_DSN: "${{ matrix.dsn }}"
+          PDO_TEST_USERNAME: "${{ matrix.username }}"
+          PDO_TEST_PASSWORD: "${{ matrix.password }}"
+        run: |
+          for i in $(seq 1 30); do
+            if php -r '
+              try {
+                new PDO(getenv("PDO_TEST_DSN"), getenv("PDO_TEST_USERNAME"), getenv("PDO_TEST_PASSWORD"));
+                exit(0);
+              } catch (Throwable $e) {
+                exit(1);
+              }'; then
+              echo "${{ matrix.database }} is accepting connections."
+              exit 0
+            fi
+            echo "Waiting for ${{ matrix.database }} ($i)..."
+            sleep 2
+          done
+          echo "::error::${{ matrix.database }} never accepted a connection"
+          exit 1
+
+      - name: "Run the PDO integration tests"
+        env:
+          PDO_TEST_DSN: "${{ matrix.dsn }}"
+          PDO_TEST_USERNAME: "${{ matrix.username }}"
+          PDO_TEST_PASSWORD: "${{ matrix.password }}"
+        # --fail-on-skipped: these tests skip themselves when PDO_TEST_DSN is
+        # unset, so without this a misconfigured job would report success
+        # having run nothing at all.
+        run: "vendor/bin/phpunit --group pdo --fail-on-skipped"
+
   ldap-integration:
     name: "LDAP Integration Tests"
     runs-on: "ubuntu-latest"

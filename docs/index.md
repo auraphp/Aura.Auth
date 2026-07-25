@@ -7,6 +7,8 @@
 - [Remember Me](remember-me.md)
 - [API Tokens](api-tokens.md)
 - [Login Throttling](throttling.md)
+- [Security Notes](security.md)
+- [Database Schemas](schemas.md)
 - [Session Management](sessions.md)
 - [DI Configuration](di-configuration.md)
 - [Upgrade Guide: 4.x → 6.0.0](upgrade.md)

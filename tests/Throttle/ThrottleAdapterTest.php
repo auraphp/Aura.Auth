@@ -20,7 +20,28 @@ class StubInnerAdapter extends AbstractAdapter
         if (($input['password'] ?? '') !== 'good') {
             throw new PasswordIncorrect();
         }
+        $this->needs_rehash = ($input['username'] ?? '') === 'stale';
         return array($input['username'], array('role' => 'user'));
+    }
+}
+
+/**
+ * An adapter with no needsRehash() at all, as a custom AdapterInterface
+ * implementation predating it would be.
+ */
+class StubBareAdapter implements \Aura\Auth\Adapter\AdapterInterface
+{
+    public function login(array $input): array
+    {
+        return array($input['username'], array());
+    }
+
+    public function logout(\Aura\Auth\Auth $auth, $status = \Aura\Auth\Status::ANON): void
+    {
+    }
+
+    public function resume(\Aura\Auth\Auth $auth): void
+    {
     }
 }
 
@@ -47,6 +68,29 @@ class ThrottleAdapterTest extends \PHPUnit\Framework\TestCase
     {
         $result = $this->adapter->login(array('username' => 'bob', 'password' => 'good'));
         $this->assertSame(array('bob', array('role' => 'user')), $result);
+    }
+
+    /**
+     * Wrapping an adapter for throttling must not quietly stop password
+     * migration: the inner adapter's rehash report has to reach the caller.
+     */
+    public function testNeedsRehashPassesThroughFromInnerAdapter()
+    {
+        $this->adapter->login(array('username' => 'stale', 'password' => 'good'));
+        $this->assertTrue($this->adapter->needsRehash());
+
+        $this->adapter->login(array('username' => 'bob', 'password' => 'good'));
+        $this->assertFalse($this->adapter->needsRehash());
+    }
+
+    public function testNeedsRehashIsFalseForAnAdapterThatCannotReport()
+    {
+        $throttle = new ThrottleService($this->storage, array('max_attempts' => 3));
+        $adapter = new ThrottleAdapter(new StubBareAdapter(), $throttle);
+
+        $adapter->login(array('username' => 'bob', 'password' => 'whatever'));
+
+        $this->assertFalse($adapter->needsRehash());
     }
 
     public function testFailureIsRecorded()

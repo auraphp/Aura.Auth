@@ -24,6 +24,7 @@ use Aura\Auth\Throttle;
 use Aura\Auth\Throttle\ThrottleStorageInterface;
 use Aura\Auth\Throttle\ThrottleService;
 use Aura\Auth\Throttle\RedisClientInterface;
+use Aura\Auth\Rehash;
 use Aura\Auth\Token;
 use Aura\Auth\Token\TokenService;
 use Aura\Auth\Token\TokenStorageInterface;
@@ -244,6 +245,54 @@ class AuthFactory
     public function newPdoRememberStorage(PDO $pdo, $table = 'aura_auth_remember'): Remember\PdoRememberStorage
     {
         return new Remember\PdoRememberStorage($pdo, $table);
+    }
+
+    /**
+     *
+     * Returns a new PDO-backed rehash writer, to pass to an adapter's
+     * `setRehashStorage()` so that outdated password hashes are replaced
+     * automatically on successful login.
+     *
+     * @param PDO $pdo A writable PDO connection.
+     *
+     * @param string $table The table holding the accounts.
+     *
+     * @param string $username_col The username column.
+     *
+     * @param string $password_col The password column to overwrite.
+     *
+     * @param string|int $algo The algorithm to hash with -- the one being
+     * migrated *to*, which need not be the one the verifier reads.
+     *
+     * @param array $options Options for `$algo`, as for password_hash() --
+     * they belong to the algorithm being written, not to the one the verifier
+     * reads, and copying the verifier's across a migration carries settings
+     * that do not apply (a legacy verifier has none, and a `cost` handed to
+     * argon2id is silently ignored). Where the two algorithms *are* the same,
+     * these must be at least what the verifier asks for: the verifier decides
+     * that a hash is outdated with password_needs_rehash() against its own
+     * options, so writing a weaker cost leaves it outdated and the row is
+     * rewritten on every login.
+     *
+     * @return Rehash\PdoRehashStorage
+     *
+     */
+    public function newPdoRehashStorage(
+        PDO $pdo,
+        $table = 'accounts',
+        $username_col = 'username',
+        $password_col = 'password',
+        $algo = PASSWORD_BCRYPT,
+        array $options = array()
+    ): Rehash\PdoRehashStorage {
+        return new Rehash\PdoRehashStorage(
+            $pdo,
+            $table,
+            $username_col,
+            $password_col,
+            $algo,
+            $options
+        );
     }
 
     /**
@@ -536,12 +585,25 @@ class AuthFactory
      *
      * @param string $file Path to the htpasswd file.
      *
+     * @param string $dummy_format Which format the file mostly holds -- `apr1`
+     * (the default), `bcrypt`, `sha`, or `des`. It affects only the dummy hash
+     * that keeps an unknown username from answering faster than a wrong
+     * password; verification still dispatches per entry. See docs/security.md.
+     *
+     * @param array $dummy_options password_hash() options for a `bcrypt` dummy,
+     * ignored by the other formats. `htpasswd -B` writes cost 5 by default and
+     * PHP writes 10 or 12, so pass `array('cost' => 5)` -- or whatever `-C` the
+     * file was written with -- to keep the two paths the same cost.
+     *
      * @return Adapter\HtpasswdAdapter
      *
      */
-    public function newHtpasswdAdapter($file): Adapter\HtpasswdAdapter
-    {
-        $verifier = new Verifier\HtpasswdVerifier;
+    public function newHtpasswdAdapter(
+        $file,
+        $dummy_format = 'apr1',
+        array $dummy_options = array()
+    ): Adapter\HtpasswdAdapter {
+        $verifier = new Verifier\HtpasswdVerifier($dummy_format, $dummy_options);
         return new Adapter\HtpasswdAdapter(
             $file,
             $verifier
