@@ -144,7 +144,11 @@ class NativeRedisClientTest extends \PHPUnit\Framework\TestCase
             $this->client->hashGetAll('k');
             $this->fail('expected ConnectionFailed');
         } catch (\Aura\Auth\Exception\ConnectionFailed $e) {
-            $this->assertStringContainsString('k', $e->getMessage());
+            $this->assertStringContainsString(
+                'WRONGTYPE Operation against a key holding the wrong kind of value',
+                $e->getMessage()
+            );
+            $this->assertStringContainsString("key 'k'", $e->getMessage());
         }
     }
 }

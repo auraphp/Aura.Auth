@@ -124,7 +124,7 @@ class NativeRedisClient implements RedisClientInterface
         // read, which must not be reported as a counter of zero.
         if (! is_array($data)) {
             throw new ConnectionFailed(
-                "Redis hgetall failed for key '{$key}';"
+                "Redis hgetall failed for key '{$key}'" . $this->lastError() . ';'
                     . ' refusing to report the failure count as zero'
             );
         }
@@ -176,15 +176,35 @@ class NativeRedisClient implements RedisClientInterface
             return;
         }
 
-        $detail = '';
-        if (method_exists($this->client, 'getLastError')) {
-            $error = $this->client->getLastError();
-            $detail = $error ? ": {$error}" : '';
-        }
-
         throw new ConnectionFailed(
-            "Redis {$command} failed for key '{$key}'{$detail};"
+            "Redis {$command} failed for key '{$key}'" . $this->lastError() . ';'
                 . ' the failed attempt could not be counted'
         );
+    }
+
+    /**
+     *
+     * Returns the server's own explanation of the last failure, ready to
+     * append to a message, or an empty string when the client does not offer
+     * one.
+     *
+     * This is the part an operator can act on: `WRONGTYPE Operation against a
+     * key holding the wrong kind of value` names the actual fault, where the
+     * key alone only says something went wrong. phpredis reports it through
+     * getLastError(); Predis raises its own exception instead and never
+     * reaches here, so the method is absent there and the detail is dropped.
+     *
+     * @return string
+     *
+     */
+    protected function lastError(): string
+    {
+        if (! method_exists($this->client, 'getLastError')) {
+            return '';
+        }
+
+        $error = $this->client->getLastError();
+
+        return $error ? ": {$error}" : '';
     }
 }

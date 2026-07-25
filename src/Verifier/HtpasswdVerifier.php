@@ -51,6 +51,15 @@ class HtpasswdVerifier implements VerifierInterface, DummyHashInterface
 
     /**
      *
+     * password_hash() options for the bcrypt dummy; see the constructor.
+     *
+     * @var array
+     *
+     */
+    protected $dummy_options;
+
+    /**
+     *
      * Constructor.
      *
      * @param string $dummy_format Which of the four htpasswd formats this
@@ -62,10 +71,20 @@ class HtpasswdVerifier implements VerifierInterface, DummyHashInterface
      * the cost of the *typical* entry that the unknown-username path has to
      * match.
      *
+     * @param array $dummy_options password_hash() options for a `bcrypt`
+     * dummy, ignored by the other three formats. A `$2y$` hash encodes its own
+     * cost, and `htpasswd -B` writes cost 5 by default (`-C` sets it) while
+     * PHP's default is 10, or 12 from PHP 8.4 on -- so leaving this unset in
+     * front of a stock `htpasswd -B` file makes the unknown-username path cost
+     * orders of magnitude *more* than a wrong password, which is the same
+     * signal pointed the other way. Pass `array('cost' => 5)`, or whatever
+     * `-C` the file was written with.
+     *
      */
-    public function __construct($dummy_format = 'apr1')
+    public function __construct($dummy_format = 'apr1', array $dummy_options = array())
     {
         $this->dummy_format = $dummy_format;
+        $this->dummy_options = $dummy_options;
     }
 
     /**
@@ -97,7 +116,11 @@ class HtpasswdVerifier implements VerifierInterface, DummyHashInterface
 
         switch ($this->dummy_format) {
             case 'bcrypt':
-                $this->dummy_hash = password_hash($unknown, PASSWORD_BCRYPT);
+                $this->dummy_hash = password_hash(
+                    $unknown,
+                    PASSWORD_BCRYPT,
+                    $this->dummy_options
+                );
                 break;
             case 'sha':
                 $this->dummy_hash = '{SHA}' . base64_encode(sha1($unknown, true));

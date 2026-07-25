@@ -583,12 +583,20 @@ class AuthFactory
      * that keeps an unknown username from answering faster than a wrong
      * password; verification still dispatches per entry. See docs/security.md.
      *
+     * @param array $dummy_options password_hash() options for a `bcrypt` dummy,
+     * ignored by the other formats. `htpasswd -B` writes cost 5 by default and
+     * PHP writes 10 or 12, so pass `array('cost' => 5)` -- or whatever `-C` the
+     * file was written with -- to keep the two paths the same cost.
+     *
      * @return Adapter\HtpasswdAdapter
      *
      */
-    public function newHtpasswdAdapter($file, $dummy_format = 'apr1'): Adapter\HtpasswdAdapter
-    {
-        $verifier = new Verifier\HtpasswdVerifier($dummy_format);
+    public function newHtpasswdAdapter(
+        $file,
+        $dummy_format = 'apr1',
+        array $dummy_options = array()
+    ): Adapter\HtpasswdAdapter {
+        $verifier = new Verifier\HtpasswdVerifier($dummy_format, $dummy_options);
         return new Adapter\HtpasswdAdapter(
             $file,
             $verifier

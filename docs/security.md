@@ -71,6 +71,12 @@ $verifier = new \Aura\Auth\Verifier\PasswordVerifier(
 
 // htpasswd -B writes bcrypt; the default here is apr1, what plain htpasswd writes
 $verifier = new \Aura\Auth\Verifier\HtpasswdVerifier('bcrypt');
+
+// a `$2y$` hash encodes its cost, and htpasswd -B writes cost 5 by default
+// (`-C` sets it) where PHP writes 10, or 12 from PHP 8.4 on -- so a bcrypt
+// htpasswd file needs the cost pinned too, or the dummy costs ~128x the
+// wrong-password path and the signal is back, pointing the other way
+$verifier = new \Aura\Auth\Verifier\HtpasswdVerifier('bcrypt', array('cost' => 5));
 ?>
 ```
 
@@ -98,12 +104,15 @@ class MyPdoAdapter extends \Aura\Auth\Adapter\PdoAdapter
 ?>
 ```
 
-**A dummy must be valid, and its plaintext unknown.** A malformed hash is
-rejected without any hashing work, which silently restores the timing
-difference; and a dummy whose plaintext someone knows becomes a working password
-the moment the value is copied into a password column. Generating it from
-`random_bytes()` and never recording the input satisfies both, which is what the
-stock verifiers do.
+**A dummy must be valid, and its plaintext unknown.** On the `password_verify()`
+and `crypt()` paths a malformed hash is rejected without any hashing work, which
+silently restores the timing difference; and a dummy whose plaintext someone
+knows becomes a working password the moment the value is copied into a password
+column. Generating it from `random_bytes()` and never recording the input
+satisfies both, which is what the stock verifiers do. (The legacy `hash()` path
+is the exception to the first half: it digests the submitted password before
+comparing, so a malformed stored value still costs the same — the second half,
+the unknown plaintext, applies there as much as anywhere.)
 
 If the costs do not match exactly, a proportional difference remains. Login
 throttling is what covers that residue: reading a small timing difference takes

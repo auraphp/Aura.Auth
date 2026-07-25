@@ -48,6 +48,10 @@ class DummyHashTest extends \PHPUnit\Framework\TestCase
                 new HtpasswdVerifier('bcrypt'),
                 password_hash('the real password', PASSWORD_BCRYPT),
             ),
+            'htpasswd bcrypt at a pinned cost' => array(
+                new HtpasswdVerifier('bcrypt', array('cost' => 5)),
+                password_hash('the real password', PASSWORD_BCRYPT, array('cost' => 5)),
+            ),
             'htpasswd des' => array(
                 new HtpasswdVerifier('des'),
                 crypt('realpw', 'ab'),
@@ -164,11 +168,30 @@ class DummyHashTest extends \PHPUnit\Framework\TestCase
                 new HtpasswdVerifier('sha'),
                 '{SHA}' . base64_encode(sha1('the real password', true)),
             ),
+            'htpasswd bcrypt' => array(
+                new HtpasswdVerifier('bcrypt', array('cost' => 4)),
+                password_hash('the real password', PASSWORD_BCRYPT, array('cost' => 4)),
+            ),
             'htpasswd des' => array(
                 new HtpasswdVerifier('des'),
                 crypt('realpw', 'ab'),
             ),
         );
+    }
+
+    /**
+     * A `$2y$` hash encodes its cost, so matching the format is not enough on
+     * its own: `htpasswd -B` writes cost 5 by default while PHP writes 10, or
+     * 12 from 8.4 on, and a dummy left at PHP's default would cost an unknown
+     * username roughly 128 times what a wrong password costs.
+     */
+    public function testHtpasswdBcryptDummyHonoursTheConfiguredCost()
+    {
+        $verifier = new HtpasswdVerifier('bcrypt', array('cost' => 5));
+
+        $info = password_get_info($verifier->getDummyHash());
+
+        $this->assertSame(5, $info['options']['cost']);
     }
 
     /**
