@@ -139,22 +139,29 @@ class AbstractAdapterTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * verifyDummy() runs only on a path that has already failed, and its
-     * result is discarded; a verifier that returned true for the dummy must
-     * still not authenticate anyone.
+     * verifyDummy() runs only on a path that has already failed, so a verifier
+     * saying "yes" to the dummy must change nothing: the work still happens,
+     * and the answer goes nowhere. That it cannot log anyone in is asserted
+     * where it can actually be observed, in PdoAdapterTest and
+     * HtpasswdAdapterTest; here the observable effect is that the verifier was
+     * given the dummy to chew on and the true came back to no one.
      */
     public function testVerifyDummyDiscardsItsResult()
     {
         $verifier = new class implements VerifierInterface {
+            public $calls = 0;
+
             public function verify($plaintext, $hashvalue, array $extra = array()): bool
             {
+                $this->calls ++;
                 return true;
             }
         };
 
-        $this->assertNull(
-            $this->newAdapter()->exposeVerifyDummy($verifier, 'some password')
-        );
+        $adapter = $this->newAdapter();
+        $adapter->exposeVerifyDummy($verifier, 'some password');
+
+        $this->assertSame(1, $verifier->calls);
     }
 
     protected function newAdapter()
@@ -170,9 +177,9 @@ class AbstractAdapterTest extends \PHPUnit\Framework\TestCase
                 return $this->getDummyHash();
             }
 
-            public function exposeVerifyDummy(VerifierInterface $verifier, $password)
+            public function exposeVerifyDummy(VerifierInterface $verifier, $password): void
             {
-                return $this->verifyDummy($verifier, $password);
+                $this->verifyDummy($verifier, $password);
             }
         };
     }
