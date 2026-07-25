@@ -297,12 +297,20 @@ $rehash_storage = $auth_factory->newPdoRehashStorage(
     'username',         // username column
     'password',         // password column to overwrite
     PASSWORD_BCRYPT,    // algorithm to migrate *to*
-    array('cost' => 12) // options; match the verifier's
+    array('cost' => 12) // options for *that* algorithm
 );
 
 $pdo_adapter->setRehashStorage($rehash_storage);
 ?>
 ```
+
+The options belong to the algorithm being written, so they are chosen for it and
+not copied from the verifier — a legacy verifier has none to copy, and a `cost`
+handed to argon2id is ignored. The one case where the two do have to line up is
+when both are the same algorithm: the verifier judges a hash outdated with
+`password_needs_rehash()` against its *own* options, so a writer set to a weaker
+cost leaves the replacement outdated too, and the row is rewritten on every
+login from then on.
 
 With that wired, a successful login whose stored hash is outdated replaces it
 before returning, and `needsRehash()` is then false because there is nothing

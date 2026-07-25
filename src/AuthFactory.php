@@ -264,8 +264,15 @@ class AuthFactory
      * @param string|int $algo The algorithm to hash with -- the one being
      * migrated *to*, which need not be the one the verifier reads.
      *
-     * @param array $options Options for the algorithm; pass the same ones the
-     * verifier was given.
+     * @param array $options Options for `$algo`, as for password_hash() --
+     * they belong to the algorithm being written, not to the one the verifier
+     * reads, and copying the verifier's across a migration carries settings
+     * that do not apply (a legacy verifier has none, and a `cost` handed to
+     * argon2id is silently ignored). Where the two algorithms *are* the same,
+     * these must be at least what the verifier asks for: the verifier decides
+     * that a hash is outdated with password_needs_rehash() against its own
+     * options, so writing a weaker cost leaves it outdated and the row is
+     * rewritten on every login.
      *
      * @return Rehash\PdoRehashStorage
      *
