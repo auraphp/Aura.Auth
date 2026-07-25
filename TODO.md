@@ -7,6 +7,14 @@
 - OIDC (`id_token`) handling and token refresh. Deferred: larger surface; leave
   to the client for now.
 
+## Remember Me
+
+Track `created_at`/`last_used_at` on remember-me tokens, for a device list and
+revoking a cookie left on a lost phone? Deferred: nobody has asked, and
+`RememberStorageInterface` is pluggable enough that a deployment wanting it can
+subclass `PdoRememberStorage` without a core change. The absence is documented
+in `docs/remember-me.md`, including why `expires` is not a stand-in.
+
 ## Verifiers
 
 Build an HttpDigestVerifier based on <http://php.net/manual/en/features.http-auth.php> and/or <http://evertpot.com/223/>.
