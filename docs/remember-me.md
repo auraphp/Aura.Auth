@@ -51,6 +51,17 @@ CREATE TABLE aura_auth_remember (
 CREATE INDEX aura_auth_remember_username ON aura_auth_remember (username);
 ```
 
+Note what the table does not hold: there is no `created_at` or `last_used_at`,
+so nothing records when a cookie was issued or last used. The API token table
+(see [API Tokens](api-tokens.md)) does track last use, because tokens are managed
+from a list where "last used 3 days ago" is the point; a remember-me cookie is
+not. `expires` does move forward on every resume — validator rotation rewrites
+the row each time — so `expires` minus the TTL is close to a last-used stamp, but
+it is a side effect rather than a recorded fact, and it drifts the moment you
+change the TTL. If you want a device list, or the ability to spot a cookie still
+live on a lost phone, add the columns and stamp them in `create()` and
+`update()`; `PdoRememberStorage` is a short class to extend.
+
 ## Wiring The Service
 
 Build a _RememberService_ from the factory and pass it into the login, logout,
