@@ -212,6 +212,37 @@ delegates to `password_verify()` for bcrypt, which is constant-time already.
 Custom verifiers implementing `VerifierInterface` should use `hash_equals()`
 for the same reason.
 
+## Passwords in Stack Traces
+
+A stack trace records the arguments to every frame on it. Without precautions,
+one exception thrown anywhere below a login call writes the plaintext password
+into the trace, and traces go on to reach log files, error reporters, and — on
+a misconfigured host — the response body itself. The password is then sitting
+in plain text in several systems that were never meant to hold it, typically
+with wider access than the password database has.
+
+Every parameter in this library that carries a credential is marked
+`#[\SensitiveParameter]`, so PHP replaces its value with
+`Object(SensitiveParameterValue)` wherever it appears in a trace. That covers
+the plaintext password, the `$input` array that holds it, the LDAP bind
+password, the OAuth access token, and API token values.
+
+Two consequences worth knowing:
+
+- **The attribute is not inherited.** If you write your own
+  `VerifierInterface`, `RehashStorageInterface`, or `AdapterInterface`
+  implementation, PHP does not copy the attribute down from the interface —
+  repeat it on your own parameters, or your implementation reintroduces the
+  leak for the whole call chain below it.
+
+- **It protects traces, not everything else.** A credential you log yourself,
+  put in an exception *message*, or store in the session is unaffected. In
+  particular, do not include `$input` in your own log lines on a failed login.
+
+If `zend.exception_ignore_args` is on (the default in PHP's production INI),
+traces carry no arguments at all and this is moot. It is off in the development
+INI, which is exactly where traces are most likely to be displayed.
+
 ## Password Storage
 
 Constant-time comparison is only worth having if what is being compared is

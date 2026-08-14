@@ -81,7 +81,7 @@ class SplitToken
      * @return string The SHA-256 hash of the validator.
      *
      */
-    public function hash($validator): string
+    public function hash(#[\SensitiveParameter] $validator): string
     {
         return hash('sha256', $validator);
     }
@@ -97,7 +97,7 @@ class SplitToken
      * @return string The `selector:validator` token value.
      *
      */
-    public function makeValue($selector, $validator): string
+    public function makeValue($selector, #[\SensitiveParameter] $validator): string
     {
         return $selector . ':' . $validator;
     }
@@ -112,7 +112,7 @@ class SplitToken
      * if the value is malformed.
      *
      */
-    public function parseValue($value): ?array
+    public function parseValue(#[\SensitiveParameter] $value): ?array
     {
         if (! is_string($value) || strpos($value, ':') === false) {
             return null;
@@ -141,7 +141,7 @@ class SplitToken
      * @return bool
      *
      */
-    public function verify($hashed_validator, $validator): bool
+    public function verify($hashed_validator, #[\SensitiveParameter] $validator): bool
     {
         return hash_equals($hashed_validator, $this->hash($validator));
     }

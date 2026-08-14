@@ -43,10 +43,13 @@ interface RehashStorageInterface
      *
      * @param string $username The account whose hash to replace.
      *
-     * @param string $plaintext The verified plaintext password.
+     * @param string $plaintext The verified plaintext password. Marked
+     * `#[\SensitiveParameter]` so that it is redacted from stack traces;
+     * implementations should carry the attribute too, as PHP does not inherit
+     * it from the interface.
      *
      * @return void
      *
      */
-    public function rehash($username, $plaintext): void;
+    public function rehash($username, #[\SensitiveParameter] $plaintext): void;
 }

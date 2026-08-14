@@ -141,7 +141,7 @@ class PdoAdapter extends AbstractAdapter
      * @return array An array of login data.
      *
      */
-    public function login(array $input): array
+    public function login(#[\SensitiveParameter] array $input): array
     {
         $this->needs_rehash = false;
         $this->rehash_error = null;
@@ -177,7 +177,7 @@ class PdoAdapter extends AbstractAdapter
      * @throws Exception\MultipleMatches where more than one row is found.
      *
      */
-    protected function fetchRow($input): array
+    protected function fetchRow(#[\SensitiveParameter] $input): array
     {
         $stm = $this->buildSelect();
         $rows = $this->fetchRows($stm, $input);
@@ -283,7 +283,7 @@ class PdoAdapter extends AbstractAdapter
      * @throws Exception\PasswordIncorrect
      *
      */
-    protected function verify($input, $data): bool
+    protected function verify(#[\SensitiveParameter] $input, $data): bool
     {
         $verified = $this->verifier->verify(
             $input['password'],

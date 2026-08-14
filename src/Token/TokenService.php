@@ -151,7 +151,7 @@ class TokenService
      * @throws TokenExpired when the token is genuine but past its expiry.
      *
      */
-    public function verify($value): ?array
+    public function verify(#[\SensitiveParameter] $value): ?array
     {
         // The validator is matched BEFORE the expiry is looked at. Reaching
         // the expiry check therefore proves the caller holds the real token,
@@ -188,7 +188,7 @@ class TokenService
      * distinguished, so that a caller cannot learn whether a selector exists.
      *
      */
-    protected function findGenuine($value): ?array
+    protected function findGenuine(#[\SensitiveParameter] $value): ?array
     {
         $parsed = $this->token->parseValue($value);
         if (! $parsed) {
@@ -220,7 +220,7 @@ class TokenService
      * @return bool True if a token was revoked.
      *
      */
-    public function revoke($value): bool
+    public function revoke(#[\SensitiveParameter] $value): bool
     {
         // Expiry is not consulted: an expired token is still genuine, and
         // expiry should not be the reason it cannot be cleaned up. Nor is the

@@ -21,7 +21,10 @@ interface VerifierInterface
      *
      * Verify that a plaintext password matches a hashed one.
      *
-     * @param string $plaintext Plaintext password.
+     * @param string $plaintext Plaintext password. Marked
+     * `#[\SensitiveParameter]` so that it is redacted from stack traces;
+     * implementations should carry the attribute too, as PHP does not inherit
+     * it from the interface.
      *
      * @param string $hashvalue Hashed password.
      *
@@ -30,5 +33,9 @@ interface VerifierInterface
      * @return bool
      *
      */
-    public function verify($plaintext, $hashvalue, array $extra = array()): bool;
+    public function verify(
+        #[\SensitiveParameter] $plaintext,
+        $hashvalue,
+        array $extra = array()
+    ): bool;
 }

@@ -126,7 +126,7 @@ class PdoRehashStorage implements RehashStorageInterface
      * {@inheritDoc}
      *
      */
-    public function rehash($username, $plaintext): void
+    public function rehash($username, #[\SensitiveParameter] $plaintext): void
     {
         $stm = "UPDATE {$this->table} "
              . "SET {$this->password_col} = :password "

@@ -73,7 +73,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return array An array of login data on success.
      *
      */
-    abstract public function login(array $input): array;
+    abstract public function login(#[\SensitiveParameter] array $input): array;
 
     /**
      *
@@ -202,7 +202,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return void
      *
      */
-    protected function applyRehash($username, $plaintext): void
+    protected function applyRehash($username, #[\SensitiveParameter] $plaintext): void
     {
         if (! $this->needs_rehash || ! $this->rehash_storage) {
             return;
@@ -248,7 +248,7 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return void
      *
      */
-    protected function checkInput(array $input): void
+    protected function checkInput(#[\SensitiveParameter] array $input): void
     {
         if (empty($input['username'])) {
             throw new Exception\UsernameMissing;
@@ -286,8 +286,10 @@ abstract class AbstractAdapter implements AdapterInterface
      * @return void
      *
      */
-    protected function verifyDummy(VerifierInterface $verifier, $password): void
-    {
+    protected function verifyDummy(
+        VerifierInterface $verifier,
+        #[\SensitiveParameter] $password
+    ): void {
         $hashvalue = $verifier instanceof DummyHashInterface
             ? $verifier->getDummyHash()
             : $this->getDummyHash();

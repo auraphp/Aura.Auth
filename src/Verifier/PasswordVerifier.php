@@ -77,8 +77,11 @@ class PasswordVerifier implements VerifierInterface, RehashInterface, DummyHashI
      * @return bool
      *
      */
-    public function verify($plaintext, $hashvalue, array $extra = array()): bool
-    {
+    public function verify(
+        #[\SensitiveParameter] $plaintext,
+        $hashvalue,
+        array $extra = array()
+    ): bool {
         if ($this->isLegacyAlgo() && ! $this->isPasswordHash($hashvalue)) {
             return hash_equals($hashvalue, hash($this->algo, $plaintext));
         }
