@@ -239,6 +239,25 @@ Two consequences worth knowing:
   put in an exception *message*, or store in the session is unaffected. In
   particular, do not include `$input` in your own log lines on a failed login.
 
+The same non-inheritance rule reaches one case the library cannot mark for you.
+`OAuth2Adapter`'s `map` option is your own callback, and PHP does not redact the
+arguments of a frame your code declared — so if your callback throws, the access
+token appears in *its* frame even though `mapOwner()` redacted the copy in the
+library's. Mark it yourself:
+
+```php
+$adapter = $auth_factory->newOAuth2Adapter($provider, [
+    'map' => function (array $owner, #[\SensitiveParameter] $token) {
+        return [$owner['email'], $owner];
+    },
+]);
+```
+
+A custom `ProviderInterface` implementation needs the same treatment on
+`getAccessToken()` and `getResourceOwner()`: the token exchange is a remote call
+and one of the likelier things in an OAuth login to throw, which makes it one of
+the likelier frames to end up in a trace holding an authorization code.
+
 If `zend.exception_ignore_args` is on (the default in PHP's production INI),
 traces carry no arguments at all and this is moot. It is off in the development
 INI, which is exactly where traces are most likely to be displayed.

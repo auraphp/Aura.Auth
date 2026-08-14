@@ -3,7 +3,10 @@ namespace Aura\Auth;
 
 use PDO;
 use PHPUnit\Framework\Attributes\DataProvider;
+use Aura\Auth\Adapter\OAuth2Adapter;
 use Aura\Auth\Adapter\PdoAdapter;
+use Aura\Auth\OAuth\AuthorizationRequest;
+use Aura\Auth\OAuth\ProviderInterface;
 use Aura\Auth\Verifier\HtpasswdVerifier;
 use Aura\Auth\Verifier\PasswordVerifier;
 
@@ -35,6 +38,53 @@ class ThrowingBinaryVerifier extends HtpasswdVerifier
 }
 
 /**
+ * Fails at the token exchange, which is the OAuth step most likely to throw in
+ * practice: an expired code, a revoked grant, a provider that is down.
+ */
+class ThrowingTokenProvider implements ProviderInterface
+{
+    public function getAuthorizationRequest(array $options = []): AuthorizationRequest
+    {
+        throw new \RuntimeException('not used');
+    }
+
+    public function getAccessToken(
+        #[\SensitiveParameter] string $code,
+        #[\SensitiveParameter] ?string $code_verifier = null
+    ) {
+        throw new \RuntimeException('the token endpoint rejected the code');
+    }
+
+    public function getResourceOwner(#[\SensitiveParameter] $token): array
+    {
+        throw new \RuntimeException('not used');
+    }
+}
+
+/**
+ * Gets as far as an access token, then fails fetching the resource owner.
+ */
+class ThrowingOwnerProvider implements ProviderInterface
+{
+    public function getAuthorizationRequest(array $options = []): AuthorizationRequest
+    {
+        throw new \RuntimeException('not used');
+    }
+
+    public function getAccessToken(
+        #[\SensitiveParameter] string $code,
+        #[\SensitiveParameter] ?string $code_verifier = null
+    ) {
+        return SensitiveParameterTest::TOKEN;
+    }
+
+    public function getResourceOwner(#[\SensitiveParameter] $token): array
+    {
+        throw new \RuntimeException('the userinfo endpoint is down');
+    }
+}
+
+/**
  * Passwords must not survive into stack traces, because traces reach log
  * files, error reporters, and error pages. PHP redacts an argument marked
  * #[\SensitiveParameter] wherever it appears in a trace, replacing it with
@@ -55,12 +105,24 @@ class SensitiveParameterTest extends \PHPUnit\Framework\TestCase
 {
     const PLAINTEXT = 'correct-horse-battery-staple-9f3a1c';
 
-    protected function setUp(): void
+    const CODE = 'authorization-code-4b81de';
+
+    const VERIFIER = 'pkce-code-verifier-7c02af';
+
+    const TOKEN = 'access-token-e5d914';
+
+    /**
+     * With zend.exception_ignore_args on, PHP records no arguments in traces at
+     * all, so a behavioural assertion would pass whether or not the attribute
+     * is present -- i.e. prove nothing.
+     *
+     * Called per behavioural test rather than from setUp(), so that
+     * testParameterIsMarkedSensitive() keeps running: reflection does not care
+     * about this setting, and production-style test environments (where the
+     * setting is on) are the last place the declaration guard should go quiet.
+     */
+    protected function requireTraceArguments()
     {
-        // With zend.exception_ignore_args on, PHP records no arguments in
-        // traces at all, so every behavioural assertion below would pass
-        // whether or not the attribute is present -- i.e. prove nothing. The
-        // declaration test still runs; it does not depend on this setting.
         if (ini_get('zend.exception_ignore_args')) {
             $this->markTestSkipped(
                 'zend.exception_ignore_args is on, so traces carry no '
@@ -105,6 +167,8 @@ class SensitiveParameterTest extends \PHPUnit\Framework\TestCase
      */
     public function testAnUnmarkedArgumentDoesLeak()
     {
+        $this->requireTraceArguments();
+
         $leak = function ($not_marked) {
             throw new \RuntimeException('boom');
         };
@@ -122,6 +186,8 @@ class SensitiveParameterTest extends \PHPUnit\Framework\TestCase
 
     public function testPdoAdapterWrongPassword()
     {
+        $this->requireTraceArguments();
+
         if (! extension_loaded('pdo_sqlite')) {
             $this->markTestSkipped('pdo_sqlite is not loaded.');
         }
@@ -161,6 +227,8 @@ class SensitiveParameterTest extends \PHPUnit\Framework\TestCase
      */
     public function testPdoAdapterUnknownUsername()
     {
+        $this->requireTraceArguments();
+
         if (! extension_loaded('pdo_sqlite')) {
             $this->markTestSkipped('pdo_sqlite is not loaded.');
         }
@@ -193,6 +261,8 @@ class SensitiveParameterTest extends \PHPUnit\Framework\TestCase
      */
     public function testHtpasswdVerifierDeepFrames()
     {
+        $this->requireTraceArguments();
+
         $hashvalue = '$apr1$abcdefgh$0123456789012345678901';
 
         foreach (array(ThrowingContextVerifier::class, ThrowingBinaryVerifier::class) as $class) {
@@ -204,6 +274,94 @@ class SensitiveParameterTest extends \PHPUnit\Framework\TestCase
             } catch (\RuntimeException $e) {
                 $this->assertTraceHasNoPlaintext($e, self::PLAINTEXT);
             }
+        }
+    }
+
+    /**
+     * OAuth credentials are bearer credentials: an authorization code, a PKCE
+     * verifier, and an access token are all enough to impersonate the user.
+     * The token exchange and the userinfo call are both remote, so they are
+     * among the likeliest things in the library to throw.
+     */
+    public function testOAuth2ProviderFailures()
+    {
+        $this->requireTraceArguments();
+
+        $cases = array(
+            new ThrowingTokenProvider(),
+            new ThrowingOwnerProvider(),
+        );
+
+        foreach ($cases as $provider) {
+            $adapter = new OAuth2Adapter($provider, array('username_field' => 'id'));
+
+            try {
+                $adapter->login(array(
+                    'code' => self::CODE,
+                    'code_verifier' => self::VERIFIER,
+                ));
+                $this->fail('expected the provider to throw');
+            } catch (\RuntimeException $e) {
+                $this->assertTraceHasNoPlaintext($e, self::CODE);
+                $this->assertTraceHasNoPlaintext($e, self::VERIFIER);
+                $this->assertTraceHasNoPlaintext($e, self::TOKEN);
+            }
+        }
+    }
+
+    /**
+     * A `map` callback is the application's own closure, and PHP will not
+     * redact the arguments of a frame the application declared. The library can
+     * only keep the token out of *its* frames; documenting that boundary is the
+     * best available answer, so this pins where the boundary actually falls
+     * rather than asserting a guarantee that cannot be made.
+     */
+    public function testThrowingMapCallbackIsTheApplicationsOwnFrame()
+    {
+        $this->requireTraceArguments();
+
+        // ThrowingOwnerProvider never reaches the callback, so drive the
+        // mapping with a provider that returns an owner.
+        $provider = new class extends ThrowingOwnerProvider {
+            public function getResourceOwner(#[\SensitiveParameter] $token): array
+            {
+                return array('id' => 'boshag');
+            }
+        };
+
+        $adapter = new OAuth2Adapter(
+            $provider,
+            array('map' => function ($owner, $token) {
+                throw new \RuntimeException('the map callback failed');
+            })
+        );
+
+        try {
+            $adapter->login(array('code' => self::CODE));
+            $this->fail('expected the map callback to throw');
+        } catch (\RuntimeException $e) {
+            // the library's own frames are clean: the authorization code is
+            // redacted everywhere, and mapOwner() redacts the token it holds
+            $this->assertTraceHasNoPlaintext($e, self::CODE);
+
+            $this->assertStringContainsString(
+                'Object(SensitiveParameterValue)',
+                $e->getTraceAsString(),
+                'mapOwner() should have redacted the token in its own frame'
+            );
+
+            // ...but the closure belongs to the application, and PHP does not
+            // redact arguments of a frame the application declared. This is the
+            // boundary docs/security.md describes; asserting it here means a
+            // future PHP that closes the gap shows up as a failing test rather
+            // than as documentation that quietly went stale.
+            $this->assertStringContainsString(
+                self::TOKEN,
+                print_r($e->getTrace(), true),
+                "the application's own callback frame is outside what the "
+                . 'library can redact; if this now passes, update '
+                . 'docs/security.md'
+            );
         }
     }
 
@@ -246,6 +404,16 @@ class SensitiveParameterTest extends \PHPUnit\Framework\TestCase
             array('Aura\Auth\Adapter\PdoAdapter', 'fetchRow', 'input'),
             array('Aura\Auth\Adapter\PdoAdapter', 'verify', 'input'),
             array('Aura\Auth\Adapter\OAuth2Adapter', 'mapOwner', 'token'),
+
+            // OAuth: the code, the PKCE verifier and the token are all bearer
+            // credentials, and both provider calls are remote and can throw
+            array('Aura\Auth\OAuth\ProviderInterface', 'getAccessToken', 'code'),
+            array('Aura\Auth\OAuth\ProviderInterface', 'getAccessToken', 'code_verifier'),
+            array('Aura\Auth\OAuth\ProviderInterface', 'getResourceOwner', 'token'),
+            array('Aura\Auth\OAuth\LeagueProvider', 'getAccessToken', 'code'),
+            array('Aura\Auth\OAuth\LeagueProvider', 'getAccessToken', 'code_verifier'),
+            array('Aura\Auth\OAuth\LeagueProvider', 'getResourceOwner', 'token'),
+            array('Aura\Auth\OAuth\AuthorizationCodeFlow', 'handleCallback', 'query'),
             array('Aura\Auth\Adapter\AbstractAdapter', 'verifyDummy', 'password'),
             array('Aura\Auth\Adapter\AbstractAdapter', 'applyRehash', 'plaintext'),
             array('Aura\Auth\Adapter\HtpasswdAdapter', 'verify', 'password'),
