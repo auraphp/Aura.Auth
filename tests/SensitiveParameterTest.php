@@ -374,8 +374,9 @@ class SensitiveParameterTest extends \PHPUnit\Framework\TestCase
      * exception is constructed *below* League's own frames -- which is what
      * puts those frames, and their arguments, into the trace.
      */
-    protected function newThrowingLeagueProvider()
-    {
+    protected function newThrowingLeagueProvider(
+        $url_access_token = 'https://provider.example/token'
+    ) {
         $handler = function ($request, $options) {
             throw new \RuntimeException('the endpoint is unreachable');
         };
@@ -386,7 +387,7 @@ class SensitiveParameterTest extends \PHPUnit\Framework\TestCase
                 'clientSecret' => 'client-secret',
                 'redirectUri' => 'https://app.example/callback',
                 'urlAuthorize' => 'https://provider.example/authorize',
-                'urlAccessToken' => 'https://provider.example/token',
+                'urlAccessToken' => $url_access_token,
                 'urlResourceOwnerDetails' => 'https://provider.example/me',
                 'pkceMethod' => 'S256',
             ),
@@ -423,10 +424,35 @@ class SensitiveParameterTest extends \PHPUnit\Framework\TestCase
                 . 'code and the verifier in its own frame'
             );
 
-            // League holds the verifier as a property rather than passing it
-            // along, so only the code reaches one of its frames as an argument
             $this->assertStringContainsString(
                 self::CODE,
+                print_r($e->getTrace(), true),
+                'league/oauth2-client does not mark its own parameters; if '
+                . 'this now passes, update docs/security.md'
+            );
+        }
+
+        // The verifier takes a longer path to a trace: League copies it out of
+        // its own property into the request parameters, so it only appears as
+        // an argument while getAccessTokenRequest() is still on the stack. A
+        // malformed token URL throws exactly there.
+        $provider = new LeagueProvider(
+            $this->newThrowingLeagueProvider('http://')
+        );
+
+        try {
+            $provider->getAccessToken(self::CODE, self::VERIFIER);
+            $this->fail('expected building the token request to throw');
+        } catch (\Throwable $e) {
+            $this->assertStringContainsString(
+                'Object(SensitiveParameterValue)',
+                $e->getTraceAsString(),
+                'LeagueProvider::getAccessToken() should have redacted the '
+                . 'code and the verifier in its own frame'
+            );
+
+            $this->assertStringContainsString(
+                self::VERIFIER,
                 print_r($e->getTrace(), true),
                 'league/oauth2-client does not mark its own parameters; if '
                 . 'this now passes, update docs/security.md'

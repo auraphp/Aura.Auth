@@ -264,12 +264,12 @@ closes. `LeagueProvider` hands the authorization code and the access token to
 below `AbstractProvider::getAccessToken()` or `getResourceOwner()` throws — a
 network failure, a rejected grant — League's own frames are on the trace with
 those values in the clear, even though `LeagueProvider`'s frames redacted them.
-So the guarantee stops at the package boundary: with
-`zend.exception_ignore_args` off, treat a trace from a failed League call as
-containing the code and the token, and keep such traces out of logs and
-responses. (The PKCE verifier is a smaller exposure by accident: League stores
-it on the provider rather than passing it along, so it does not appear as a
-frame argument.)
+The PKCE verifier is reachable the same way: League holds it on the provider,
+but copies it into the request parameters, so it is a frame argument for as
+long as the request is being built. So the guarantee stops at the package
+boundary: with `zend.exception_ignore_args` off, treat a trace from a failed
+League call as containing the code, the verifier and the token, and keep such
+traces out of logs and responses.
 
 If `zend.exception_ignore_args` is on (the default in PHP's production INI),
 traces carry no arguments at all and this is moot. It is off in the development
