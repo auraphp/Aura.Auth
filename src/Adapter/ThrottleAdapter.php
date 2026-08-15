@@ -74,7 +74,7 @@ class ThrottleAdapter implements AdapterInterface
      * currently blocked by backoff.
      *
      */
-    public function login(array $input): array
+    public function login(#[\SensitiveParameter] array $input): array
     {
         $key = isset($input['username']) ? (string) $input['username'] : '';
 

@@ -29,7 +29,7 @@ interface AdapterInterface
      * @return array An array of login data on success.
      *
      */
-    public function login(array $input): array;
+    public function login(#[\SensitiveParameter] array $input): array;
 
     /**
      *

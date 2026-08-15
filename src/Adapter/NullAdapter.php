@@ -26,7 +26,7 @@ class NullAdapter extends AbstractAdapter
      * @return array
      *
      */
-    public function login(array $input): array
+    public function login(#[\SensitiveParameter] array $input): array
     {
         return array(null, null);
     }

@@ -176,8 +176,11 @@ class HtpasswdVerifier implements VerifierInterface, DummyHashInterface
      * @return bool
      *
      */
-    public function verify($plaintext, $hashvalue, array $extra = array()): bool
-    {
+    public function verify(
+        #[\SensitiveParameter] $plaintext,
+        $hashvalue,
+        array $extra = array()
+    ): bool {
         $hashvalue = trim($hashvalue);
 
         if (substr($hashvalue, 0, 4) == '$2y$') {
@@ -206,7 +209,7 @@ class HtpasswdVerifier implements VerifierInterface, DummyHashInterface
      * @return bool
      *
      */
-    protected function sha($plaintext, $hashvalue): bool
+    protected function sha(#[\SensitiveParameter] $plaintext, $hashvalue): bool
     {
         $hex = sha1($plaintext, true);
         $computed_hash = '{SHA}' . base64_encode($hex);
@@ -224,7 +227,7 @@ class HtpasswdVerifier implements VerifierInterface, DummyHashInterface
      * @return bool
      *
      */
-    protected function apr1($plaintext, $hashvalue): bool
+    protected function apr1(#[\SensitiveParameter] $plaintext, $hashvalue): bool
     {
         $salt = preg_replace('/^\$apr1\$([^$]+)\$.*/', '\\1', $hashvalue);
         return hash_equals($hashvalue, $this->computeApr1($plaintext, $salt));
@@ -247,7 +250,7 @@ class HtpasswdVerifier implements VerifierInterface, DummyHashInterface
      * @return string
      *
      */
-    protected function computeApr1($plaintext, $salt): string
+    protected function computeApr1(#[\SensitiveParameter] $plaintext, $salt): string
     {
         $context = $this->computeContext($plaintext, $salt);
         $binary = $this->computeBinary($plaintext, $salt, $context);
@@ -268,7 +271,7 @@ class HtpasswdVerifier implements VerifierInterface, DummyHashInterface
      * @return string
      *
      */
-    protected function computeContext($plaintext, $salt): string
+    protected function computeContext(#[\SensitiveParameter] $plaintext, $salt): string
     {
         $length = strlen($plaintext);
         $hash = hash('md5', $plaintext . $salt . $plaintext, true);
@@ -298,8 +301,11 @@ class HtpasswdVerifier implements VerifierInterface, DummyHashInterface
      * @return string
      *
      */
-    protected function computeBinary($plaintext, $salt, $context): string
-    {
+    protected function computeBinary(
+        #[\SensitiveParameter] $plaintext,
+        $salt,
+        #[\SensitiveParameter] $context
+    ): string {
         $binary = hash('md5', $context, true);
         for ($i = 0; $i < 1000; $i++) {
             $new = ($i & 1) ? $plaintext : $binary;
@@ -384,7 +390,7 @@ class HtpasswdVerifier implements VerifierInterface, DummyHashInterface
      * @return bool
      *
      */
-    protected function des($plaintext, $hashvalue): bool
+    protected function des(#[\SensitiveParameter] $plaintext, $hashvalue): bool
     {
         if (strlen($plaintext) > 8) {
             return false;

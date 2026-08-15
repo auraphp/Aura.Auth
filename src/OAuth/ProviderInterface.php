@@ -39,23 +39,31 @@ interface ProviderInterface
      * Exchanges an authorization code for an access token.
      *
      * @param string $code The authorization code from the validated callback.
+     * Marked `#[\SensitiveParameter]`: exchanging a code is the step most
+     * likely to throw -- an expired code, a revoked grant, a network failure --
+     * so this is exactly the frame that ends up in a trace. Implementations
+     * must repeat the attribute, as PHP does not inherit it from an interface.
      *
      * @param string|null $code_verifier The PKCE code verifier persisted at the
-     * redirect step, if any.
+     * redirect step, if any. Sensitive for the same reason.
      *
      * @return mixed The access token (as returned by the underlying client).
      *
      */
-    public function getAccessToken(string $code, ?string $code_verifier = null);
+    public function getAccessToken(
+        #[\SensitiveParameter] string $code,
+        #[\SensitiveParameter] ?string $code_verifier = null
+    );
 
     /**
      *
      * Fetches the resource owner (the authenticated user) for an access token.
      *
-     * @param mixed $token The access token from getAccessToken().
+     * @param mixed $token The access token from getAccessToken(). Marked
+     * `#[\SensitiveParameter]`; implementations must repeat the attribute.
      *
      * @return array The resource owner's data as an associative array.
      *
      */
-    public function getResourceOwner($token): array;
+    public function getResourceOwner(#[\SensitiveParameter] $token): array;
 }

@@ -57,7 +57,11 @@ class AuthorizationRequest
      * @param string|null $code_verifier The PKCE code verifier, if any.
      *
      */
-    public function __construct(string $url, string $state, ?string $code_verifier = null)
+    public function __construct(
+        string $url,
+        string $state,
+        #[\SensitiveParameter] ?string $code_verifier = null
+    )
     {
         $this->url = $url;
         $this->state = $state;

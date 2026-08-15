@@ -89,7 +89,7 @@ class OAuth2Adapter extends AbstractAdapter
      * `username_field` was configured.
      *
      */
-    public function login(array $input): array
+    public function login(#[\SensitiveParameter] array $input): array
     {
         if (empty($input['code'])) {
             throw new Exception\AuthorizationCodeMissing();
@@ -118,7 +118,7 @@ class OAuth2Adapter extends AbstractAdapter
      * @throws Exception\OAuth2MappingNotConfigured
      *
      */
-    protected function mapOwner(array $owner, $token): array
+    protected function mapOwner(array $owner, #[\SensitiveParameter] $token): array
     {
         if ($this->map !== null) {
             return ($this->map)($owner, $token);

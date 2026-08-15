@@ -119,7 +119,7 @@ class HeaderAdapter extends AbstractAdapter
      * @throws TokenExpired when the token is genuine but past its expiry.
      *
      */
-    public function login(array $input): array
+    public function login(#[\SensitiveParameter] array $input): array
     {
         $value = isset($input['token']) ? $input['token'] : $this->getToken();
 

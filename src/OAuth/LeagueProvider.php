@@ -70,8 +70,10 @@ class LeagueProvider implements ProviderInterface
      * {@inheritDoc}
      *
      */
-    public function getAccessToken(string $code, ?string $code_verifier = null)
-    {
+    public function getAccessToken(
+        #[\SensitiveParameter] string $code,
+        #[\SensitiveParameter] ?string $code_verifier = null
+    ) {
         if ($code_verifier !== null && method_exists($this->provider, 'setPkceCode')) {
             $this->provider->setPkceCode($code_verifier);
         }
@@ -86,7 +88,7 @@ class LeagueProvider implements ProviderInterface
      * {@inheritDoc}
      *
      */
-    public function getResourceOwner($token): array
+    public function getResourceOwner(#[\SensitiveParameter] $token): array
     {
         return $this->provider->getResourceOwner($token)->toArray();
     }

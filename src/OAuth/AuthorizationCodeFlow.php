@@ -128,7 +128,7 @@ class AuthorizationCodeFlow
      * @throws Exception\AuthorizationCodeMissing when no code is present.
      *
      */
-    public function handleCallback(array $query): array
+    public function handleCallback(#[\SensitiveParameter] array $query): array
     {
         // 1. Validate state (constant-time), consuming it so it cannot replay.
         $expected = $this->segment->get($this->state_key);

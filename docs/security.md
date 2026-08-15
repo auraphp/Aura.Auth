@@ -212,6 +212,69 @@ delegates to `password_verify()` for bcrypt, which is constant-time already.
 Custom verifiers implementing `VerifierInterface` should use `hash_equals()`
 for the same reason.
 
+## Passwords in Stack Traces
+
+A stack trace records the arguments to every frame on it. Without precautions,
+one exception thrown anywhere below a login call writes the plaintext password
+into the trace, and traces go on to reach log files, error reporters, and — on
+a misconfigured host — the response body itself. The password is then sitting
+in plain text in several systems that were never meant to hold it, typically
+with wider access than the password database has.
+
+Every parameter in this library that carries a credential is marked
+`#[\SensitiveParameter]`, so PHP replaces its value with
+`Object(SensitiveParameterValue)` wherever it appears in a trace. That covers
+the plaintext password, the `$input` array that holds it, the LDAP bind
+password, the OAuth access token, and API token values.
+
+Two consequences worth knowing:
+
+- **The attribute is not inherited.** If you write your own
+  `VerifierInterface`, `RehashStorageInterface`, or `AdapterInterface`
+  implementation, PHP does not copy the attribute down from the interface —
+  repeat it on your own parameters, or your implementation reintroduces the
+  leak for the whole call chain below it.
+
+- **It protects traces, not everything else.** A credential you log yourself,
+  put in an exception *message*, or store in the session is unaffected. In
+  particular, do not include `$input` in your own log lines on a failed login.
+
+The same non-inheritance rule reaches one case the library cannot mark for you.
+`OAuth2Adapter`'s `map` option is your own callback, and PHP does not redact the
+arguments of a frame your code declared — so if your callback throws, the access
+token appears in *its* frame even though `mapOwner()` redacted the copy in the
+library's. Mark it yourself:
+
+```php
+$adapter = $auth_factory->newOAuth2Adapter($provider, [
+    'map' => function (array $owner, #[\SensitiveParameter] $token) {
+        return [$owner['email'], $owner];
+    },
+]);
+```
+
+A custom `ProviderInterface` implementation needs the same treatment on
+`getAccessToken()` and `getResourceOwner()`: the token exchange is a remote call
+and one of the likelier things in an OAuth login to throw, which makes it one of
+the likelier frames to end up in a trace holding an authorization code.
+
+The rule reaches one more case, and this one no amount of marking on our side
+closes. `LeagueProvider` hands the authorization code and the access token to
+`league/oauth2-client`, which does not mark its own parameters. When something
+below `AbstractProvider::getAccessToken()` or `getResourceOwner()` throws — a
+network failure, a rejected grant — League's own frames are on the trace with
+those values in the clear, even though `LeagueProvider`'s frames redacted them.
+The PKCE verifier is reachable the same way: League holds it on the provider,
+but copies it into the request parameters, so it is a frame argument for as
+long as the request is being built. So the guarantee stops at the package
+boundary: with `zend.exception_ignore_args` off, treat a trace from a failed
+League call as containing the code, the verifier and the token, and keep such
+traces out of logs and responses.
+
+If `zend.exception_ignore_args` is on (the default in PHP's production INI),
+traces carry no arguments at all and this is moot. It is off in the development
+INI, which is exactly where traces are most likely to be displayed.
+
 ## Password Storage
 
 Constant-time comparison is only worth having if what is being compared is

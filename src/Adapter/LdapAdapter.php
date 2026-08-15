@@ -124,7 +124,7 @@ class LdapAdapter extends AbstractAdapter
      * if verification failed.
      *
      */
-    public function login(array $input): array
+    public function login(#[\SensitiveParameter] array $input): array
     {
         $this->checkInput($input);
         $username = $input['username'];
@@ -180,7 +180,7 @@ class LdapAdapter extends AbstractAdapter
      * @throws Exception\BindFailed when the username/password fails.
      *
      */
-    protected function bind($conn, $username, $password): void
+    protected function bind($conn, $username, #[\SensitiveParameter] $password): void
     {
         $username = $this->escape($username);
         $bind_rdn = sprintf($this->dnformat, $username);
@@ -219,8 +219,11 @@ class LdapAdapter extends AbstractAdapter
      * entry.
      *
      */
-    protected function bindSearch($conn, $username, $password): array
-    {
+    protected function bindSearch(
+        $conn,
+        $username,
+        #[\SensitiveParameter] $password
+    ): array {
         // bind as the service account so we can search the directory
         $bound = $this->ldapBind(
             $conn,
@@ -308,7 +311,7 @@ class LdapAdapter extends AbstractAdapter
      * @return bool True if the bind succeeded, false otherwise.
      *
      */
-    protected function ldapBind($conn, $dn, $password): bool
+    protected function ldapBind($conn, $dn, #[\SensitiveParameter] $password): bool
     {
         set_error_handler(static function () {
             // returning true marks the warning as handled, keeping the

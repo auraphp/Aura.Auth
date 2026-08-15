@@ -83,7 +83,7 @@ class LoginService
      * @return void
      *
      */
-    public function login(Auth $auth, array $input): void
+    public function login(Auth $auth, #[\SensitiveParameter] array $input): void
     {
         list($name, $data) = $this->adapter->login($input);
         $remember = ! empty($input['remember']);

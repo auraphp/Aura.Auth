@@ -86,7 +86,7 @@ class HtpasswdAdapter extends AbstractAdapter
      * @return array An array of login data.
      *
      */
-    public function login(array $input): array
+    public function login(#[\SensitiveParameter] array $input): array
     {
         $this->needs_rehash = false;
         $this->rehash_error = null;
@@ -165,7 +165,7 @@ class HtpasswdAdapter extends AbstractAdapter
      * @throws Exception\PasswordIncorrect on failed verification.
      *
      */
-    protected function verify($password, $hashvalue): void
+    protected function verify(#[\SensitiveParameter] $password, $hashvalue): void
     {
         if (! $this->verifier->verify($password, $hashvalue)) {
             throw new Exception\PasswordIncorrect;
