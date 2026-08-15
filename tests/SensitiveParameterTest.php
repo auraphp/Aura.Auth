@@ -6,7 +6,11 @@ use PHPUnit\Framework\Attributes\DataProvider;
 use Aura\Auth\Adapter\OAuth2Adapter;
 use Aura\Auth\Adapter\PdoAdapter;
 use Aura\Auth\OAuth\AuthorizationRequest;
+use Aura\Auth\OAuth\LeagueProvider;
 use Aura\Auth\OAuth\ProviderInterface;
+use GuzzleHttp\Client;
+use League\OAuth2\Client\Provider\GenericProvider;
+use League\OAuth2\Client\Token\AccessToken;
 use Aura\Auth\Verifier\HtpasswdVerifier;
 use Aura\Auth\Verifier\PasswordVerifier;
 
@@ -366,6 +370,94 @@ class SensitiveParameterTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
+     * Builds a real League provider whose HTTP handler throws, so that the
+     * exception is constructed *below* League's own frames -- which is what
+     * puts those frames, and their arguments, into the trace.
+     */
+    protected function newThrowingLeagueProvider()
+    {
+        $handler = function ($request, $options) {
+            throw new \RuntimeException('the endpoint is unreachable');
+        };
+
+        return new GenericProvider(
+            array(
+                'clientId' => 'client-id',
+                'clientSecret' => 'client-secret',
+                'redirectUri' => 'https://app.example/callback',
+                'urlAuthorize' => 'https://provider.example/authorize',
+                'urlAccessToken' => 'https://provider.example/token',
+                'urlResourceOwnerDetails' => 'https://provider.example/me',
+                'pkceMethod' => 'S256',
+            ),
+            array('httpClient' => new Client(array('handler' => $handler)))
+        );
+    }
+
+    /**
+     * The same non-inheritance rule that leaves a `map` callback outside the
+     * library's reach also leaves `league/oauth2-client` outside it:
+     * `AbstractProvider::getAccessToken()` and `getResourceOwner()` do not mark
+     * their own parameters, so when a call below them throws, League's frames
+     * carry the authorization code and the access token in the clear.
+     *
+     * `LeagueProvider` still redacts them in *its* frames, which is as far as
+     * this package can go. Pinning the boundary here means a future League
+     * release that marks its parameters shows up as a failing test rather than
+     * as documentation that quietly went stale.
+     */
+    public function testLeagueProviderIsTheDependencysOwnFrame()
+    {
+        $this->requireTraceArguments();
+
+        $provider = new LeagueProvider($this->newThrowingLeagueProvider());
+
+        try {
+            $provider->getAccessToken(self::CODE, self::VERIFIER);
+            $this->fail('expected the token exchange to throw');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString(
+                'Object(SensitiveParameterValue)',
+                $e->getTraceAsString(),
+                'LeagueProvider::getAccessToken() should have redacted the '
+                . 'code and the verifier in its own frame'
+            );
+
+            // League holds the verifier as a property rather than passing it
+            // along, so only the code reaches one of its frames as an argument
+            $this->assertStringContainsString(
+                self::CODE,
+                print_r($e->getTrace(), true),
+                'league/oauth2-client does not mark its own parameters; if '
+                . 'this now passes, update docs/security.md'
+            );
+        }
+
+        $provider = new LeagueProvider($this->newThrowingLeagueProvider());
+
+        try {
+            $provider->getResourceOwner(new AccessToken(
+                array('access_token' => self::TOKEN)
+            ));
+            $this->fail('expected the userinfo call to throw');
+        } catch (\RuntimeException $e) {
+            $this->assertStringContainsString(
+                'Object(SensitiveParameterValue)',
+                $e->getTraceAsString(),
+                'LeagueProvider::getResourceOwner() should have redacted the '
+                . 'token in its own frame'
+            );
+
+            $this->assertStringContainsString(
+                self::TOKEN,
+                print_r($e->getTrace(), true),
+                'league/oauth2-client does not mark its own parameters; if '
+                . 'this now passes, update docs/security.md'
+            );
+        }
+    }
+
+    /**
      * Every parameter that carries a credential, and the attribute it must
      * declare. Adding a row here is how a new credential-bearing parameter
      * gets covered.
@@ -413,6 +505,7 @@ class SensitiveParameterTest extends \PHPUnit\Framework\TestCase
             array('Aura\Auth\OAuth\LeagueProvider', 'getAccessToken', 'code'),
             array('Aura\Auth\OAuth\LeagueProvider', 'getAccessToken', 'code_verifier'),
             array('Aura\Auth\OAuth\LeagueProvider', 'getResourceOwner', 'token'),
+            array('Aura\Auth\OAuth\AuthorizationRequest', '__construct', 'code_verifier'),
             array('Aura\Auth\OAuth\AuthorizationCodeFlow', 'handleCallback', 'query'),
             array('Aura\Auth\Adapter\AbstractAdapter', 'verifyDummy', 'password'),
             array('Aura\Auth\Adapter\AbstractAdapter', 'applyRehash', 'plaintext'),

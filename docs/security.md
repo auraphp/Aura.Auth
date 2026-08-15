@@ -258,6 +258,19 @@ A custom `ProviderInterface` implementation needs the same treatment on
 and one of the likelier things in an OAuth login to throw, which makes it one of
 the likelier frames to end up in a trace holding an authorization code.
 
+The rule reaches one more case, and this one no amount of marking on our side
+closes. `LeagueProvider` hands the authorization code and the access token to
+`league/oauth2-client`, which does not mark its own parameters. When something
+below `AbstractProvider::getAccessToken()` or `getResourceOwner()` throws — a
+network failure, a rejected grant — League's own frames are on the trace with
+those values in the clear, even though `LeagueProvider`'s frames redacted them.
+So the guarantee stops at the package boundary: with
+`zend.exception_ignore_args` off, treat a trace from a failed League call as
+containing the code and the token, and keep such traces out of logs and
+responses. (The PKCE verifier is a smaller exposure by accident: League stores
+it on the provider rather than passing it along, so it does not appear as a
+frame argument.)
+
 If `zend.exception_ignore_args` is on (the default in PHP's production INI),
 traces carry no arguments at all and this is moot. It is off in the development
 INI, which is exactly where traces are most likely to be displayed.
