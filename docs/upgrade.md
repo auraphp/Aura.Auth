@@ -5,7 +5,7 @@ full list, see the [CHANGELOG](https://github.com/auraphp/Aura.Auth/blob/7.x/CHA
 
 ## PHP Version Requirement
 
-PHP 8.2 or later is now required.
+PHP 8.4 or later is now required.
 
 ## New Dependency: `aura/session-interface`
 
@@ -60,5 +60,5 @@ chapter for full setup.
 ## Tooling
 
 The test suite now requires `phpunit/phpunit` `^11.0`, and the CI matrix targets
-PHP 8.2 / 8.3 / 8.4. The `vimeo/psalm` dev dependency has been removed. These
+PHP 8.4 / 8.5. The `vimeo/psalm` dev dependency has been removed. These
 changes affect contributors only, not consumers of the library.
