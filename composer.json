@@ -33,8 +33,7 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Aura\\Auth\\": "tests/",
-            "Aura\\Di\\": "vendor/aura/di/tests/"
+            "Aura\\Auth\\": "tests/"
         }
     },
     "suggest": {
