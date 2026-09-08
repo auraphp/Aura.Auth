@@ -17,17 +17,15 @@
     ],
     "require": {
         "php": "^8.4",
-        "aura/session-interface": "^7.0"
+        "aura/session-interface": "^7.0@beta"
     },
     "autoload": {
         "psr-4": {
             "Aura\\Auth\\": "src/"
         }
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "require-dev": {
-        "aura/session": "7.x-dev",
+        "aura/session": "7.x-dev@dev",
         "phpunit/phpunit": "^11.0",
         "league/oauth2-client": "^2.7"
     },
