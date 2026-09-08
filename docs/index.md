@@ -11,4 +11,4 @@
 - [Database Schemas](schemas.md)
 - [Session Management](sessions.md)
 - [DI Configuration](di-configuration.md)
-- [Upgrade Guide: 4.x → 6.0.0](upgrade.md)
+- [Upgrade Guide: 4.x → 7.0.0](upgrade.md)

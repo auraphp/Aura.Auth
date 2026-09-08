@@ -1,7 +1,7 @@
-# Upgrade Guide: 4.x → 6.0.0
+# Upgrade Guide: 4.x → 7.0.0
 
-This guide summarizes the changes in 6.0.0 that affect existing code. For the
-full list, see the [CHANGELOG](https://github.com/auraphp/Aura.Auth/blob/6.x/CHANGELOG.md).
+This guide summarizes the changes in 7.0.0 that affect existing code. For the
+full list, see the [CHANGELOG](https://github.com/auraphp/Aura.Auth/blob/7.x/CHANGELOG.md).
 
 ## PHP Version Requirement
 
@@ -10,7 +10,7 @@ PHP 8.2 or later is now required.
 ## New Dependency: `aura/session-interface`
 
 Aura.Auth now depends on the [`aura/session-interface`](https://packagist.org/packages/aura/session-interface)
-(`^6.0`) package, which provides the shared session and segment contracts. This
+(`^7.0`) package, which provides the shared session and segment contracts. This
 is installed automatically via Composer.
 
 ## Shared Session Contracts
@@ -39,7 +39,7 @@ signatures accordingly.
 
 ## New Feature: Remember Me
 
-6.0.0 adds "remember me" support (issue #4):
+7.0.0 adds "remember me" support (issue #4):
 
 - A new `Status::REMEMBERED` constant and `Auth::isRemembered()` method mark
   users re-authenticated from a cookie as **lower privilege** than credentialed

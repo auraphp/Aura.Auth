@@ -5,7 +5,7 @@ The _Service_ objects use a _Session_ object to start sessions and regenerate se
 ## Using Aura.Session
 
 You don't have to write a custom wrapper to use a full-featured session library.
-Since 6.0.0, `AuthFactory` (and everything it builds — `Auth`, the
+Since 7.0.0, `AuthFactory` (and everything it builds — `Auth`, the
 `LoginService` / `LogoutService` / `ResumeService`, and the OAuth
 `AuthorizationCodeFlow`) type-hints the shared `Aura\Session_Interface`
 contracts. [Aura.Session](https://github.com/auraphp/Aura.Session)'s own
