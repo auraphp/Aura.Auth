@@ -16,7 +16,7 @@ Note that the purpose of this package is only to authenticate user credentials. 
 
 ### Installation
 
-This library requires PHP 8.2 or later, and depends only on [aura/session-interface](https://packagist.org/packages/aura/session-interface) for its shared session contracts.
+This library requires PHP 8.4 or later, and depends only on [aura/session-interface](https://packagist.org/packages/aura/session-interface) for its shared session contracts.
 
 It is installable and autoloadable via Composer as [aura/auth](https://packagist.org/packages/aura/auth).
 
@@ -24,8 +24,8 @@ Alternatively, [download a release](https://github.com/auraphp/Aura.Auth/release
 
 ### Quality
 
-[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/auraphp/Aura.Auth/badges/quality-score.png?b=6.x)](https://scrutinizer-ci.com/g/auraphp/Aura.Auth/)
-[![Continuous Integration](https://github.com/auraphp/Aura.Auth/actions/workflows/continuous-integration.yml/badge.svg?branch=6.x)](https://github.com/auraphp/Aura.Auth/actions/workflows/continuous-integration.yml)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/auraphp/Aura.Auth/badges/quality-score.png?b=7.x)](https://scrutinizer-ci.com/g/auraphp/Aura.Auth/)
+[![Continuous Integration](https://github.com/auraphp/Aura.Auth/actions/workflows/continuous-integration.yml/badge.svg?branch=7.x)](https://github.com/auraphp/Aura.Auth/actions/workflows/continuous-integration.yml)
 
 To run the unit tests at the command line, issue `composer install` and then `vendor/bin/phpunit` at the package root. This requires [Composer](http://getcomposer.org/) to be available as `composer`.
 
