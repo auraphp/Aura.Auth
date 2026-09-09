@@ -1,0 +1,37 @@
+# Releasing this package: Actions -> Release -> Run workflow, pick the branch
+# (7.x) and type the version. Or from a terminal:
+#
+#     gh workflow run release.yml --ref 7.x -f version=7.0.0
+#
+# The shared workflow creates the tag itself, and only after every check has
+# passed. Do not tag by hand -- Packagist derives versions from tags, so a tag
+# is a published version the moment it exists.
+#
+# Release notes come from this package's own CHANGELOG.md. The version you type
+# must match the version at the top of the change log -- or, for a pre-release
+# such as 7.0.0-alpha1, its base version, so that alphas and betas do not each
+# need a change log section of their own.
+#
+# NOTE: two things on this branch must be settled before a release can pass.
+# composer.json requires aura/session-interface ^6.0 while require-dev pulls
+# aura/session 7.x-dev, which needs ^7.0@beta -- so composer install fails on
+# any PHP version. And CHANGELOG.md still heads with 6.0.0, so a 7.0.0 release
+# needs a 7.0.0 section at the top.
+
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, e.g. 7.0.0'
+        required: true
+        type: string
+
+jobs:
+  release:
+    uses: auraphp/bin/.github/workflows/release.yml@v1.0.0
+    permissions:
+      contents: write
+    with:
+      version: ${{ inputs.version }}
