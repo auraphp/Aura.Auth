@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 7.0.1
+
+- (FIX) `LoginService::login()` no longer passes the `remember` input to the adapter. It handed the whole input array to `$adapter->login()` and only then read `remember`, so the documented remember-me call (`'remember' => ! empty($_POST['remember'])`) failed with `PdoAdapter`, which binds every input value except `password` to its query: the extra value has no placeholder, and the driver rejects the statement (`SQLSTATE[HY093]` on MySQL, `General error: 25 column index out of range` on SQLite), whether or not the adapter is wrapped in `ThrottleAdapter`. The key is now removed before the adapter is called. Other input keys still reach the adapter, so values bound to placeholders in a custom `$where` keep working.
+
 ## 7.0.0
 
 - PHP 8.4+ is now required.
