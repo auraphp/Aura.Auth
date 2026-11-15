@@ -2,6 +2,14 @@
 namespace Aura\Auth\Service;
 
 use Aura\Auth\Adapter\FakeAdapter;
+use Aura\Auth\Adapter\PdoAdapter;
+use Aura\Auth\FakePhpfunc;
+use Aura\Auth\Remember\Cookie;
+use Aura\Auth\Remember\FakeRememberStorage;
+use Aura\Auth\Remember\RememberService;
+use Aura\Auth\Token\SplitToken;
+use Aura\Auth\Verifier\PasswordVerifier;
+use PDO;
 use Aura\Auth\Session\FakeSession;
 use Aura\Auth\Session\FakeSegment;
 use Aura\Auth\Session\Timer;
@@ -45,6 +53,69 @@ class LoginServiceTest extends \PHPUnit\Framework\TestCase
 
         $this->assertTrue($this->auth->isValid());
         $this->assertSame('boshag', $this->auth->getUserName());
+    }
+
+    public function testLogin_doesNotPassRememberToAdapter()
+    {
+        $this->login_service->login($this->auth, array(
+            'username' => 'boshag',
+            'password' => '123456',
+            'remember' => true,
+        ));
+
+        $this->assertSame(
+            array('username' => 'boshag', 'password' => '123456'),
+            $this->adapter->input
+        );
+    }
+
+    public function testLogin_rememberWithPdoAdapter()
+    {
+        if (! extension_loaded('pdo_sqlite')) {
+            $this->markTestSkipped('Requires the pdo_sqlite extension.');
+        }
+
+        // a real PDO, since only a real driver rejects a bound value that
+        // has no matching placeholder in the statement
+        $pdo = new PDO('sqlite::memory:');
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo->exec('CREATE TABLE accounts (username VARCHAR(255), password VARCHAR(255))');
+        $pdo->prepare('INSERT INTO accounts (username, password) VALUES (?, ?)')
+            ->execute(array(
+                'boshag',
+                password_hash('123456', PASSWORD_BCRYPT, array('cost' => 4)),
+            ));
+
+        $storage = new FakeRememberStorage;
+        $phpfunc = new FakePhpfunc;
+        $login_service = new LoginService(
+            new PdoAdapter(
+                $pdo,
+                new PasswordVerifier(PASSWORD_BCRYPT),
+                array('username', 'password'),
+                'accounts'
+            ),
+            $this->session,
+            new RememberService(
+                $storage,
+                $this->session,
+                new SplitToken($phpfunc),
+                new Cookie($phpfunc, array()),
+                'remember',
+                2592000
+            )
+        );
+
+        $login_service->login($this->auth, array(
+            'username' => 'boshag',
+            'password' => '123456',
+            'remember' => true,
+        ));
+
+        $this->assertTrue($this->auth->isValid());
+        $this->assertSame('boshag', $this->auth->getUserName());
+        $this->assertCount(1, $storage->rows);
+        $this->assertArrayHasKey('remember', $phpfunc->cookies);
     }
 
     public function testForceLogin()
