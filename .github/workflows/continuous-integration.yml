@@ -6,6 +6,10 @@ on:
 
 name: "Continuous Integration"
 
+# No CI job publishes or writes repository contents; limit the token to checkout.
+permissions:
+  contents: read
+
 jobs:
   unit-tests:
     name: "Unit Tests"
