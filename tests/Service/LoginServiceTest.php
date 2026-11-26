@@ -3,18 +3,17 @@ namespace Aura\Auth\Service;
 
 use Aura\Auth\Adapter\FakeAdapter;
 use Aura\Auth\Adapter\PdoAdapter;
+use Aura\Auth\Auth;
 use Aura\Auth\FakePhpfunc;
 use Aura\Auth\Remember\Cookie;
 use Aura\Auth\Remember\FakeRememberStorage;
 use Aura\Auth\Remember\RememberService;
+use Aura\Auth\Session\FakeSegment;
+use Aura\Auth\Session\FakeSession;
+use Aura\Auth\Status;
 use Aura\Auth\Token\SplitToken;
 use Aura\Auth\Verifier\PasswordVerifier;
 use PDO;
-use Aura\Auth\Session\FakeSession;
-use Aura\Auth\Session\FakeSegment;
-use Aura\Auth\Session\Timer;
-use Aura\Auth\Auth;
-use Aura\Auth\Status;
 
 class LoginServiceTest extends \PHPUnit\Framework\TestCase
 {

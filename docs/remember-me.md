@@ -104,6 +104,10 @@ Once wired, the feature works through the call sites you already have:
   ?>
   ```
 
+  The login service reads `remember` and removes it from the input before
+  calling the adapter, so adapters (including custom ones) never receive it and
+  should not rely on it.
+
 - **Resume.** When the session is anonymous or has timed out, `resume()`
   automatically falls back to the remember-me cookie, rotating the token and
   setting the status to `REMEMBERED`:
