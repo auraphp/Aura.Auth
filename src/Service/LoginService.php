@@ -85,8 +85,11 @@ class LoginService
      */
     public function login(Auth $auth, #[\SensitiveParameter] array $input): void
     {
-        list($name, $data) = $this->adapter->login($input);
+        // "remember" is for this service, not a credential; adapters such as
+        // PdoAdapter bind every remaining input value to their query
         $remember = ! empty($input['remember']);
+        unset($input['remember']);
+        list($name, $data) = $this->adapter->login($input);
         $this->forceLogin($auth, $name, $data, Status::VALID, $remember);
     }
 

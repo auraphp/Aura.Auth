@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 7.0.1
+
+- (FIX) `LoginService::login()` no longer passes the `remember` input to the adapter, so the documented remember-me login works with `PdoAdapter`.
+
 ## 7.0.0
 
 - PHP 8.4+ is now required.
