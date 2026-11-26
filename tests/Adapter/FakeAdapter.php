@@ -8,12 +8,12 @@ class FakeAdapter extends AbstractAdapter
 {
     protected $accounts = array();
 
+    public ?array $input = null;
+
     public function __construct(array $accounts = array())
     {
         $this->accounts = $accounts;
     }
-
-    public $input;
 
     public function login(array $input): array
     {
